@@ -2,15 +2,68 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
-public class RigidbodyFollower : MonoBehaviour {
+public class CopyTransform : MonoBehaviour
+{
+	public enum FollowType
+	{
+		Copy,
+		Velocity,
+		Force
+	}
+	
+	public Transform target;
+	
+	[Header("Position")]
+	public bool followPosition;
+	public FollowType positionFollowType;
+	public float positionForceMult;
 
-    public Transform rightController;
+	public Vector3 positionOffset;
+	
+	
+	[Header("Rotation")]
+	public bool followRotation;
+	public FollowType rotationFollowType;
+	public float rotationForceMult;
 
-    void FixedUpdate()
-    {
-        GetComponent<Rigidbody>().velocity = (rightController.position - transform.position) / Time.deltaTime;
-        transform.rotation = rightController.rotation;
-        transform.Rotate(0, -90, -90);
-    }
+	public Vector3 rotationOffset;
+
+
+	private void Update()
+	{
+		if (followPosition && positionFollowType == FollowType.Copy)
+		{
+			transform.position = target.position + positionOffset;
+		}
+
+		if (followRotation && rotationFollowType == FollowType.Copy)
+		{
+			transform.rotation = target.rotation;
+			transform.Rotate(rotationOffset);
+		}
+	}
+
+	void FixedUpdate()
+	{
+		if (followPosition && positionFollowType == FollowType.Copy)
+		{
+			GetComponent<Rigidbody>().velocity = (target.position - transform.position) / Time.fixedDeltaTime;
+		}
+		
+		if (followPosition && positionFollowType == FollowType.Force) {
+				GetComponent<Rigidbody>().AddForce((target.position - transform.position) * positionForceMult);
+		}
+
+		if (followRotation && rotationFollowType == FollowType.Velocity)
+		{
+			transform.rotation = target.rotation;
+			transform.Rotate(rotationOffset);
+		}
+		
+		if (followRotation && rotationFollowType == FollowType.Force)
+		{
+			transform.rotation = target.rotation;
+			transform.Rotate(rotationOffset);
+		}
+	}
 }
