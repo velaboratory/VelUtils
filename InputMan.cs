@@ -65,14 +65,6 @@ public class InputMan : MonoBehaviour
 	public float touchpadThreshold = .5f;
 	public float thumbstickThreshold = .5f;
 
-	private float navigationArrowTimeout = 0f;
-	private float navigationArrowTimeoutMaxTime = .75f;
-	private int navigationArrowCounter = 0;
-
-	private bool lastSecondaryTriggerDown = false;
-	private bool secondaryTriggerDown = false;
-	private bool lastTriggerDown = false;
-
 	private bool triggerDown = false;
 	//private bool clickedLastFrame();
 
@@ -106,7 +98,7 @@ public class InputMan : MonoBehaviour
 
 	public bool SecondaryTriggerDown()
 	{
-		return secondaryTriggerDown;
+		return false;
 	}
 
 	// grip
