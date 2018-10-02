@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CopyTransform : MonoBehaviour
+public class RigidbodyFollower : MonoBehaviour
 {
 	public enum FollowType
 	{
@@ -31,6 +31,12 @@ public class CopyTransform : MonoBehaviour
 
 	private void Update()
 	{
+		if (!target)
+		{
+			Debug.Log("No target set!");
+			return;
+		}
+		
 		if (followPosition && positionFollowType == FollowType.Copy)
 		{
 			transform.position = target.position + positionOffset;
@@ -45,6 +51,12 @@ public class CopyTransform : MonoBehaviour
 
 	void FixedUpdate()
 	{
+		if (!target)
+		{
+			Debug.Log("No target set!");
+			return;
+		}
+		
 		if (followPosition && positionFollowType == FollowType.Copy)
 		{
 			GetComponent<Rigidbody>().velocity = (target.position - transform.position) / Time.fixedDeltaTime;

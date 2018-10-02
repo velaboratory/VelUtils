@@ -3,38 +3,35 @@
 
 using System.Collections.Generic;
 using UnityEngine;
-
 #if STEAMVR_AVAILABLE
 using Valve.VR;
+
 #endif
 
-	public enum HeadsetType
-	{
-		none,
-		Rift,
-		Vive,
-		WMR
-	}
+public enum HeadsetType
+{
+	none,
+	Rift,
+	Vive,
+	WMR
+}
 
-	public enum Side
-	{
-		Left,
-		Right
-	}
+public enum Side
+{
+	Left,
+	Right
+}
 
-	public enum VRPackage
-	{
-		none,
-		SteamVR,
-		Oculus
-	}
+public enum VRPackage
+{
+	none,
+	SteamVR,
+	Oculus
+}
 
 
 public class InputMan : MonoBehaviour
 {
-
-
-
 	public HeadsetType headsetType;
 	public Side dominantHand;
 	public VRPackage vrPackageInUse;
@@ -70,11 +67,12 @@ public class InputMan : MonoBehaviour
 	/// </summary>
 	private Dictionary<string, bool[]> firstPressed = new Dictionary<string, bool[]>();
 
-	// the distance necessary to cout as a "press"
+	// the distance necessary to count as a "press"
 	public float triggerThreshold = .5f;
 	public float gripThreshold = .5f;
 	public float touchpadThreshold = .5f;
 	public float thumbstickThreshold = .5f;
+	public float thumbstickIdleThreshold = .1f;
 
 	private bool triggerDown = false;
 	//private bool clickedLastFrame();
@@ -82,6 +80,7 @@ public class InputMan : MonoBehaviour
 	#endregion
 
 	#region Trigger
+
 	public float TriggerValue(Side side)
 	{
 		return Input.GetAxis("VR_Trigger_" + side.ToString());
@@ -116,9 +115,11 @@ public class InputMan : MonoBehaviour
 	{
 		return false;
 	}
+
 	#endregion
 
 	#region Grip
+
 	public float GripValue(Side side)
 	{
 		return Input.GetAxis("VR_Grip_" + side.ToString());
@@ -128,9 +129,11 @@ public class InputMan : MonoBehaviour
 	{
 		return GripValue(side) > gripThreshold;
 	}
+
 	#endregion
 
 	#region Thumbstick/Touchpad
+
 	public bool ThumbstickPress(Side side)
 	{
 		return Input.GetButton("VR_Thumbstick_Press_" + side.ToString());
@@ -158,10 +161,19 @@ public class InputMan : MonoBehaviour
 		}
 	}
 
+	public bool ThumbstickIdleX(Side side)
+	{
+		return Mathf.Abs(ThumbstickX(side)) < thumbstickIdleThreshold;
+	}
+
+	public bool ThumbstickIdleY(Side side)
+	{
+		return Mathf.Abs(ThumbstickY(side)) < thumbstickIdleThreshold;
+	}
+
 	public bool ThumbstickIdle(Side side)
 	{
-		return Mathf.Abs(ThumbstickX(side)) < .1f &&
-			Mathf.Abs(ThumbstickY(side)) < .1f;
+		return ThumbstickIdleX(side) && ThumbstickIdleY(side);
 	}
 
 	public float ThumbstickX(Side side)
@@ -190,6 +202,16 @@ public class InputMan : MonoBehaviour
 		return ThumbstickPressDown(side);
 	}
 
+	public bool PadIdleX(Side side)
+	{
+		return ThumbstickIdleX(side);
+	}
+
+	public bool PadIdleY(Side side)
+	{
+		return ThumbstickIdleY(side);
+	}
+
 	public bool PadIdle(Side side)
 	{
 		return ThumbstickIdle(side);
@@ -214,9 +236,11 @@ public class InputMan : MonoBehaviour
 	{
 		return ThumbstickY(side);
 	}
+
 	#endregion
 
 	#region Menu buttons
+
 	public bool MenuButton(Side side)
 	{
 		return Input.GetButton("VR_MenuButton_" + side.ToString());
@@ -247,9 +271,11 @@ public class InputMan : MonoBehaviour
 	{
 		return Input.GetButton("Menu_" + NonDominantHand.ToString());
 	}
+
 	#endregion
 
 	#region Directions
+
 	public bool Up(Side side)
 	{
 		return (ThumbstickY(side) > thumbstickThreshold) && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
@@ -269,16 +295,17 @@ public class InputMan : MonoBehaviour
 	{
 		return (ThumbstickX(side) > thumbstickThreshold) && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
 	}
+
 	#endregion
 
 	#region Vibrations
+
 	/// <summary>
 	/// Vibrate the controller
 	/// </summary>
 	/// <param name="intensity">Intensity from 0 to 1</param>
 	public void Vibrate(Side side, float intensity)
 	{
-
 #if OCULUS_UTILITES_AVAILABLE
 			OVRInput.Vibrate or something
 #endif
@@ -286,6 +313,7 @@ public class InputMan : MonoBehaviour
 		SteamVR_Controller.Input(side == Side.Left ? 0 : 1).TriggerHapticPulse(500);
 #endif
 	}
+
 	#endregion
 
 	private void Start()
