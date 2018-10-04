@@ -14,7 +14,11 @@ public class RigidbodyFollowerEditor : Editor
 		EditorGUILayout.Space();
 		EditorGUILayout.Space();
 
-		rbf.target = (Transform)EditorGUILayout.ObjectField("Target", rbf.target, typeof(Transform));
+		if (rbf.target == null)
+		{
+			EditorGUILayout.HelpBox("No target assigned. Please assign a target to follow.", MessageType.Error);
+		}
+		rbf.target = (Transform)EditorGUILayout.ObjectField("Target", rbf.target, typeof(Transform), true);
 		
 		EditorGUILayout.Space();
 		EditorGUILayout.LabelField("Position", EditorStyles.boldLabel);
@@ -24,10 +28,23 @@ public class RigidbodyFollowerEditor : Editor
 			rbf.positionFollowType =
 				(RigidbodyFollower.FollowType) EditorGUILayout.EnumPopup("Position Follow Type",
 					rbf.positionFollowType);
+			
+			if (rbf.positionFollowType != RigidbodyFollower.FollowType.Copy)
+			{
+				if (!rbf.GetComponent<Rigidbody>())
+				{
+					EditorGUILayout.HelpBox("No rigidbody attached.", MessageType.Error);
+				} else if (rbf.GetComponent<Rigidbody>().drag < 20)
+				{
+					EditorGUILayout.HelpBox("Rigidbody drag of 30 or so is recommended.", MessageType.Info);
+				}
+			}
+			rbf.useFixedUpdatePos = GUILayout.Toggle(rbf.useFixedUpdatePos, "Use Fixed Update");
+			
 			if (rbf.positionFollowType == RigidbodyFollower.FollowType.Force)
 			{
 				rbf.positionForceMult = EditorGUILayout.FloatField("Position Force Mult", rbf.positionForceMult);
-			}
+			} 
 
 			rbf.positionOffset = EditorGUILayout.Vector3Field("Position Offset", rbf.positionOffset);
 		}
@@ -42,6 +59,18 @@ public class RigidbodyFollowerEditor : Editor
 			rbf.rotationFollowType =
 				(RigidbodyFollower.FollowType) EditorGUILayout.EnumPopup("Rotation Follow Type",
 					rbf.rotationFollowType);
+			
+			if (rbf.rotationFollowType != RigidbodyFollower.FollowType.Copy)
+			{
+				if (!rbf.GetComponent<Rigidbody>())
+				{
+					EditorGUILayout.HelpBox("No rigidbody attached.", MessageType.Error);
+				} else if (rbf.GetComponent<Rigidbody>().drag < 20)
+				{
+					EditorGUILayout.HelpBox("Rigidbody drag of 30 or so is recommended.", MessageType.Info);
+				}
+			}
+			rbf.useFixedUpdateRot = GUILayout.Toggle(rbf.useFixedUpdateRot, "Use Fixed Update");
 			if (rbf.rotationFollowType == RigidbodyFollower.FollowType.Force)
 			{
 				rbf.rotationForceMult = EditorGUILayout.FloatField("Rotation Force Mult", rbf.rotationForceMult);

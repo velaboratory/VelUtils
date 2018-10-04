@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Timers;
 using UnityEngine;
 
 public class RigidbodyFollower : MonoBehaviour
@@ -10,23 +12,34 @@ public class RigidbodyFollower : MonoBehaviour
 		Velocity,
 		Force
 	}
-	
+
 	public Transform target;
-	
-	[Header("Position")]
-	public bool followPosition;
+
+	[Header("Position")] public bool followPosition;
 	public FollowType positionFollowType;
-	public float positionForceMult;
+	public float positionForceMult = 100f;
+	public bool useFixedUpdatePos = true;
 
 	public Vector3 positionOffset;
-	
-	
-	[Header("Rotation")]
-	public bool followRotation;
+
+
+	[Header("Rotation")] public bool followRotation;
 	public FollowType rotationFollowType;
-	public float rotationForceMult;
+	public float rotationForceMult = .05f;
+	public bool useFixedUpdateRot = true;
 
 	public Vector3 rotationOffset;
+
+	private Rigidbody rb;
+
+	private void Start()
+	{
+		if (GetComponent<Rigidbody>())
+		{
+			rb = GetComponent<Rigidbody>();
+			rb.maxAngularVelocity = 1000f;
+		}
+	}
 
 
 	private void Update()
@@ -36,16 +49,15 @@ public class RigidbodyFollower : MonoBehaviour
 			Debug.Log("No target set!");
 			return;
 		}
-		
-		if (followPosition && positionFollowType == FollowType.Copy)
+
+		if (followPosition && !useFixedUpdatePos)
 		{
-			transform.position = target.position + positionOffset;
+			UpdatePosition(Time.smoothDeltaTime);
 		}
 
-		if (followRotation && rotationFollowType == FollowType.Copy)
+		if (followRotation && !useFixedUpdateRot)
 		{
-			transform.rotation = target.rotation;
-			transform.Rotate(rotationOffset);
+			UpdateRotation(Time.smoothDeltaTime);
 		}
 	}
 
@@ -56,26 +68,68 @@ public class RigidbodyFollower : MonoBehaviour
 			Debug.Log("No target set!");
 			return;
 		}
-		
-		if (followPosition && positionFollowType == FollowType.Copy)
+
+		if (followPosition && useFixedUpdatePos)
 		{
-			GetComponent<Rigidbody>().velocity = (target.position - transform.position) / Time.fixedDeltaTime;
-		}
-		
-		if (followPosition && positionFollowType == FollowType.Force) {
-				GetComponent<Rigidbody>().AddForce((target.position - transform.position) * positionForceMult);
+			UpdatePosition(Time.fixedDeltaTime);
 		}
 
-		if (followRotation && rotationFollowType == FollowType.Velocity)
+		if (followRotation && useFixedUpdateRot)
 		{
-			transform.rotation = target.rotation;
-			transform.Rotate(rotationOffset);
+			UpdateRotation(Time.fixedDeltaTime);
 		}
-		
-		if (followRotation && rotationFollowType == FollowType.Force)
+	}
+
+	private void UpdatePosition(float timeStep)
+	{
+		Vector3 t = target.position + positionOffset;
+		switch (positionFollowType)
 		{
-			transform.rotation = target.rotation;
-			transform.Rotate(rotationOffset);
+			case FollowType.Copy:
+				transform.position = t;
+				break;
+			case FollowType.Velocity:
+				rb.velocity = Vector3.ClampMagnitude((t - transform.position) / timeStep, 100);
+				break;
+			case FollowType.Force:
+				Vector3 dir = t - transform.position;
+				rb.AddForce(
+					Vector3.ClampMagnitude(dir * Vector3.Magnitude(dir) * positionForceMult * rb.mass / timeStep,
+						5000));
+				break;
+			default:
+				throw new ArgumentOutOfRangeException();
 		}
+	}
+
+	private void UpdateRotation(float timeStep)
+	{
+		Quaternion t = Quaternion.Euler(rotationOffset) * target.rotation;
+		switch (rotationFollowType)
+		{
+			case FollowType.Copy:
+				transform.rotation = t;
+				break;
+			case FollowType.Velocity:
+				var angularVel = AngularVel(timeStep, t);
+				rb.angularVelocity = Vector3.ClampMagnitude(angularVel, 100);
+				break;
+			case FollowType.Force:
+				var angularTorq = AngularVel(timeStep, t) * rotationForceMult;
+				rb.AddTorque(Vector3.ClampMagnitude(angularTorq, 100));
+				break;
+			default:
+				throw new ArgumentOutOfRangeException();
+		}
+	}
+
+	private Vector3 AngularVel(float timeStep, Quaternion t)
+	{
+		Quaternion rot = t * Quaternion.Inverse(transform.rotation);
+		float angle;
+		Vector3 axis;
+		rot.ToAngleAxis(out angle, out axis);
+		Vector3 angularVel = axis * angle * Mathf.Deg2Rad / timeStep;
+		return angularVel;
 	}
 }
