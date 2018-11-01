@@ -1,6 +1,7 @@
-#define STEAMVR_AVAILABLE // change to #define or #undef if SteamVR utilites are installed
+#undef STEAMVR_AVAILABLE // change to #define or #undef if SteamVR utilites are installed
 #undef OCULUS_UTILITES_AVAILABLE
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 #if STEAMVR_AVAILABLE
@@ -22,6 +23,12 @@ public enum Side
 	Right
 }
 
+public enum Axis
+{
+	X,
+	Y
+}
+
 public enum VRPackage
 {
 	none,
@@ -29,7 +36,9 @@ public enum VRPackage
 	Oculus
 }
 
-
+/// <summary>
+/// Makes input from VR devices accessible from a unified set of methods. Can treat axes as button down.
+/// </summary>
 public class InputMan : MonoBehaviour
 {
 	public HeadsetType headsetType;
@@ -86,9 +95,19 @@ public class InputMan : MonoBehaviour
 		return Input.GetAxis("VR_Trigger_" + side.ToString());
 	}
 
+	public bool Trigger()
+	{
+		return Trigger(Side.Left) || Trigger(Side.Right);
+	}
+	
 	public bool Trigger(Side side)
 	{
 		return TriggerValue(side) > triggerThreshold;
+	}
+	
+	public bool TriggerDown()
+	{
+		return TriggerDown(Side.Left) || TriggerDown(Side.Right);
 	}
 
 	public bool TriggerDown(Side side)
@@ -125,6 +144,11 @@ public class InputMan : MonoBehaviour
 		return Input.GetAxis("VR_Grip_" + side.ToString());
 	}
 
+	public bool Grip()
+	{
+		return Grip(Side.Left) || Grip(Side.Right);
+	}
+
 	public bool Grip(Side side)
 	{
 		return GripValue(side) > gripThreshold;
@@ -133,10 +157,20 @@ public class InputMan : MonoBehaviour
 	#endregion
 
 	#region Thumbstick/Touchpad
+	
+	public bool ThumbstickPress()
+	{
+		return ThumbstickPress(Side.Left) || ThumbstickPress(Side.Right);
+	}
 
 	public bool ThumbstickPress(Side side)
 	{
 		return Input.GetButton("VR_Thumbstick_Press_" + side.ToString());
+	}
+	
+	public bool ThumbstickPressDown()
+	{
+		return ThumbstickPressDown(Side.Left) || ThumbstickPressDown(Side.Right);
 	}
 
 	public bool ThumbstickPressDown(Side side)
@@ -161,6 +195,23 @@ public class InputMan : MonoBehaviour
 		}
 	}
 
+	public bool ThumbstickIdle(Side side, Axis axis)
+	{
+		if (axis == Axis.X)
+		{
+			return ThumbstickIdleX(side);
+		}
+		else if (axis == Axis.Y)
+		{
+			return ThumbstickIdleY(side);
+		}
+		else
+		{
+			Debug.LogError("More axes than possible.");
+			return false;
+		}
+	}
+
 	public bool ThumbstickIdleX(Side side)
 	{
 		return Mathf.Abs(ThumbstickX(side)) < thumbstickIdleThreshold;
@@ -174,6 +225,23 @@ public class InputMan : MonoBehaviour
 	public bool ThumbstickIdle(Side side)
 	{
 		return ThumbstickIdleX(side) && ThumbstickIdleY(side);
+	}
+	
+	public float Thumbstick(Side side, Axis axis)
+	{
+		if (axis == Axis.X)
+		{
+			return ThumbstickX(side);
+		}
+		else if (axis == Axis.Y)
+		{
+			return ThumbstickY(side);
+		}
+		else
+		{
+			Debug.LogError("More axes than possible.");
+			return 0;
+		}
 	}
 
 	public float ThumbstickX(Side side)
@@ -241,16 +309,35 @@ public class InputMan : MonoBehaviour
 
 	#region Menu buttons
 
+	public bool MenuButton()
+	{
+		return MenuButton(Side.Left) || MenuButton(Side.Right);
+	}
+
 	public bool MenuButton(Side side)
 	{
 		return Input.GetButton("VR_MenuButton_" + side.ToString());
+	}
+	
+	public bool MenuButtonDown()
+	{
+		return MenuButtonDown(Side.Left) || MenuButtonDown(Side.Right);
 	}
 
 	public bool MenuButtonDown(Side side)
 	{
 		return Input.GetButtonDown("VR_MenuButton_" + side.ToString());
 	}
+	
+	public bool MainMenu()
+	{
+		return Input.GetButton("Menu_" + DominantHand.ToString());
+	}
 
+	public bool SecondaryMenu()
+	{
+		return Input.GetButton("Menu_" + NonDominantHand.ToString());
+	}
 
 	public bool MainMenuDown()
 	{
@@ -260,16 +347,6 @@ public class InputMan : MonoBehaviour
 	public bool SecondaryMenuDown()
 	{
 		return Input.GetButtonDown("Menu_" + NonDominantHand.ToString());
-	}
-
-	public bool MainMenu()
-	{
-		return Input.GetButton("Menu_" + DominantHand.ToString());
-	}
-
-	public bool SecondaryMenu()
-	{
-		return Input.GetButton("Menu_" + NonDominantHand.ToString());
 	}
 
 	#endregion
@@ -306,29 +383,30 @@ public class InputMan : MonoBehaviour
 	/// <param name="intensity">Intensity from 0 to 1</param>
 	public void Vibrate(Side side, float intensity)
 	{
-#if OCULUS_UTILITES_AVAILABLE
-			OVRInput.Vibrate or something
-#endif
-#if STEAMVR_AVAILABLE
-		SteamVR_Controller.Input(side == Side.Left ? 0 : 1).TriggerHapticPulse(500);
-#endif
+		#if OCULUS_UTILITES_AVAILABLE
+			//OVRInput.Vibrate or something
+		#endif
+		
+		#if STEAMVR_AVAILABLE
+			SteamVR_Controller.Input(side == Side.Left ? 0 : 1).TriggerHapticPulse(500);
+		#endif
 	}
 
 	#endregion
 
 	private void Start()
 	{
-#if OCULUS_UTILITES_AVAILABLE
-#endif
-#if STEAMVR_AVAILABLE
-#endif
+		#if OCULUS_UTILITES_AVAILABLE
+		#endif
+		#if STEAMVR_AVAILABLE
+		#endif
 
 
 		Side side = Side.Left;
 		for (int i = 0; i < 2; i++)
 		{
-			firstPressed.Add("VR_Trigger_" + side.ToString(), new bool[2]);
-			firstPressed.Add("VR_Grip_" + side.ToString(), new bool[2]);
+			firstPressed.Add("VR_Trigger_" + side, new bool[2]);
+			firstPressed.Add("VR_Grip_" + side, new bool[2]);
 
 			side = Side.Right;
 		}
@@ -357,13 +435,10 @@ public class InputMan : MonoBehaviour
 
 	void Update()
 	{
-		Side side = Side.Left;
-		for (int i = 0; i < 2; i++)
+		foreach (Side side in (Side[]) Enum.GetValues(typeof(Side)))
 		{
 			UpdateDictionary(Trigger(side), "VR_Trigger_" + side);
 			UpdateDictionary(Grip(side), "VR_Grip_" + side);
-
-			side = Side.Right;
 		}
 	}
 }

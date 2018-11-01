@@ -3,6 +3,9 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Adds `F5` shortcut to enter play mode.
+/// </summary>
 public class EditorShortCutKeys : ScriptableObject {
 
 	[MenuItem("Edit/Run _F5")] // shortcut key F5 to Play (and exit playmode also)

@@ -31,9 +31,12 @@ public class InputAxis
 	public int joyNum;
 }
 
+/// <summary>
+/// Adds a dropdown menu option for automatically populating the Input system for use with the InputMan script for use with a VR device.
+/// </summary>
 public class SetupVRInput : MonoBehaviour
 {
-	// Add a menu item named "Do Something" to MyMenu in the menu bar.
+	// Add a menu item named "SetupVRInput" to project settings in the menu bar.
 	[MenuItem("Edit/Project Settings/SetupVRInput", false, 2)]
 	static void DoSetupVRInput()
 	{
