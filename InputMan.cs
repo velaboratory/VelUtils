@@ -43,7 +43,7 @@ public class InputMan : MonoBehaviour
 {
 	public HeadsetType headsetType;
 	public Side dominantHand;
-	public VRPackage vrPackageInUse;
+	public VRPackage VRPackageInUse;
 
 	public Side DominantHand
 	{
@@ -153,6 +153,26 @@ public class InputMan : MonoBehaviour
 	{
 		return GripValue(side) > gripThreshold;
 	}
+
+	public bool GripDown()
+	{
+		return GripDown(Side.Left) || GripDown(Side.Right);
+	}
+
+	public bool GripDown(Side side)
+	{
+		return firstPressed["VR_Grip_" + side.ToString()][0];
+	}
+	
+//	public bool GripUp()
+//	{
+//		return GripUp(Side.Left) || GripUp(Side.Right);
+//	}
+//	
+//	public bool GripUp(Side side)
+//	{
+//		return firstPressed["VR_Grip_" + side.ToString()][0];
+//	}
 
 	#endregion
 

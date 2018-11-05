@@ -21,6 +21,9 @@ One object copies the position and/or rotation of another using a variety of tec
 ### `SaveLoc.cs`
 Saves the location and rotation of an object to playerprefs. Local or global coordinates.
 
+### `Movement.cs`
+Adds several movement techniques while maintaining compatibility with many rig setups. (Only contains echo movement for now)
+
 ### `Editor/SetupVRInput.cs`
 Adds a dropdown menu option for automatically populating the Input system for use with the InputMan script for use with a VR device.
 

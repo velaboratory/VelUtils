@@ -50,7 +50,7 @@ namespace unityutilities
 		{
 			if (!target)
 			{
-				Debug.Log("No target set!");
+				//Debug.Log("No target set!");
 				return;
 			}
 
@@ -69,7 +69,7 @@ namespace unityutilities
 		{
 			if (!target)
 			{
-				Debug.Log("No target set!");
+				//Debug.Log("No target set!");
 				return;
 			}
 
