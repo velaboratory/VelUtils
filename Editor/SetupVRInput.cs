@@ -205,7 +205,7 @@ public class SetupVRInput : MonoBehaviour
 			dead = 0.001f,
 			sensitivity = 1f,
 			type = AxisType.KeyOrMouseButton,
-			positiveButton = "joystick button 2"
+			positiveButton = "joystick button 1"
 		});
 		
 		AddAxis(new InputAxis()

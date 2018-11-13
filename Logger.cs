@@ -7,11 +7,14 @@ namespace unityutilities {
 	/// <summary>
 	/// Logs any data to a file.
 	/// </summary>
-	public class Logger
+	public class Logger : MonoBehaviour
 	{
-		private static string dataDirectory = "log";
+		private static string dataDirectory = "Log";
 		private static string fileExtension = ".tsv";
 		private static string delimiter = "\t";
+
+        private static StreamWriter[] writers = new StreamWriter[0];
+        private static string[] writersPaths = new string[0];
 	
 		public static void LogRow(string fileName, IEnumerable<string> data)
 		{
@@ -27,18 +30,57 @@ namespace unityutilities {
 			}
 	
 			string directoryPath = Application.dataPath + "/" + dataDirectory + "/";
-			string filePath = Path.Combine(directoryPath, fileName + fileExtension);
-	
-			// create the writer
-			StreamWriter writer;
-			if (File.Exists(filePath))
-			{
-				writer = new StreamWriter(filePath, true);
-			}
-			else
-			{
-				writer = new StreamWriter(filePath);
-			}
+            if (!Directory.Exists(directoryPath)) {
+                Directory.CreateDirectory(directoryPath);
+            }
+            string filePath = Path.Combine(directoryPath, fileName + fileExtension);
+
+
+
+            //write vars
+            StreamWriter writer;
+            bool writerExists = false;
+            int writerIndex = -1;
+
+            //check if writer exists
+            for (int x = 0; x < writers.Length; x++) {
+                if (filePath.Equals(writersPaths[x])) {
+                    writerExists = true;
+                    writerIndex = x;
+                    break;
+                }
+            }
+
+            //if writer exists, use that
+            if (writerExists) {
+                writer = writers[writerIndex];
+            }
+
+            //else make a new writer and add it to the list
+            else {
+                if (File.Exists(filePath)) {
+                    writer = new StreamWriter(filePath, true);
+                }
+                else {
+                    writer = new StreamWriter(filePath);
+                }
+
+                StreamWriter[] tempWriters = new StreamWriter[writers.Length + 1];
+                string[] tempWritersPaths = new string[writersPaths.Length + 1];
+
+                for (int x = 0; x < writers.Length; x++) {
+                    tempWriters[x] = writers[x];
+                    tempWritersPaths[x] = writersPaths[x];
+                }
+
+                tempWriters[writers.Length] = writer;
+                tempWritersPaths[writersPaths.Length] = filePath;
+
+                writers = tempWriters;
+                writersPaths = tempWritersPaths;
+            }
+
+			
 	
 			// actually log data
 			try
@@ -62,7 +104,16 @@ namespace unityutilities {
 				Debug.LogWarning(e.Message);
 			}
 	
-			writer.Close();
+			writer.Flush();
 		}
-	}
+
+        //close writers
+        void OnApplicationQuit() {
+            for(int x = 0; x < writers.Length; x++) {
+                writers[x].Close();
+            }
+        }
+
+    }
+
 }

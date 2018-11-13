@@ -1,12 +1,13 @@
 #undef STEAMVR_AVAILABLE // change to #define or #undef if SteamVR utilites are installed
-#undef OCULUS_UTILITES_AVAILABLE
+#define OCULUS_UTILITES_AVAILABLE
 
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
+
 #if STEAMVR_AVAILABLE
 using Valve.VR;
-
 #endif
 
 public enum HeadsetType
@@ -17,10 +18,15 @@ public enum HeadsetType
 	WMR
 }
 
+/// <summary>
+/// Both and None are not supported by most operations
+/// </summary>
 public enum Side
 {
 	Left,
-	Right
+	Right,
+	Both,
+	None
 }
 
 public enum Axis
@@ -82,6 +88,8 @@ public class InputMan : MonoBehaviour
 	public float touchpadThreshold = .5f;
 	public float thumbstickThreshold = .5f;
 	public float thumbstickIdleThreshold = .1f;
+	public float directionalTimeout = 1f;
+	private Dictionary<string, float> directionalTimeoutValue = new Dictionary<string, float>();
 
 	private bool triggerDown = false;
 	//private bool clickedLastFrame();
@@ -336,7 +344,7 @@ public class InputMan : MonoBehaviour
 
 	public bool MenuButton(Side side)
 	{
-		return Input.GetButton("VR_MenuButton_" + side.ToString());
+		return Input.GetButton("VR_MenuButton_" + side);
 	}
 	
 	public bool MenuButtonDown()
@@ -346,27 +354,37 @@ public class InputMan : MonoBehaviour
 
 	public bool MenuButtonDown(Side side)
 	{
-		return Input.GetButtonDown("VR_MenuButton_" + side.ToString());
+		return Input.GetButtonDown("VR_MenuButton_" + side);
 	}
 	
 	public bool MainMenu()
 	{
-		return Input.GetButton("Menu_" + DominantHand.ToString());
+		return Input.GetButton("Menu_" + DominantHand);
 	}
 
 	public bool SecondaryMenu()
 	{
-		return Input.GetButton("Menu_" + NonDominantHand.ToString());
+		return Input.GetButton("Menu_" + NonDominantHand);
+	}
+	
+	public bool SecondaryMenu(Side side)
+	{
+		return Input.GetButton("VR_SecondButton_" + side);
+	}
+	
+	public bool SecondaryMenuDown(Side side)
+	{
+		return Input.GetButtonDown("VR_SecondButton_" + side);
 	}
 
 	public bool MainMenuDown()
 	{
-		return Input.GetButtonDown("Menu_" + DominantHand.ToString());
+		return Input.GetButtonDown("Menu_" + DominantHand);
 	}
 
 	public bool SecondaryMenuDown()
 	{
-		return Input.GetButtonDown("Menu_" + NonDominantHand.ToString());
+		return Input.GetButtonDown("Menu_" + NonDominantHand);
 	}
 
 	#endregion
@@ -375,27 +393,33 @@ public class InputMan : MonoBehaviour
 
 	public bool Up(Side side)
 	{
-		return (ThumbstickY(side) > thumbstickThreshold) && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+		return firstPressed["VR_Thumbstick_Y_Up_" + side][0] && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
 	}
 
 	public bool Down(Side side)
 	{
-		return (ThumbstickY(side) < -thumbstickThreshold) && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+		return firstPressed["VR_Thumbstick_Y_Down_" + side][0] && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
 	}
 
 	public bool Left(Side side)
 	{
-		return (ThumbstickX(side) < -thumbstickThreshold) && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+		return firstPressed["VR_Thumbstick_X_Left_" + side][0] && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
 	}
 
 	public bool Right(Side side)
 	{
-		return (ThumbstickX(side) > thumbstickThreshold) && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+		return firstPressed["VR_Thumbstick_X_Right_" + side][0] && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
 	}
 
 	#endregion
 
 	#region Vibrations
+	
+	/// <summary>
+	/// Whether the left (0) or right (1) controllers are vibrating
+	/// </summary>
+	private bool[] vibrating;
+	private OVRHapticsClip[] hapticsClip;
 
 	/// <summary>
 	/// Vibrate the controller
@@ -403,10 +427,34 @@ public class InputMan : MonoBehaviour
 	/// <param name="intensity">Intensity from 0 to 1</param>
 	public void Vibrate(Side side, float intensity)
 	{
-		#if OCULUS_UTILITES_AVAILABLE
-			//OVRInput.Vibrate or something
-		#endif
+		intensity = Mathf.Clamp01(intensity);
 		
+		#if OCULUS_UTILITES_AVAILABLE
+			OVRHaptics.OVRHapticsChannel channel;
+			if (side == Side.Left)
+			{
+				channel = OVRHaptics.LeftChannel;
+			} else if (side == Side.Right)
+			{
+				channel = OVRHaptics.RightChannel;
+			}
+			else
+			{
+				Debug.LogError("Cannot vibrate on " + side);
+				return;
+			}
+	
+			int length = 10;
+			byte[] bytes = new byte[length];
+			for (int i = 0; i < length; i++)
+			{
+				bytes[i] = (byte)(intensity * 255);
+			}
+	
+			OVRHapticsClip clip = new OVRHapticsClip(bytes, length);
+			channel.Preempt(clip);
+		#endif
+
 		#if STEAMVR_AVAILABLE
 			SteamVR_Controller.Input(side == Side.Left ? 0 : 1).TriggerHapticPulse(500);
 		#endif
@@ -420,16 +468,38 @@ public class InputMan : MonoBehaviour
 		#endif
 		#if STEAMVR_AVAILABLE
 		#endif
+		
+		Debug.Log("InputMan loaded device: " + XRSettings.loadedDeviceName);
+		
+		if (XRSettings.loadedDeviceName == "Oculus")
+		{
+			headsetType = HeadsetType.Rift;
+		}
+		else if (XRSettings.loadedDeviceName.Contains("Vive"))
+		{
+			headsetType = HeadsetType.Vive;
+		}
+		else if (XRSettings.loadedDeviceName.Contains("Mixed"))
+		{
+			headsetType = HeadsetType.WMR;
+		}
 
-
-		Side side = Side.Left;
 		for (int i = 0; i < 2; i++)
 		{
-			firstPressed.Add("VR_Trigger_" + side, new bool[2]);
-			firstPressed.Add("VR_Grip_" + side, new bool[2]);
+			firstPressed.Add("VR_Trigger_" + (Side) i, new bool[2]);
+			firstPressed.Add("VR_Grip_" + (Side) i, new bool[2]);
+			firstPressed.Add("VR_Thumbstick_X_Left_" + (Side) i, new bool[2]);
+			firstPressed.Add("VR_Thumbstick_X_Right_" + (Side) i, new bool[2]);
+			firstPressed.Add("VR_Thumbstick_Y_Up_" + (Side) i, new bool[2]);
+			firstPressed.Add("VR_Thumbstick_Y_Down_" + (Side) i, new bool[2]);
 
-			side = Side.Right;
+			directionalTimeoutValue.Add("VR_Thumbstick_X_Left_" + (Side) i, 0);
+			directionalTimeoutValue.Add("VR_Thumbstick_X_Right_" + (Side) i, 0);
+			directionalTimeoutValue.Add("VR_Thumbstick_Y_Up_" + (Side) i, 0);
+			directionalTimeoutValue.Add("VR_Thumbstick_Y_Down_" + (Side) i, 0);
 		}
+
+		
 	}
 
 	void UpdateDictionary(bool currentVal, string key)
@@ -453,12 +523,38 @@ public class InputMan : MonoBehaviour
 		}
 	}
 
+	void UpdateDictionaryDirection(bool currentVal, string key)
+	{
+		if (currentVal)
+		{
+			if (directionalTimeoutValue[key] > directionalTimeout)
+			{
+				firstPressed[key][1] = false;
+				directionalTimeoutValue[key] = 0;
+			}
+
+			directionalTimeoutValue[key] += Time.deltaTime;
+		}
+		else
+		{
+			directionalTimeoutValue[key] = 0;
+		}
+
+		UpdateDictionary(currentVal, key);
+	}
+
 	void Update()
 	{
-		foreach (Side side in (Side[]) Enum.GetValues(typeof(Side)))
+		for (int i = 0; i < 2; i++)
 		{
-			UpdateDictionary(Trigger(side), "VR_Trigger_" + side);
-			UpdateDictionary(Grip(side), "VR_Grip_" + side);
+			UpdateDictionary(Trigger((Side) i), "VR_Trigger_" + (Side) i);
+			UpdateDictionary(Grip((Side) i), "VR_Grip_" + (Side) i);
+			
+			
+			UpdateDictionaryDirection(ThumbstickX((Side) i) < -thumbstickThreshold, "VR_Thumbstick_X_Left_" + (Side) i);
+			UpdateDictionaryDirection(ThumbstickX((Side) i) > thumbstickThreshold, "VR_Thumbstick_X_Right_" + (Side) i);
+			UpdateDictionaryDirection(ThumbstickY((Side) i) > thumbstickThreshold, "VR_Thumbstick_Y_Up_" + (Side) i);
+			UpdateDictionaryDirection(ThumbstickY((Side) i) < -thumbstickThreshold, "VR_Thumbstick_Y_Down_" + (Side) i);
 		}
 	}
 }
