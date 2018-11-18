@@ -39,6 +39,8 @@ namespace unityutilities
 		public float slidingAccel = 1f;
 		public float slidingSpeed = 3f;
 
+		public Transform leftHandGrabbedObj;
+		public Transform rightHandGrabbedObj;
 		private GameObject leftHandGrabPos;
 		private GameObject rightHandGrabPos;
 
@@ -66,11 +68,20 @@ namespace unityutilities
 		void Update()
 		{
 			// grab walls and air
-			if (grabAir)
+			if (grabWalls && leftHandGrabbedObj != null)
 			{
-				GrabAir(ref leftHand, ref leftHandGrabPos, Side.Left);
-				GrabAir(ref rightHand, ref rightHandGrabPos, Side.Right);
+				GrabMove(ref leftHand, ref leftHandGrabPos, Side.Left, leftHandGrabbedObj);
 			}
+			else if (grabWalls && rightHandGrabbedObj != null)
+			{
+				GrabMove(ref rightHand, ref rightHandGrabPos, Side.Right, rightHandGrabbedObj);
+			}
+			else if (grabAir)
+			{
+				GrabMove(ref leftHand, ref leftHandGrabPos, Side.Left);
+				GrabMove(ref rightHand, ref rightHandGrabPos, Side.Right);
+			}
+
 
 			// turn
 			Turn();
@@ -94,10 +105,10 @@ namespace unityutilities
 			Vector3 forward = -head.forward;
 			forward.y = 0;
 			forward.Normalize();
-			
+
 			Vector3 right = new Vector3(-forward.z, 0, forward.x);
 
-			
+
 			if (useForce)
 			{
 				Vector3 forwardForce = Time.deltaTime * inputMan.ThumbstickY(Side.Left) * forward * 1000f;
@@ -105,7 +116,7 @@ namespace unityutilities
 				{
 					rigRB.AddForce(forwardForce);
 				}
-				
+
 				Vector3 rightForce = Time.deltaTime * inputMan.ThumbstickX(Side.Left) * right * 1000f;
 				if (Mathf.Abs(Vector3.Dot(rigRB.velocity, head.right)) < slidingSpeed)
 				{
@@ -242,7 +253,7 @@ namespace unityutilities
 			}
 		}
 
-		private void GrabAir(ref Transform hand, ref GameObject grabPos, Side side)
+		private void GrabMove(ref Transform hand, ref GameObject grabPos, Side side, Transform parent = null)
 		{
 			if (inputMan.GripDown(side))
 			{
@@ -255,6 +266,7 @@ namespace unityutilities
 
 				grabPos = new GameObject(side + " Hand Grab Pos");
 				grabPos.transform.position = hand.position;
+				grabPos.transform.SetParent(parent);
 				cpt.target = grabPos.transform;
 				cpt.positionOffset = rigRB.position - hand.position;
 			}
