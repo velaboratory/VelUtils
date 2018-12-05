@@ -1,5 +1,5 @@
 #undef STEAMVR_AVAILABLE // change to #define or #undef if SteamVR utilites are installed
-#define OCULUS_UTILITES_AVAILABLE
+#undef OCULUS_UTILITES_AVAILABLE
 
 using System;
 using System.Collections.Generic;
@@ -100,7 +100,11 @@ public class InputMan : MonoBehaviour
 
 	public float TriggerValue(Side side)
 	{
+		#if STEAMVR_AVAILABLE
+		return SteamVR_Input.InputMan.inActions.TriggerValue.GetAxis(SideToInputSources(side));
+		#endif
 		return Input.GetAxis("VR_Trigger_" + side.ToString());
+		
 	}
 
 	public bool Trigger()
@@ -110,6 +114,9 @@ public class InputMan : MonoBehaviour
 	
 	public bool Trigger(Side side)
 	{
+		#if STEAMVR_AVAILABLE
+		return SteamVR_Input.InputMan.inActions.Trigger.GetState(SideToInputSources(side));
+		#endif
 		return TriggerValue(side) > triggerThreshold;
 	}
 	
@@ -120,6 +127,9 @@ public class InputMan : MonoBehaviour
 
 	public bool TriggerDown(Side side)
 	{
+		#if STEAMVR_AVAILABLE
+		return SteamVR_Input.InputMan.inActions.Trigger.GetStateDown(SideToInputSources(side));
+		#endif
 		return firstPressed["VR_Trigger_" + side.ToString()][0];
 	}
 
@@ -149,6 +159,9 @@ public class InputMan : MonoBehaviour
 
 	public float GripValue(Side side)
 	{
+		#if STEAMVR_AVAILABLE
+		return SteamVR_Input.InputMan.inActions.GripValue.GetAxis(SideToInputSources(side));
+		#endif
 		return Input.GetAxis("VR_Grip_" + side.ToString());
 	}
 
@@ -159,6 +172,9 @@ public class InputMan : MonoBehaviour
 
 	public bool Grip(Side side)
 	{
+		#if STEAMVR_AVAILABLE
+		return SteamVR_Input.InputMan.inActions.Trigger.GetState(SideToInputSources(side));
+		#endif
 		return GripValue(side) > gripThreshold;
 	}
 
@@ -169,6 +185,9 @@ public class InputMan : MonoBehaviour
 
 	public bool GripDown(Side side)
 	{
+		#if STEAMVR_AVAILABLE
+			return SteamVR_Input.InputMan.inActions.Grip.GetStateDown(SideToInputSources(side));
+		#endif
 		return firstPressed["VR_Grip_" + side.ToString()][0];
 	}
 	
@@ -419,7 +438,9 @@ public class InputMan : MonoBehaviour
 	/// Whether the left (0) or right (1) controllers are vibrating
 	/// </summary>
 	private bool[] vibrating;
+	#if OCULUS_UTILITES_AVAILABLE
 	private OVRHapticsClip[] hapticsClip;
+	#endif
 
 	/// <summary>
 	/// Vibrate the controller
@@ -456,8 +477,9 @@ public class InputMan : MonoBehaviour
 		#endif
 
 		#if STEAMVR_AVAILABLE
-			SteamVR_Controller.Input(side == Side.Left ? 0 : 1).TriggerHapticPulse(500);
-		#endif
+			//SteamVR_Controller.Input(side == Side.Left ? 0 : 1).TriggerHapticPulse(500);
+			//SteamVR_Input._default.outActions.Haptic
+#endif
 	}
 
 	#endregion
@@ -465,21 +487,23 @@ public class InputMan : MonoBehaviour
 	private void Start()
 	{
 		#if OCULUS_UTILITES_AVAILABLE
+			VRPackageInUse = VRPackage.Oculus;
 		#endif
 		#if STEAMVR_AVAILABLE
+			VRPackageInUse = VRPackage.SteamVR;
 		#endif
 		
 		Debug.Log("InputMan loaded device: " + XRSettings.loadedDeviceName);
 		
-		if (XRSettings.loadedDeviceName == "Oculus")
+		if (XRDevice.model.Contains("Oculus"))
 		{
 			headsetType = HeadsetType.Rift;
 		}
-		else if (XRSettings.loadedDeviceName.Contains("Vive"))
+		else if (XRDevice.model.Contains("Vive"))
 		{
 			headsetType = HeadsetType.Vive;
 		}
-		else if (XRSettings.loadedDeviceName.Contains("Mixed"))
+		else if (XRDevice.model.Contains("Mixed") || XRDevice.model.Contains("WMR"))
 		{
 			headsetType = HeadsetType.WMR;
 		}
@@ -501,6 +525,28 @@ public class InputMan : MonoBehaviour
 
 		
 	}
+	
+	#if STEAMVR_AVAILABLE
+	SteamVR_Input_Sources SideToInputSources(Side side)
+	{
+		if (side == Side.Left)
+		{
+			return SteamVR_Input_Sources.LeftHand;
+		} else if (side == Side.Right)
+		{
+			return SteamVR_Input_Sources.RightHand;
+		} else if (side == Side.Both)
+		{
+			return SteamVR_Input_Sources.Any;
+		}
+		else
+		{
+			Debug.LogError("Cannot convert that side to an input source.");
+		}
+
+		return SteamVR_Input_Sources.Any;
+	}
+	#endif
 
 	void UpdateDictionary(bool currentVal, string key)
 	{
@@ -545,6 +591,7 @@ public class InputMan : MonoBehaviour
 
 	void Update()
 	{
+		
 		for (int i = 0; i < 2; i++)
 		{
 			UpdateDictionary(Trigger((Side) i), "VR_Trigger_" + (Side) i);
