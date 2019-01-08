@@ -38,7 +38,7 @@ namespace unityutilities {
 		}
 
 		private void OnApplicationQuit() {
-			if (load) {
+			if (save) {
 				if (coordinateSystem == Space.Self) {
 					PlayerPrefs.SetFloat(name + "_xLPos", transform.localPosition.x);
 					PlayerPrefs.SetFloat(name + "_yLPos", transform.localPosition.y);
