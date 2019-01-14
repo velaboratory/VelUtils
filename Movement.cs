@@ -38,7 +38,7 @@ namespace unityutilities
 		private float normalDrag;
 		public float slidingAccel = 1f;
 		public float slidingSpeed = 3f;
-		public float minVel = .05f;
+		public float minVel = .1f;
 
 		public delegate void GrabEvent(Transform obj, Side side);
 
@@ -49,6 +49,8 @@ namespace unityutilities
 		public Transform leftHandGrabbedObj;
 		[HideInInspector]
 		public Transform rightHandGrabbedObj;
+		private Transform lastLeftHandGrabbedObj;
+		private Transform lastRightHandGrabbedObj;
 		private GameObject leftHandGrabPos;
 		private GameObject rightHandGrabPos;
 
@@ -71,7 +73,7 @@ namespace unityutilities
 			cpt.followPosition = true;
 			cpt.positionFollowType = CopyTransform.FollowType.Velocity;
 			normalDrag = rigRB.drag;
-			
+
 		}
 
 		void Update()
@@ -105,14 +107,22 @@ namespace unityutilities
 				SlidingMovement();
 			}
 
+			// update lastVels
+			lastVels[lastVelsIndex] = rigRB.velocity;
+			lastVelsIndex = ++lastVelsIndex % 5;
+			
+			// update last frame's grabbed objs
+			lastLeftHandGrabbedObj = leftHandGrabbedObj;
+			lastRightHandGrabbedObj = rightHandGrabbedObj;
+			
+		}
+
+		private void RoundVelToZero()
+		{
 			if (rigRB.velocity.magnitude < minVel)
 			{
 				rigRB.velocity = Vector3.zero;
 			}
-
-			// update lastVels
-			lastVels[lastVelsIndex] = rigRB.velocity;
-			lastVelsIndex = ++lastVelsIndex % 5;
 		}
 
 		private void SlidingMovement()
@@ -182,6 +192,7 @@ namespace unityutilities
 			else if (inputMan.PadClickUp(Side.Right))
 			{
 				rigRB.drag = normalDrag;
+				RoundVelToZero();
 			}
 
 			if (handBoosters)
@@ -271,7 +282,9 @@ namespace unityutilities
 
 		private void GrabMove(ref Transform hand, ref GameObject grabPos, Side side, Transform parent = null)
 		{
-			if (inputMan.GripDown(side))
+			if (inputMan.GripDown(side) || (inputMan.Grip(side) && 
+                ((side == Side.Left && leftHandGrabbedObj != null && lastLeftHandGrabbedObj == null) || 
+                (side == Side.Right && rightHandGrabbedObj != null && lastRightHandGrabbedObj == null))))
 			{
 				grabbingSide = side;
 
@@ -287,10 +300,7 @@ namespace unityutilities
 				cpt.positionOffset = rigRB.position - hand.position;
 				
 				// if event has subscribers, execute
-				if (OnGrab != null)
-				{
-					OnGrab(parent, side);
-				}
+				OnGrab?.Invoke(parent, side);
 			}
 			else if (side == grabbingSide)
 			{
@@ -308,8 +318,8 @@ namespace unityutilities
 					if (grabPos != null)
 					{
 						Destroy(grabPos.gameObject);
-
 						rigRB.velocity = MedianAvg(lastVels);
+						RoundVelToZero();
 					}
 				}
 			}
