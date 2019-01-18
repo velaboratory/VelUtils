@@ -86,7 +86,15 @@ namespace unityutilities
 
 		private void UpdatePosition(float timeStep)
 		{
-			Vector3 t = target.position + positionOffset;
+			Vector3 t;
+			if (positionOffsetCoordinateSystem == Space.World)
+			{
+				t = target.position + positionOffset;
+			} else
+			{
+				t = target.TransformPoint(positionOffset);
+			}
+			
 			switch (positionFollowType)
 			{
 				case FollowType.Copy:
