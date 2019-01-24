@@ -58,6 +58,16 @@ namespace unityutilities
 					rbf.positionForceMult = EditorGUILayout.FloatField("Position Force Mult", rbf.positionForceMult);
 				}
 
+				if (rbf.positionFollowType == CopyTransform.FollowType.Velocity ||
+				    rbf.positionFollowType == CopyTransform.FollowType.Force)
+				{
+					rbf.snapIfDistanceGreaterThan =
+						EditorGUILayout.FloatField(
+							new GUIContent("Snap Distance",
+								"If the object needs to travel farther than this distance in one frame, it will snap immediately. 0 to disable."),
+							rbf.snapIfDistanceGreaterThan);
+				}
+
 				rbf.positionOffset = EditorGUILayout.Vector3Field("Position Offset", rbf.positionOffset);
 				rbf.positionOffsetCoordinateSystem = (Space) EditorGUILayout.EnumPopup("Offset Coordinate System",
 					rbf.positionOffsetCoordinateSystem);
@@ -99,7 +109,16 @@ namespace unityutilities
 					rbf.rotationForceMult = EditorGUILayout.FloatField("Rotation Force Mult", rbf.rotationForceMult);
 				}
 
-				rbf.rotationOffset = EditorGUILayout.Vector3Field("Rotation Offset", rbf.rotationOffset);
+				if (rbf.rotationFollowType == CopyTransform.FollowType.Velocity ||
+				    rbf.rotationFollowType == CopyTransform.FollowType.Force)
+				{
+					rbf.snapIfAngleGreaterThan = EditorGUILayout.FloatField(
+						new GUIContent("Snap Angle",
+							"If the object needs to rotate farther than this angle in one frame, it will snap immediately. 0 to disable."),
+						rbf.snapIfAngleGreaterThan);
+				}
+
+				//rbf.rotationOffset = EditorGUILayout.Vector3Field("Rotation Offset", rbf.rotationOffset);
 				rbf.rotationOffsetCoordinateSystem = (Space) EditorGUILayout.EnumPopup("Offset Coordinate System",
 					rbf.rotationOffsetCoordinateSystem);
 			}
