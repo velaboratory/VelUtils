@@ -10,7 +10,7 @@ namespace unityutilities
 	[RequireComponent(typeof(Rigidbody))]
 	public class Movement : MonoBehaviour
 	{
-		[Header("Object References")] public InputMan inputMan;
+		[Header("Object References")]
 		public Rigidbody rigRB;
 		public Transform head;
 		public Transform leftHand;
@@ -64,7 +64,7 @@ namespace unityutilities
 
 		void Start()
 		{
-			cpt = GetComponent<CopyTransform>();
+			cpt = null;
 			if (cpt == null)
 			{
 				cpt = gameObject.AddComponent<CopyTransform>();
@@ -137,13 +137,13 @@ namespace unityutilities
 
 			if (useForce)
 			{
-				Vector3 forwardForce = Time.deltaTime * inputMan.ThumbstickY(Side.Left) * forward * 1000f;
+				Vector3 forwardForce = Time.deltaTime * InputMan.ThumbstickY(Side.Left) * forward * 1000f;
 				if (Mathf.Abs(Vector3.Dot(rigRB.velocity, head.forward)) < slidingSpeed)
 				{
 					rigRB.AddForce(forwardForce);
 				}
 
-				Vector3 rightForce = Time.deltaTime * inputMan.ThumbstickX(Side.Left) * right * 1000f;
+				Vector3 rightForce = Time.deltaTime * InputMan.ThumbstickX(Side.Left) * right * 1000f;
 				if (Mathf.Abs(Vector3.Dot(rigRB.velocity, head.right)) < slidingSpeed)
 				{
 					rigRB.AddForce(rightForce);
@@ -152,8 +152,8 @@ namespace unityutilities
 			else
 			{
 				Vector3 currentSpeed = rigRB.velocity;
-				Vector3 forwardSpeed = inputMan.ThumbstickY(Side.Left) * forward;
-				Vector3 rightSpeed = inputMan.ThumbstickX(Side.Left) * right;
+				Vector3 forwardSpeed = InputMan.ThumbstickY(Side.Left) * forward;
+				Vector3 rightSpeed = InputMan.ThumbstickX(Side.Left) * right;
 				Vector3 speed = forwardSpeed + rightSpeed;
 				rigRB.velocity = slidingSpeed * speed + (currentSpeed.y * rigRB.transform.up);
 			}
@@ -166,7 +166,7 @@ namespace unityutilities
 			mainBoosterBudget = Mathf.Clamp01(mainBoosterBudget);
 
 			// use main booster
-			if (stickBoostBrake && inputMan.ThumbstickPressDown(Side.Left) && inputMan.ThumbstickIdle(Side.Left))
+			if (stickBoostBrake && InputMan.ThumbstickPressDown(Side.Left) && InputMan.ThumbstickIdle(Side.Left))
 			{
 				// add timeout
 				if (mainBoosterBudget - mainBoosterCost > 0)
@@ -184,12 +184,12 @@ namespace unityutilities
 			}
 
 			// use main brake
-			if (stickBoostBrake && inputMan.PadClick(Side.Right))
+			if (stickBoostBrake && InputMan.PadClick(Side.Right))
 			{
 				// add a bunch of drag
 				rigRB.drag = mainBrakeDrag;
 			}
-			else if (inputMan.PadClickUp(Side.Right))
+			else if (InputMan.PadClickUp(Side.Right))
 			{
 				rigRB.drag = normalDrag;
 				RoundVelToZero();
@@ -197,7 +197,7 @@ namespace unityutilities
 
 			if (handBoosters)
 			{
-				if (inputMan.SecondaryMenu(Side.Left))
+				if (InputMan.SecondaryMenu(Side.Left))
 				{
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
@@ -208,7 +208,7 @@ namespace unityutilities
 					}
 				}
 
-				if (inputMan.SecondaryMenu(Side.Right))
+				if (InputMan.SecondaryMenu(Side.Right))
 				{
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
@@ -235,45 +235,45 @@ namespace unityutilities
 
 			if (continuousRotation)
 			{
-				if (yaw && Mathf.Abs(inputMan.ThumbstickX(Side.Right)) > .5f)
+				if (yaw && Mathf.Abs(InputMan.ThumbstickX(Side.Right)) > .5f)
 				{
 					rigRB.transform.RotateAround(pivot, rigRB.transform.up,
-						inputMan.ThumbstickX(Side.Right) * Time.deltaTime * continuousRotationSpeed * 2);
+						InputMan.ThumbstickX(Side.Right) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
-				else if (pitch && Mathf.Abs(inputMan.ThumbstickY(Side.Right)) > .5f)
+				else if (pitch && Mathf.Abs(InputMan.ThumbstickY(Side.Right)) > .5f)
 				{
 					rigRB.transform.RotateAround(pivot, head.right,
-						inputMan.ThumbstickY(Side.Right) * Time.deltaTime * continuousRotationSpeed * 2);
+						InputMan.ThumbstickY(Side.Right) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
-				else if (roll && Mathf.Abs(inputMan.ThumbstickX(Side.Left)) > .5f)
+				else if (roll && Mathf.Abs(InputMan.ThumbstickX(Side.Left)) > .5f)
 				{
 					rigRB.transform.RotateAround(pivot, head.forward,
-						inputMan.ThumbstickX(Side.Left) * Time.deltaTime * continuousRotationSpeed * 2);
+						InputMan.ThumbstickX(Side.Left) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
 			}
 			else
 			{
-				if (yaw && inputMan.Left(Side.Right))
+				if (yaw && InputMan.Left(Side.Right))
 				{
 					rigRB.transform.RotateAround(pivot, rigRB.transform.up, -snapRotationAmount);
 				}
-				else if (yaw && inputMan.Right(Side.Right))
+				else if (yaw && InputMan.Right(Side.Right))
 				{
 					rigRB.transform.RotateAround(pivot, rigRB.transform.up, snapRotationAmount);
 				}
-				else if (pitch && inputMan.Up(Side.Right))
+				else if (pitch && InputMan.Up(Side.Right))
 				{
 					rigRB.transform.RotateAround(pivot, head.transform.forward, -snapRotationAmount);
 				}
-				else if (pitch && inputMan.Down(Side.Right))
+				else if (pitch && InputMan.Down(Side.Right))
 				{
 					rigRB.transform.RotateAround(pivot, head.transform.forward, snapRotationAmount);
 				}
-				else if (roll && inputMan.Left(Side.Left))
+				else if (roll && InputMan.Left(Side.Left))
 				{
 					rigRB.transform.RotateAround(pivot, head.transform.right, -snapRotationAmount);
 				}
-				else if (roll && inputMan.Right(Side.Left))
+				else if (roll && InputMan.Right(Side.Left))
 				{
 					rigRB.transform.RotateAround(pivot, head.transform.right, snapRotationAmount);
 				}
@@ -282,7 +282,7 @@ namespace unityutilities
 
 		private void GrabMove(ref Transform hand, ref GameObject grabPos, Side side, Transform parent = null)
 		{
-			if (inputMan.GripDown(side) || (inputMan.Grip(side) && 
+			if (InputMan.GripDown(side) || (InputMan.Grip(side) && 
                 ((side == Side.Left && leftHandGrabbedObj != null && lastLeftHandGrabbedObj == null) || 
                 (side == Side.Right && rightHandGrabbedObj != null && lastRightHandGrabbedObj == null))))
 			{
@@ -299,12 +299,14 @@ namespace unityutilities
 				cpt.target = grabPos.transform;
 				cpt.positionOffset = rigRB.position - hand.position;
 				
+				InputMan.Vibrate(side, 1);
+				
 				// if event has subscribers, execute
 				OnGrab?.Invoke(parent, side);
 			}
 			else if (side == grabbingSide)
 			{
-				if (inputMan.Grip(side))
+				if (InputMan.Grip(side))
 				{
 					cpt.positionOffset = rigRB.position - hand.position;
 				}
