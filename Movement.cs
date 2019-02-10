@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -24,6 +25,7 @@ namespace unityutilities
 		public bool pitch;
 		public bool roll;
 		public bool slidingMovement;
+		public bool teleportingMovement;
 
 		[Header("Tuning")] public bool continuousRotation;
 		public float continuousRotationSpeed = 100f;
@@ -39,6 +41,10 @@ namespace unityutilities
 		public float slidingAccel = 1f;
 		public float slidingSpeed = 3f;
 		public float minVel = .1f;
+		public float maxTeleportableSlope = 10f;
+		public Material lineRendererMaterial;
+		public float lineRendererWidth = .02f;
+		public float teleportCurve;
 
 		public delegate void GrabEvent(Transform obj, Side side);
 
@@ -60,6 +66,12 @@ namespace unityutilities
 		private CopyTransform cpt;
 
 		private Side grabbingSide = Side.None;
+		
+		
+		// teleporting vars
+		private LineRenderer lineRenderer;
+		private Side currentTeleportingSide = Side.None;
+		RaycastHit teleportHit;
 
 
 		void Start()
@@ -74,6 +86,7 @@ namespace unityutilities
 			cpt.positionFollowType = CopyTransform.FollowType.Velocity;
 			normalDrag = rigRB.drag;
 
+			
 		}
 
 		void Update()
@@ -114,7 +127,116 @@ namespace unityutilities
 			// update last frame's grabbed objs
 			lastLeftHandGrabbedObj = leftHandGrabbedObj;
 			lastRightHandGrabbedObj = rightHandGrabbedObj;
+
+			Teleporting();
+
+		}
+
+		private void Teleporting()
+		{
+			// check for start of teleports
+			if (InputMan.Up(Side.Left))
+			{
+				currentTeleportingSide = Side.Left;
+			}
+
+			if (InputMan.Up(Side.Right))
+			{
+				currentTeleportingSide = Side.Right;
+			}
 			
+			// if the teleport laser is visible
+			if (currentTeleportingSide != Side.None)
+			{
+			
+				// check for end of teleport
+				if (currentTeleportingSide == Side.Left && InputMan.ThumbstickIdleY(Side.Left) ||
+				    currentTeleportingSide == Side.Right && InputMan.ThumbstickIdleY(Side.Right))
+				{
+					// complete the teleport
+					TeleportTo(teleportHit.point, transform.rotation);
+					currentTeleportingSide = Side.None;
+					
+					// delete the line renderer
+					Destroy(lineRenderer);
+				}
+
+
+				// add a new linerenderer if needed
+				if (lineRenderer == null)
+				{
+					lineRenderer = gameObject.AddComponent<LineRenderer>();
+					lineRenderer.widthMultiplier = lineRendererWidth;
+					lineRenderer.material = lineRendererMaterial;
+				}
+
+				// simulate the curved ray
+				Vector3 lastPos;
+				Vector3 lastDir;
+				List<Vector3> points = new List<Vector3>();
+				
+				if (currentTeleportingSide == Side.Left)
+				{
+					lastPos = leftHand.position;
+					lastDir = leftHand.forward;
+				}
+				else
+				{
+					lastPos = rightHand.position;
+					lastDir = rightHand.forward;
+				}
+
+				const float segmentLength = .2f;
+				const float numSegments = 100f;
+				
+				// the teleport line will stop at a max distance
+				for (int i = 0; i < numSegments; i++)
+				{
+					if (Physics.Raycast(lastPos, lastDir, out teleportHit, segmentLength))
+					{
+						points.Add(teleportHit.point);
+
+						if (Vector3.Angle(teleportHit.normal, Vector3.up) < maxTeleportableSlope)
+						{
+							// TODO define the point as a good teleportable point
+						}
+						
+						
+						break;
+					}
+					else
+					{
+						// add the point to the line renderer
+						points.Add(lastPos);
+						
+						// calculate the next ray
+						lastPos += lastDir * segmentLength;
+						lastDir = Vector3.RotateTowards(lastDir, Vector3.down, teleportCurve, 0);
+					}
+				}
+				
+				
+				lineRenderer.positionCount = points.Count;
+				lineRenderer.SetPositions(points.ToArray());
+			}
+			
+			
+		}
+
+		public void TeleportTo(Vector3 position, Vector3 direction)
+		{
+			TeleportTo(position, Quaternion.LookRotation(direction));
+		}
+		
+		public void TeleportTo(Vector3 position, Quaternion rotation)
+		{
+			float headRotOffset = Vector3.SignedAngle(transform.forward, Vector3.ProjectOnPlane(head.transform.forward,Vector3.up), Vector3.up);
+			transform.rotation = rotation;
+			transform.Rotate(Vector3.up, -headRotOffset);
+		
+			Vector3 headPosOffset = transform.position - head.transform.position;
+			headPosOffset.y = 0;
+			transform.position = position + headPosOffset;
 		}
 
 		private void RoundVelToZero()

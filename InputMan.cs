@@ -654,8 +654,8 @@ public class InputMan : MonoBehaviour
 			
 			UpdateDictionaryDirection(ThumbstickX((Side) i) < -thumbstickThreshold, "VR_Thumbstick_X_Left_" + (Side) i);
 			UpdateDictionaryDirection(ThumbstickX((Side) i) > thumbstickThreshold, "VR_Thumbstick_X_Right_" + (Side) i);
-			UpdateDictionaryDirection(ThumbstickY((Side) i) > thumbstickThreshold, "VR_Thumbstick_Y_Up_" + (Side) i);
-			UpdateDictionaryDirection(ThumbstickY((Side) i) < -thumbstickThreshold, "VR_Thumbstick_Y_Down_" + (Side) i);
+			UpdateDictionaryDirection(ThumbstickY((Side) i) < -thumbstickThreshold, "VR_Thumbstick_Y_Up_" + (Side) i);
+			UpdateDictionaryDirection(ThumbstickY((Side) i) > thumbstickThreshold, "VR_Thumbstick_Y_Down_" + (Side) i);
 		}
 	}
 }
