@@ -19,7 +19,7 @@ namespace unityutilities {
 						PlayerPrefs.GetFloat(name + "_xLPos", transform.localPosition.x),
 						PlayerPrefs.GetFloat(name + "_yLPos", transform.localPosition.y),
 						PlayerPrefs.GetFloat(name + "_zLPos", transform.localPosition.z));
-					transform.eulerAngles = new Vector3(
+					transform.localEulerAngles = new Vector3(
 						PlayerPrefs.GetFloat(name + "_xLRot", transform.localEulerAngles.x),
 						PlayerPrefs.GetFloat(name + "_yLRot", transform.localEulerAngles.y),
 						PlayerPrefs.GetFloat(name + "_zLRot", transform.localEulerAngles.z));
