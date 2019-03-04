@@ -20,7 +20,7 @@ namespace unityutilities
 		[Header("Position")] public bool followPosition;
 		public FollowType positionFollowType;
 		public float positionForceMult = 1000f;
-		public bool useFixedUpdatePos = true;
+		public bool useFixedUpdatePos = false;
 
 		public Vector3 positionOffset;
 		public Space positionOffsetCoordinateSystem;
@@ -31,7 +31,7 @@ namespace unityutilities
 		[Header("Rotation")] public bool followRotation;
 		public FollowType rotationFollowType;
 		public float rotationForceMult = 1;
-		public bool useFixedUpdateRot = true;
+		public bool useFixedUpdateRot = false;
 
 		public Quaternion rotationOffset;
 		public Space rotationOffsetCoordinateSystem;
@@ -134,7 +134,7 @@ namespace unityutilities
 		{
 			Quaternion t;
 			if (rotationOffsetCoordinateSystem == Space.Self) {
-				t = target.rotation * Quaternion.Inverse(rotationOffset);
+				t = target.rotation * (rotationOffset);
 			} else
 			{
 				t = target.rotation;
@@ -175,6 +175,23 @@ namespace unityutilities
 			rot.ToAngleAxis(out angle, out axis);
 			Vector3 angularVel = axis * angle * Mathf.Deg2Rad / timeStep;
 			return angularVel;
+		}
+
+		/// <summary>
+		/// Set the target transform and set offsets at the same time, so that the obj doesn't move.
+		/// Also sets the obj to follow pos and rot.
+		/// </summary>
+		/// <param name="target">The target to follow</param>
+		public void SetTarget(Transform target)
+		{
+			this.target = target;
+			positionOffset = target.InverseTransformPoint(transform.position);
+			rotationOffset = Quaternion.Inverse(target.transform.rotation) * transform.rotation;
+			positionOffsetCoordinateSystem = Space.Self;
+			rotationOffsetCoordinateSystem = Space.Self;
+			
+			followPosition = true;
+			followRotation = true;
 		}
 	}
 }

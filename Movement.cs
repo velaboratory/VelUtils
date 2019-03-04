@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -27,9 +28,15 @@ namespace unityutilities
 		public bool slidingMovement;
 		public bool teleportingMovement;
 
-		[Header("Tuning")] public bool continuousRotation;
+		[Header("Rotation")] 
+		[Tooltip("Not used if pitch is enabled.")]
+		public Side turnInput = Side.Either;
+		public bool continuousRotation;
 		public float continuousRotationSpeed = 100f;
 		public float snapRotationAmount = 30f;
+		
+		
+		[Header("Tuning")]
 		public float mainBoosterMaxSpeed = 5f;
 		public float mainBrakeDrag = 2f;
 		public float maxHandBoosterSpeed = 4f;
@@ -41,10 +48,7 @@ namespace unityutilities
 		public float slidingAccel = 1f;
 		public float slidingSpeed = 3f;
 		public float minVel = .1f;
-		public float maxTeleportableSlope = 10f;
-		public Material lineRendererMaterial;
-		public float lineRendererWidth = .02f;
-		public float teleportCurve;
+		
 
 		public delegate void GrabEvent(Transform obj, Side side);
 
@@ -70,8 +74,105 @@ namespace unityutilities
 		
 		// teleporting vars
 		private LineRenderer lineRenderer;
-		private Side currentTeleportingSide = Side.None;
-		RaycastHit teleportHit;
+		[HideInInspector]
+		public Side currentTeleportingSide = Side.None;
+		private RaycastHit teleportHit;
+		
+		/// <summary>
+		/// The current chosen spot to teleport to
+		/// </summary>
+		[Serializable]
+		public class Teleporter
+		{
+			// inspector values
+			public bool rotateOnTeleport;
+			public float maxTeleportableSlope = 20f;
+			public float lineRendererWidth = .01f;
+			public float teleportCurve = .01f;
+			public float smoothTeleportTime = .1f;
+			public GameObject teleportMarkerOverride;
+			public Material lineRendererMaterialOverride;
+			
+			[HideInInspector]
+			public GameObject teleportMarkerInstance;
+			
+			
+			public Teleporter()
+			{
+				Active = false;
+			}
+			
+			public Teleporter(Vector3 pos, Vector3 dir)
+			{
+				Pos = pos;
+				Dir = dir;
+				Active = true;
+			}
+
+			private bool active;
+			
+			private Vector3 pos;
+			private Vector3 dir;
+
+			public bool Active
+			{
+				get { return active; }
+				set
+				{
+					if (active != value)
+					{
+						if (teleportMarkerInstance != null)
+						{
+							teleportMarkerInstance.SetActive(value);
+						}
+						else
+						{
+							if (teleportMarkerOverride != null)
+							{
+								teleportMarkerInstance = Instantiate(teleportMarkerOverride);
+							}
+							else
+							{
+								teleportMarkerInstance = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+								Destroy(teleportMarkerInstance.GetComponent<Collider>());
+								teleportMarkerInstance.transform.localScale = new Vector3(.1f,.01f,.1f);
+								teleportMarkerInstance.GetComponent<MeshRenderer>().material.color = Color.black;
+							}
+						}
+					}
+
+					active = value;
+				}
+			}
+
+			public Vector3 Pos
+			{
+				get { return pos; }
+				set
+				{
+					pos = value;
+					if (teleportMarkerInstance != null)
+					{
+						teleportMarkerInstance.transform.position = pos;
+					}
+				}
+			}
+
+			public Vector3 Dir
+			{
+				get { return dir; }
+				set
+				{
+					dir = value;
+					if (teleportMarkerInstance != null)
+					{
+						teleportMarkerInstance.transform.rotation = Quaternion.LookRotation(dir);
+					}
+				}
+			}
+		}
+
+		public Teleporter teleporter = new Teleporter();
 
 
 		void Start()
@@ -148,79 +249,126 @@ namespace unityutilities
 			// if the teleport laser is visible
 			if (currentTeleportingSide != Side.None)
 			{
-			
+
 				// check for end of teleport
-				if (currentTeleportingSide == Side.Left && InputMan.ThumbstickIdleY(Side.Left) ||
-				    currentTeleportingSide == Side.Right && InputMan.ThumbstickIdleY(Side.Right))
+				if (currentTeleportingSide == Side.Left && InputMan.ThumbstickIdle(Side.Left) ||
+				    currentTeleportingSide == Side.Right && InputMan.ThumbstickIdle(Side.Right))
 				{
 					// complete the teleport
-					TeleportTo(teleportHit.point, transform.rotation);
+					TeleportTo(teleporter);
+
 					currentTeleportingSide = Side.None;
-					
+
 					// delete the line renderer
 					Destroy(lineRenderer);
-				}
-
-
-				// add a new linerenderer if needed
-				if (lineRenderer == null)
-				{
-					lineRenderer = gameObject.AddComponent<LineRenderer>();
-					lineRenderer.widthMultiplier = lineRendererWidth;
-					lineRenderer.material = lineRendererMaterial;
-				}
-
-				// simulate the curved ray
-				Vector3 lastPos;
-				Vector3 lastDir;
-				List<Vector3> points = new List<Vector3>();
-				
-				if (currentTeleportingSide == Side.Left)
-				{
-					lastPos = leftHand.position;
-					lastDir = leftHand.forward;
+					teleporter.Active = false;
 				}
 				else
 				{
-					lastPos = rightHand.position;
-					lastDir = rightHand.forward;
-				}
 
-				const float segmentLength = .2f;
-				const float numSegments = 100f;
-				
-				// the teleport line will stop at a max distance
-				for (int i = 0; i < numSegments; i++)
-				{
-					if (Physics.Raycast(lastPos, lastDir, out teleportHit, segmentLength))
+					// add a new linerenderer if needed
+					if (lineRenderer == null)
 					{
-						points.Add(teleportHit.point);
-
-						if (Vector3.Angle(teleportHit.normal, Vector3.up) < maxTeleportableSlope)
+						lineRenderer = gameObject.AddComponent<LineRenderer>();
+						lineRenderer.widthMultiplier = teleporter.lineRendererWidth;
+						if (teleporter.lineRendererMaterialOverride != null)
 						{
-							// TODO define the point as a good teleportable point
+							lineRenderer.material = teleporter.lineRendererMaterialOverride;
 						}
-						
-						
-						break;
+						else
+						{
+							lineRenderer.material.shader = Shader.Find("Unlit/Color");
+							lineRenderer.material.color = Color.black;
+						}
+					}
+
+					// simulate the curved ray
+					Vector3 lastPos;
+					Vector3 lastDir;
+					List<Vector3> points = new List<Vector3>();
+
+					if (currentTeleportingSide == Side.Left)
+					{
+						lastPos = leftHand.position;
+						lastDir = leftHand.forward;
 					}
 					else
 					{
-						// add the point to the line renderer
-						points.Add(lastPos);
-						
-						// calculate the next ray
-						lastPos += lastDir * segmentLength;
-						lastDir = Vector3.RotateTowards(lastDir, Vector3.down, teleportCurve, 0);
+						lastPos = rightHand.position;
+						lastDir = rightHand.forward;
 					}
+
+					const float segmentLength = .25f;
+					const float numSegments = 100f;
+
+					// the teleport line will stop at a max distance
+					for (int i = 0; i < numSegments; i++)
+					{
+						if (Physics.Raycast(lastPos, lastDir, out teleportHit, segmentLength, ~(1 << 2)))
+						{
+							points.Add(teleportHit.point);
+
+							// if the hit point is valid
+							if (Vector3.Angle(teleportHit.normal, Vector3.up) < teleporter.maxTeleportableSlope)
+							{
+								// define the point as a good teleportable point
+								teleporter.Pos = teleportHit.point;
+								Vector3 dir = head.forward;
+								dir = Vector3.ProjectOnPlane(dir, Vector3.up);
+								if (teleporter.rotateOnTeleport)
+								{
+									Vector3 thumbstickDir = new Vector3(
+										InputMan.ThumbstickX(currentTeleportingSide),
+										0,
+										InputMan.ThumbstickY(currentTeleportingSide));
+									thumbstickDir.Normalize();
+									float angle = -Vector3.SignedAngle(-Vector3.forward, thumbstickDir, Vector3.up);
+									dir = Quaternion.Euler(0, angle, 0) * dir;
+								}
+								teleporter.Dir = dir;
+
+
+								teleporter.Active = true;
+
+							}
+							else
+							{
+								// if the hit point is close enough to the last valid point
+								teleporter.Active = !(Vector3.Distance(teleporter.Pos, teleportHit.point) > .1f);
+							}
+
+
+							break;
+						}
+						else
+						{
+							// add the point to the line renderer
+							points.Add(lastPos);
+
+							// calculate the next ray
+							lastPos += lastDir * segmentLength;
+							lastDir = Vector3.RotateTowards(lastDir, Vector3.down, teleporter.teleportCurve, 0);
+						}
+					}
+
+
+					lineRenderer.positionCount = points.Count;
+					lineRenderer.SetPositions(points.ToArray());
 				}
-				
-				
-				lineRenderer.positionCount = points.Count;
-				lineRenderer.SetPositions(points.ToArray());
 			}
-			
-			
+
+		}
+		
+		/// <summary>
+		/// May not actually teleport if goal is not active
+		/// </summary>
+		/// <param name="goal">The target pos</param>
+		private void TeleportTo(Teleporter goal)
+		{
+			if (goal.Active)
+			{
+				TeleportTo(goal.Pos, goal.Dir);
+			}
 		}
 
 		public void TeleportTo(Vector3 position, Vector3 direction)
@@ -231,12 +379,37 @@ namespace unityutilities
 		public void TeleportTo(Vector3 position, Quaternion rotation)
 		{
 			float headRotOffset = Vector3.SignedAngle(transform.forward, Vector3.ProjectOnPlane(head.transform.forward,Vector3.up), Vector3.up);
+			rotation = Quaternion.Euler(0,-headRotOffset,0) * rotation;
+			Quaternion origRot = transform.rotation;
 			transform.rotation = rotation;
-			transform.Rotate(Vector3.up, -headRotOffset);
 		
 			Vector3 headPosOffset = transform.position - head.transform.position;
 			headPosOffset.y = 0;
-			transform.position = position + headPosOffset;
+			//transform.position = position + headPosOffset;
+			
+			transform.rotation = origRot;
+			
+			StartCoroutine(DoSmoothTeleport(position + headPosOffset, rotation, teleporter.smoothTeleportTime));
+		}
+
+		IEnumerator DoSmoothTeleport(Vector3 position, Quaternion rotation, float time)
+		{
+			float distance = Vector3.Distance(transform.position, position);
+			float angle;
+			Vector3 axis;
+			rotation.ToAngleAxis(out angle, out axis);
+			
+			transform.rotation = rotation;
+			
+			for (float i = 0; i < time; i+=Time.deltaTime)
+			{
+				transform.position = Vector3.MoveTowards(transform.position, position, (Time.deltaTime / time)*distance);
+				//transform.RotateAround(head.position, axis,angle*(Time.deltaTime/time));
+				yield return null;
+			}
+
+			transform.rotation = rotation;
+			transform.position = position;
 		}
 
 		private void RoundVelToZero()
@@ -345,6 +518,12 @@ namespace unityutilities
 
 		private void Turn()
 		{
+			// don't turn if currently teleporting
+			if (currentTeleportingSide != Side.None)
+			{
+				return;
+			}
+			
 			Vector3 pivot = head.position;
 			if (grabbingSide == Side.Left)
 			{
@@ -357,17 +536,22 @@ namespace unityutilities
 
 			if (continuousRotation)
 			{
-				if (yaw && Mathf.Abs(InputMan.ThumbstickX(Side.Right)) > .5f)
+				Side turnInputLocal = turnInput;
+				if (roll)
+				{
+					turnInputLocal = Side.Right;
+				}
+				if (yaw && !InputMan.ThumbstickIdleX(turnInputLocal))
 				{
 					rigRB.transform.RotateAround(pivot, rigRB.transform.up,
-						InputMan.ThumbstickX(Side.Right) * Time.deltaTime * continuousRotationSpeed * 2);
+						InputMan.ThumbstickX(turnInputLocal) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
-				else if (pitch && Mathf.Abs(InputMan.ThumbstickY(Side.Right)) > .5f)
+				else if (pitch && !InputMan.ThumbstickIdleY(turnInputLocal))
 				{
 					rigRB.transform.RotateAround(pivot, head.right,
-						InputMan.ThumbstickY(Side.Right) * Time.deltaTime * continuousRotationSpeed * 2);
+						InputMan.ThumbstickY(turnInputLocal) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
-				else if (roll && Mathf.Abs(InputMan.ThumbstickX(Side.Left)) > .5f)
+				else if (roll && !InputMan.ThumbstickIdleX(Side.Left))
 				{
 					rigRB.transform.RotateAround(pivot, head.forward,
 						InputMan.ThumbstickX(Side.Left) * Time.deltaTime * continuousRotationSpeed * 2);
@@ -375,19 +559,24 @@ namespace unityutilities
 			}
 			else
 			{
-				if (yaw && InputMan.Left(Side.Right))
+				Side turnInputLocal = turnInput;
+				if (roll)
+				{
+					turnInputLocal = Side.Right;
+				}
+				if (yaw && InputMan.Left(turnInputLocal))
 				{
 					rigRB.transform.RotateAround(pivot, rigRB.transform.up, -snapRotationAmount);
 				}
-				else if (yaw && InputMan.Right(Side.Right))
+				else if (yaw && InputMan.Right(turnInputLocal))
 				{
 					rigRB.transform.RotateAround(pivot, rigRB.transform.up, snapRotationAmount);
 				}
-				else if (pitch && InputMan.Up(Side.Right))
+				else if (pitch && InputMan.Up(turnInputLocal))
 				{
 					rigRB.transform.RotateAround(pivot, head.transform.forward, -snapRotationAmount);
 				}
-				else if (pitch && InputMan.Down(Side.Right))
+				else if (pitch && InputMan.Down(turnInputLocal))
 				{
 					rigRB.transform.RotateAround(pivot, head.transform.forward, snapRotationAmount);
 				}

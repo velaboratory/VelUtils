@@ -303,12 +303,32 @@ public class InputMan : MonoBehaviour
 
 	public static float ThumbstickX(Side side)
 	{
-		return Input.GetAxis("VR_Thumbstick_X_" + side);
+		switch (side)
+		{
+			case Side.Both:
+				return Mathf.Min(Input.GetAxis("VR_Thumbstick_X_" + Side.Left), Input.GetAxis("VR_Thumbstick_X_" + Side.Right));
+			case Side.Either:
+				return Mathf.Max(Input.GetAxis("VR_Thumbstick_X_" + Side.Left), Input.GetAxis("VR_Thumbstick_X_" + Side.Right));
+			case Side.None:
+				return 0;
+			default:
+				return Input.GetAxis("VR_Thumbstick_X_" + side);
+		}
 	}
 
 	public static float ThumbstickY(Side side)
 	{
-		return Input.GetAxis("VR_Thumbstick_Y_" + side);
+		switch (side)
+		{
+			case Side.Both:
+				return Mathf.Min(Input.GetAxis("VR_Thumbstick_Y_" + Side.Left), Input.GetAxis("VR_Thumbstick_Y_" + Side.Right));
+			case Side.Either:
+				return Mathf.Max(Input.GetAxis("VR_Thumbstick_Y_" + Side.Left), Input.GetAxis("VR_Thumbstick_Y_" + Side.Right));
+			case Side.None:
+				return 0;
+			default:
+				return Input.GetAxis("VR_Thumbstick_Y_" + side);
+		}
 	}
 
 	public static bool MainThumbstick()
@@ -465,22 +485,54 @@ public class InputMan : MonoBehaviour
 
 	public static bool Up(Side side)
 	{
-		return firstPressed["VR_Thumbstick_Y_Up_" + side][0] && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+		if (side == Side.Both || side == Side.Either)
+		{
+			return (firstPressed["VR_Thumbstick_Y_Up_" + Side.Left][0] &&
+			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Left))) ||
+			       (firstPressed["VR_Thumbstick_Y_Up_" + Side.Right][0] &&
+			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Right)));
+		} else {
+			return firstPressed["VR_Thumbstick_Y_Up_" + side][0] && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+		}
 	}
 
 	public static bool Down(Side side)
 	{
-		return firstPressed["VR_Thumbstick_Y_Down_" + side][0] && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+		if (side == Side.Both || side == Side.Either)
+		{
+			return (firstPressed["VR_Thumbstick_Y_Down_" + Side.Left][0] &&
+			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Left))) ||
+			       (firstPressed["VR_Thumbstick_Y_Down_" + Side.Right][0] &&
+			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Right)));
+		} else {
+			return firstPressed["VR_Thumbstick_Y_Down_" + side][0] && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+		}
 	}
 
 	public static bool Left(Side side)
 	{
-		return firstPressed["VR_Thumbstick_X_Left_" + side][0] && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+		if (side == Side.Both || side == Side.Either)
+		{
+			return (firstPressed["VR_Thumbstick_X_Left_" + Side.Left][0] &&
+			       (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Left))) ||
+			       (firstPressed["VR_Thumbstick_X_Left_" + Side.Right][0] &&
+			       (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Right)));
+		} else {
+			return firstPressed["VR_Thumbstick_X_Left_" + side][0] && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+		}
 	}
 
 	public static bool Right(Side side)
 	{
-		return firstPressed["VR_Thumbstick_X_Right_" + side][0] && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+		if (side == Side.Both || side == Side.Either)
+		{
+			return (firstPressed["VR_Thumbstick_X_Right_" + Side.Left][0] &&
+			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Left))) ||
+			       (firstPressed["VR_Thumbstick_X_Right_" + Side.Right][0] &&
+			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Right)));
+		} else {
+			return firstPressed["VR_Thumbstick_X_Right_" + side][0] && (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+		}
 	}
 
 	#endregion
