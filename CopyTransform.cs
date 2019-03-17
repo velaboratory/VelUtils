@@ -185,13 +185,14 @@ namespace unityutilities
 		public void SetTarget(Transform target)
 		{
 			this.target = target;
+			if (positionOffsetCoordinateSystem == Space.Self)
 			positionOffset = target.InverseTransformPoint(transform.position);
-			rotationOffset = Quaternion.Inverse(target.transform.rotation) * transform.rotation;
-			positionOffsetCoordinateSystem = Space.Self;
-			rotationOffsetCoordinateSystem = Space.Self;
+			else
+				positionOffset = transform.position - target.position;
 			
-			followPosition = true;
-			followRotation = true;
+			
+			if (rotationOffsetCoordinateSystem == Space.Self)
+				rotationOffset = Quaternion.Inverse(target.transform.rotation) * transform.rotation;
 		}
 	}
 }
