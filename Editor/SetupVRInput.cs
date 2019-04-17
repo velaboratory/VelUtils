@@ -37,7 +37,7 @@ public class InputAxis
 public class SetupVRInput : MonoBehaviour
 {
 	// Add a menu item named "SetupVRInput" to project settings in the menu bar.
-	[MenuItem("Edit/Project Settings/SetupVRInput", false, 2)]
+	[MenuItem("Tools/unityutilities/SetupVRInput", false, 2)]
 	static void DoSetupVRInput()
 	{
 		SetupInputManager();

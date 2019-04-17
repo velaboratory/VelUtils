@@ -12,11 +12,7 @@ namespace unityutilities
 	[RequireComponent(typeof(Rigidbody))]
 	public class Movement : MonoBehaviour
 	{
-		[Header("Object References")]
-		public Rigidbody rigRB;
-		public Transform head;
-		public Transform leftHand;
-		public Transform rightHand;
+		public Rig rig;
 
 		[Header("Features")] public bool grabWalls;
 		public bool grabAir = true;
@@ -34,6 +30,7 @@ namespace unityutilities
 		public bool continuousRotation;
 		public float continuousRotationSpeed = 100f;
 		public float snapRotationAmount = 30f;
+		public float turnNullZone = .1f;
 		
 		
 		[Header("Tuning")]
@@ -185,7 +182,7 @@ namespace unityutilities
 
 			cpt.followPosition = true;
 			cpt.positionFollowType = CopyTransform.FollowType.Velocity;
-			normalDrag = rigRB.drag;
+			normalDrag = rig.rb.drag;
 
 			
 		}
@@ -196,22 +193,22 @@ namespace unityutilities
 			Turn();
 			
 			// grab walls and air
-			if (grabWalls)
+			if (grabWalls && !grabAir)
 			{
 				if (leftHandGrabbedObj != null || grabbingSide == Side.Left)
 				{
-					GrabMove(ref leftHand, ref leftHandGrabPos, Side.Left, leftHandGrabbedObj);
+					GrabMove(ref rig.leftHand, ref leftHandGrabPos, Side.Left, leftHandGrabbedObj);
 				}
 
 				if (rightHandGrabbedObj != null || grabbingSide == Side.Right)
 				{
-					GrabMove(ref rightHand, ref rightHandGrabPos, Side.Right, rightHandGrabbedObj);
+					GrabMove(ref rig.rightHand, ref rightHandGrabPos, Side.Right, rightHandGrabbedObj);
 				}
 			}
 			else if (grabAir)
 			{
-				GrabMove(ref leftHand, ref leftHandGrabPos, Side.Left);
-				GrabMove(ref rightHand, ref rightHandGrabPos, Side.Right);
+				GrabMove(ref rig.leftHand, ref leftHandGrabPos, Side.Left);
+				GrabMove(ref rig.rightHand, ref rightHandGrabPos, Side.Right);
 			}
 
 			Boosters();
@@ -222,14 +219,17 @@ namespace unityutilities
 			}
 
 			// update lastVels
-			lastVels[lastVelsIndex] = rigRB.velocity;
+			lastVels[lastVelsIndex] = rig.rb.velocity;
 			lastVelsIndex = ++lastVelsIndex % 5;
 			
 			// update last frame's grabbed objs
 			lastLeftHandGrabbedObj = leftHandGrabbedObj;
 			lastRightHandGrabbedObj = rightHandGrabbedObj;
 
+			if (teleportingMovement)
+			{
 			Teleporting();
+			}
 
 		}
 
@@ -289,13 +289,13 @@ namespace unityutilities
 
 					if (currentTeleportingSide == Side.Left)
 					{
-						lastPos = leftHand.position;
-						lastDir = leftHand.forward;
+						lastPos = rig.leftHand.position;
+						lastDir = rig.leftHand.forward;
 					}
 					else
 					{
-						lastPos = rightHand.position;
-						lastDir = rightHand.forward;
+						lastPos = rig.rightHand.position;
+						lastDir = rig.rightHand.forward;
 					}
 
 					const float segmentLength = .25f;
@@ -313,7 +313,7 @@ namespace unityutilities
 							{
 								// define the point as a good teleportable point
 								teleporter.Pos = teleportHit.point;
-								Vector3 dir = head.forward;
+								Vector3 dir = rig.head.forward;
 								dir = Vector3.ProjectOnPlane(dir, Vector3.up);
 								if (teleporter.rotateOnTeleport)
 								{
@@ -325,6 +325,7 @@ namespace unityutilities
 									float angle = -Vector3.SignedAngle(-Vector3.forward, thumbstickDir, Vector3.up);
 									dir = Quaternion.Euler(0, angle, 0) * dir;
 								}
+
 								teleporter.Dir = dir;
 
 
@@ -356,7 +357,6 @@ namespace unityutilities
 					lineRenderer.SetPositions(points.ToArray());
 				}
 			}
-
 		}
 		
 		/// <summary>
@@ -378,12 +378,12 @@ namespace unityutilities
 		
 		public void TeleportTo(Vector3 position, Quaternion rotation)
 		{
-			float headRotOffset = Vector3.SignedAngle(transform.forward, Vector3.ProjectOnPlane(head.transform.forward,Vector3.up), Vector3.up);
+			float headRotOffset = Vector3.SignedAngle(transform.forward, Vector3.ProjectOnPlane(rig.head.transform.forward,Vector3.up), Vector3.up);
 			rotation = Quaternion.Euler(0,-headRotOffset,0) * rotation;
 			Quaternion origRot = transform.rotation;
 			transform.rotation = rotation;
 		
-			Vector3 headPosOffset = transform.position - head.transform.position;
+			Vector3 headPosOffset = transform.position - rig.head.transform.position;
 			headPosOffset.y = 0;
 			//transform.position = position + headPosOffset;
 			
@@ -404,7 +404,7 @@ namespace unityutilities
 			for (float i = 0; i < time; i+=Time.deltaTime)
 			{
 				transform.position = Vector3.MoveTowards(transform.position, position, (Time.deltaTime / time)*distance);
-				//transform.RotateAround(head.position, axis,angle*(Time.deltaTime/time));
+				//transform.RotateAround(rig.head.position, axis,angle*(Time.deltaTime/time));
 				yield return null;
 			}
 
@@ -414,16 +414,16 @@ namespace unityutilities
 
 		private void RoundVelToZero()
 		{
-			if (rigRB.velocity.magnitude < minVel)
+			if (rig.rb.velocity.magnitude < minVel)
 			{
-				rigRB.velocity = Vector3.zero;
+				rig.rb.velocity = Vector3.zero;
 			}
 		}
 
 		private void SlidingMovement()
 		{
 			bool useForce = false;
-			Vector3 forward = -head.forward;
+			Vector3 forward = -rig.head.forward;
 			forward.y = 0;
 			forward.Normalize();
 
@@ -433,24 +433,24 @@ namespace unityutilities
 			if (useForce)
 			{
 				Vector3 forwardForce = Time.deltaTime * InputMan.ThumbstickY(Side.Left) * forward * 1000f;
-				if (Mathf.Abs(Vector3.Dot(rigRB.velocity, head.forward)) < slidingSpeed)
+				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.forward)) < slidingSpeed)
 				{
-					rigRB.AddForce(forwardForce);
+					rig.rb.AddForce(forwardForce);
 				}
 
 				Vector3 rightForce = Time.deltaTime * InputMan.ThumbstickX(Side.Left) * right * 1000f;
-				if (Mathf.Abs(Vector3.Dot(rigRB.velocity, head.right)) < slidingSpeed)
+				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.right)) < slidingSpeed)
 				{
-					rigRB.AddForce(rightForce);
+					rig.rb.AddForce(rightForce);
 				}
 			}
 			else
 			{
-				Vector3 currentSpeed = rigRB.velocity;
+				Vector3 currentSpeed = rig.rb.velocity;
 				Vector3 forwardSpeed = InputMan.ThumbstickY(Side.Left) * forward;
 				Vector3 rightSpeed = InputMan.ThumbstickX(Side.Left) * right;
 				Vector3 speed = forwardSpeed + rightSpeed;
-				rigRB.velocity = slidingSpeed * speed + (currentSpeed.y * rigRB.transform.up);
+				rig.rb.velocity = slidingSpeed * speed + (currentSpeed.y * rig.rb.transform.up);
 			}
 		}
 
@@ -468,10 +468,10 @@ namespace unityutilities
 				{
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
-					if (Vector3.Dot(rigRB.velocity, head.forward) < mainBoosterMaxSpeed)
+					if (Vector3.Dot(rig.rb.velocity, rig.head.forward) < mainBoosterMaxSpeed)
 					{
 						// add the force
-						rigRB.AddForce(head.forward * mainBoosterForce * 100f);
+						rig.rb.AddForce(rig.head.forward * mainBoosterForce * 100f);
 					}
 
 					mainBoosterBudget -= mainBoosterCost;
@@ -482,35 +482,35 @@ namespace unityutilities
 			if (stickBoostBrake && InputMan.PadClick(Side.Right))
 			{
 				// add a bunch of drag
-				rigRB.drag = mainBrakeDrag;
+				rig.rb.drag = mainBrakeDrag;
 			}
 			else if (InputMan.PadClickUp(Side.Right))
 			{
-				rigRB.drag = normalDrag;
+				rig.rb.drag = normalDrag;
 				RoundVelToZero();
 			}
 
 			if (handBoosters)
 			{
-				if (InputMan.SecondaryMenu(Side.Left))
+				if (InputMan.MenuButton(Side.Left))
 				{
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
-					if (Vector3.Dot(rigRB.velocity, leftHand.forward) < maxHandBoosterSpeed)
+					if (Vector3.Dot(rig.rb.velocity, rig.leftHand.forward) < maxHandBoosterSpeed)
 					{
 						// add the force
-						rigRB.AddForce(leftHand.forward * handBoosterAccel * Time.deltaTime * 100f);
+						rig.rb.AddForce(rig.leftHand.forward * handBoosterAccel * Time.deltaTime * 100f);
 					}
 				}
 
-				if (InputMan.SecondaryMenu(Side.Right))
+				if (InputMan.MenuButton(Side.Right))
 				{
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
-					if (Vector3.Dot(rigRB.velocity, rightHand.forward) < maxHandBoosterSpeed)
+					if (Vector3.Dot(rig.rb.velocity, rig.rightHand.forward) < maxHandBoosterSpeed)
 					{
 						// add the force
-						rigRB.AddForce(rightHand.forward * handBoosterAccel * Time.deltaTime * 100f);
+						rig.rb.AddForce(rig.rightHand.forward * handBoosterAccel * Time.deltaTime * 100f);
 					}
 				}
 			}
@@ -524,14 +524,14 @@ namespace unityutilities
 				return;
 			}
 			
-			Vector3 pivot = head.position;
+			Vector3 pivot = rig.head.position;
 			if (grabbingSide == Side.Left)
 			{
-				pivot = leftHand.position;
+				pivot = rig.leftHand.position;
 			}
 			else if (grabbingSide == Side.Right)
 			{
-				pivot = rightHand.position;
+				pivot = rig.rightHand.position;
 			}
 
 			if (continuousRotation)
@@ -541,19 +541,19 @@ namespace unityutilities
 				{
 					turnInputLocal = Side.Right;
 				}
-				if (yaw && !InputMan.ThumbstickIdleX(turnInputLocal))
+				if (yaw && Mathf.Abs(InputMan.ThumbstickX(turnInputLocal)) > turnNullZone)
 				{
-					rigRB.transform.RotateAround(pivot, rigRB.transform.up,
+					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up,
 						InputMan.ThumbstickX(turnInputLocal) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
-				else if (pitch && !InputMan.ThumbstickIdleY(turnInputLocal))
+				else if (pitch && Mathf.Abs(InputMan.ThumbstickY(turnInputLocal)) > turnNullZone)
 				{
-					rigRB.transform.RotateAround(pivot, head.right,
+					rig.rb.transform.RotateAround(pivot, rig.head.right,
 						InputMan.ThumbstickY(turnInputLocal) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
-				else if (roll && !InputMan.ThumbstickIdleX(Side.Left))
+				else if (roll && Mathf.Abs(InputMan.ThumbstickX(Side.Left)) > turnNullZone)
 				{
-					rigRB.transform.RotateAround(pivot, head.forward,
+					rig.rb.transform.RotateAround(pivot, rig.head.forward,
 						InputMan.ThumbstickX(Side.Left) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
 			}
@@ -566,29 +566,34 @@ namespace unityutilities
 				}
 				if (yaw && InputMan.Left(turnInputLocal))
 				{
-					rigRB.transform.RotateAround(pivot, rigRB.transform.up, -snapRotationAmount);
+					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up, -snapRotationAmount);
 				}
 				else if (yaw && InputMan.Right(turnInputLocal))
 				{
-					rigRB.transform.RotateAround(pivot, rigRB.transform.up, snapRotationAmount);
+					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up, snapRotationAmount);
 				}
 				else if (pitch && InputMan.Up(turnInputLocal))
 				{
-					rigRB.transform.RotateAround(pivot, head.transform.forward, -snapRotationAmount);
+					rig.rb.transform.RotateAround(pivot, rig.head.transform.forward, -snapRotationAmount);
 				}
 				else if (pitch && InputMan.Down(turnInputLocal))
 				{
-					rigRB.transform.RotateAround(pivot, head.transform.forward, snapRotationAmount);
+					rig.rb.transform.RotateAround(pivot, rig.head.transform.forward, snapRotationAmount);
 				}
 				else if (roll && InputMan.Left(Side.Left))
 				{
-					rigRB.transform.RotateAround(pivot, head.transform.right, -snapRotationAmount);
+					rig.rb.transform.RotateAround(pivot, rig.head.transform.right, -snapRotationAmount);
 				}
 				else if (roll && InputMan.Right(Side.Left))
 				{
-					rigRB.transform.RotateAround(pivot, head.transform.right, snapRotationAmount);
+					rig.rb.transform.RotateAround(pivot, rig.head.transform.right, snapRotationAmount);
 				}
 			}
+		}
+
+		public void ResetOrientation()
+		{
+			rig.rb.transform.localRotation = Quaternion.identity;
 		}
 
 		private void GrabMove(ref Transform hand, ref GameObject grabPos, Side side, Transform parent = null)
@@ -608,7 +613,7 @@ namespace unityutilities
 				grabPos.transform.position = hand.position;
 				grabPos.transform.SetParent(parent);
 				cpt.target = grabPos.transform;
-				cpt.positionOffset = rigRB.position - hand.position;
+				cpt.positionOffset = rig.rb.position - hand.position;
 				
 				InputMan.Vibrate(side, 1);
 				
@@ -619,7 +624,7 @@ namespace unityutilities
 			{
 				if (InputMan.Grip(side))
 				{
-					cpt.positionOffset = rigRB.position - hand.position;
+					cpt.positionOffset = rig.rb.position - hand.position;
 				}
 				else
 				{
@@ -630,10 +635,39 @@ namespace unityutilities
 
 					if (grabPos != null)
 					{
+						OnRelease?.Invoke(grabPos.transform, side);
 						Destroy(grabPos.gameObject);
-						rigRB.velocity = MedianAvg(lastVels);
+						cpt.target = null;
+						//rig.rb.velocity = MedianAvg(lastVels);
+						rig.rb.velocity = -transform.TransformVector(InputMan.LocalControllerVelocity(side));
 						RoundVelToZero();
 					}
+				}
+			}
+		}
+
+		public void SetGrabbedObj(Transform obj, Side side)
+		{
+			if (side == Side.Left)
+			{
+				if (obj == null)
+				{
+					leftHandGrabbedObj = null;
+				}
+				else
+				{
+					leftHandGrabbedObj = obj;
+				}
+			}
+			else if (side == Side.Right)
+			{
+				if (obj == null)
+				{
+					rightHandGrabbedObj = null;
+				}
+				else
+				{
+					rightHandGrabbedObj = obj;
 				}
 			}
 		}
