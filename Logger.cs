@@ -16,8 +16,14 @@ namespace unityutilities {
         private static StreamWriter[] writers = new StreamWriter[0];
         private static string[] writersPaths = new string[0];
 	
+		private static bool enableLogging = true;
+	
 		public static void LogRow(string fileName, IEnumerable<string> data)
 		{
+			if (!enableLogging) {
+				return;
+			}
+
 			// make directory
 			if (dataDirectory[0] == '/')
 			{
@@ -107,9 +113,14 @@ namespace unityutilities {
 			writer.Flush();
 		}
 
+		public void EnableLogging(bool enable) {
+			enableLogging = enable;
+		}
+
         //close writers
         void OnApplicationQuit() {
             for(int x = 0; x < writers.Length; x++) {
+				writers[x].WriteLine("-------------");
                 writers[x].Close();
             }
         }

@@ -75,6 +75,13 @@ namespace unityutilities
 		public Side currentTeleportingSide = Side.None;
 		private RaycastHit teleportHit;
 		
+		public delegate void EmptyEvent();
+		public delegate void TeleportEvent(Vector3 translation);
+		public delegate void SnapTurnEvent(string direction);
+		public event EmptyEvent TeleportStart = delegate { };
+		public event TeleportEvent TeleportEnd = delegate { };
+		public event SnapTurnEvent SnapTurn = delegate { };
+		
 		/// <summary>
 		/// The current chosen spot to teleport to
 		/// </summary>
@@ -256,7 +263,7 @@ namespace unityutilities
 				{
 					// complete the teleport
 					TeleportTo(teleporter);
-
+					TeleportEnd?.Invoke(teleporter.Pos + rig.head.transform.position - transform.position);
 					currentTeleportingSide = Side.None;
 
 					// delete the line renderer
@@ -560,33 +567,45 @@ namespace unityutilities
 			else
 			{
 				Side turnInputLocal = turnInput;
+				string snapTurnDirection = "";
+
 				if (roll)
 				{
 					turnInputLocal = Side.Right;
 				}
 				if (yaw && InputMan.Left(turnInputLocal))
 				{
+					snapTurnDirection = "left";
 					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up, -snapRotationAmount);
 				}
 				else if (yaw && InputMan.Right(turnInputLocal))
 				{
+					snapTurnDirection = "right";
 					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up, snapRotationAmount);
 				}
 				else if (pitch && InputMan.Up(turnInputLocal))
 				{
+					snapTurnDirection = "up";
 					rig.rb.transform.RotateAround(pivot, rig.head.transform.forward, -snapRotationAmount);
 				}
 				else if (pitch && InputMan.Down(turnInputLocal))
 				{
+					snapTurnDirection = "down";
 					rig.rb.transform.RotateAround(pivot, rig.head.transform.forward, snapRotationAmount);
 				}
 				else if (roll && InputMan.Left(Side.Left))
 				{
+					snapTurnDirection = "roll-left";
 					rig.rb.transform.RotateAround(pivot, rig.head.transform.right, -snapRotationAmount);
 				}
 				else if (roll && InputMan.Right(Side.Left))
 				{
+					snapTurnDirection = "roll-right";
 					rig.rb.transform.RotateAround(pivot, rig.head.transform.right, snapRotationAmount);
+				}
+
+				if (snapTurnDirection != "") {
+					SnapTurn?.Invoke(snapTurnDirection);
 				}
 			}
 		}

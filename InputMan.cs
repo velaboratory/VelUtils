@@ -71,6 +71,39 @@ public class InputMan : MonoBehaviour {
 		}
 	}
 
+	private InputDevice[] xRNodes;
+	private XRNodeState[] xrNodeStates;
+
+	private static InputDevice GetXRNode(Side side)
+	{
+		if (side == Side.Left)
+		{
+			return InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+		} else //(side == Side.Right)
+		{
+			return InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+		}
+	}
+
+	private static XRNodeState GetXRNodeState(Side side)
+	{
+		List<XRNodeState> nodes = new List<XRNodeState>();
+		InputTracking.GetNodeStates(nodes);
+
+		foreach (XRNodeState ns in nodes)
+		{
+			if (side == Side.Left && ns.nodeType == XRNode.LeftHand)
+			{
+				return ns;
+			}
+			else if (side == Side.Right && ns.nodeType == XRNode.RightHand)
+			{
+				return ns;
+			}
+		}
+		return nodes[0];
+	}
+
 	private static InputMan instance;
 
 	private void Awake() {
@@ -448,11 +481,11 @@ public class InputMan : MonoBehaviour {
 	
 			OVRHapticsClip clip = new OVRHapticsClip(bytes, length);
 			channel.Preempt(clip);
-		#endif
-
-		#if STEAMVR_AVAILABLE
+# elif STEAMVR_AVAILABLE
 			//SteamVR_Controller.Input(side == Side.Left ? 0 : 1).TriggerHapticPulse(500);
 			//SteamVR_Input._default.outActions.Haptic
+#else
+		GetXRNode(side).SendHapticImpulse(0, intensity);
 #endif
 	}
 
@@ -465,6 +498,7 @@ public class InputMan : MonoBehaviour {
 		#if OCULUS_UTILITES_AVAILABLE
 		vel = OVRInput.GetLocalControllerVelocity(Side2OVRController(side));
 #else
+		GetXRNodeState(side).TryGetVelocity(out vel);
 		#endif
 		
 		return vel;
