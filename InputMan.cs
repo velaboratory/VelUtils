@@ -337,11 +337,11 @@ public class InputMan : MonoBehaviour {
 	#region Menu buttons
 
 	public static bool MenuButton(Side side = Side.Either) {
-		return GetRawButton("VR_Menu_Button_", side);
+		return GetRawButton("VR_MenuButton_", side);
 	}
 
 	public static bool MenuButtonDown(Side side = Side.Either) {
-		return GetRawButtonDown("VR_Menu_Button_", side);
+		return GetRawButtonDown("VR_MenuButton_", side);
 	}
 	
 	public static bool MainMenuButton() {
