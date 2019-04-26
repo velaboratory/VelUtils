@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿#define OCULUS_UTILITES_AVAILABLE
 
-#define OCULUS_UTILITES_AVAILABLE
+using UnityEngine;
 
 namespace unityutilities {
 	#if OCULUS_UTILITES_AVAILABLE
