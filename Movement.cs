@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace unityutilities
 {
@@ -97,6 +98,20 @@ namespace unityutilities
 			public GameObject teleportMarkerOverride;
 			public Material lineRendererMaterialOverride;
 			
+			[Header("Blink")]
+			public bool blink;
+			public float blinkDuration;
+			public ScreenFade screenFade;
+
+			public int renderQueue = 5000;
+			private float alpha;
+			[HideInInspector] public Material blinkMaterial = null;
+			[HideInInspector] public MeshRenderer blinkRenderer;
+			[HideInInspector] public MeshFilter blinkMesh;
+			private bool fading = false;
+
+
+
 			[HideInInspector]
 			public GameObject teleportMarkerInstance;
 			
@@ -178,6 +193,55 @@ namespace unityutilities
 
 		public Teleporter teleporter = new Teleporter();
 
+		private void Awake() {
+			if (teleportingMovement && teleporter.blink) {
+				teleporter.blinkMaterial = new Material(Shader.Find("unityutilities/UnlitTransparent"));
+				teleporter.blinkMesh = rig.head.gameObject.AddComponent<MeshFilter>();
+				teleporter.blinkRenderer = rig.head.gameObject.AddComponent<MeshRenderer>();
+
+				Mesh mesh = new Mesh();
+				teleporter.blinkMesh.mesh = mesh;
+
+				float x = 1f;
+				float y = 1f;
+				float distance = .5f;
+
+				Vector3[] vertices = new Vector3[4] {
+					new Vector3(-x, -y, distance),
+					new Vector3(x, -y, distance),
+					new Vector3(-x, y, distance),
+					new Vector3(x, y, distance)
+				};
+
+				int[] tris = new int[6] { 0, 2, 1, 2, 3, 1 };
+
+				Vector3[] normals = new Vector3[4] {
+					-Vector3.forward,
+					-Vector3.forward,
+					-Vector3.forward,
+					-Vector3.forward
+				};
+
+				Vector2[] uv = new Vector2[4] {
+					new Vector2(0, 0),
+					new Vector2(1, 0),
+					new Vector2(0, 1),
+					new Vector2(1, 1)
+				};
+
+				mesh.vertices = vertices;
+				mesh.triangles = tris;
+				mesh.normals = normals;
+				mesh.uv = uv;
+
+				teleporter.blinkMaterial.renderQueue = teleporter.renderQueue;
+				teleporter.blinkRenderer.material = teleporter.blinkMaterial;
+
+				SetBlinkOpacity(0);
+
+				SceneManager.activeSceneChanged += SceneChangeEvent;
+			}
+		}
 
 		void Start()
 		{
@@ -239,6 +303,8 @@ namespace unityutilities
 			}
 
 		}
+
+		#region Teleporting
 
 		private void Teleporting()
 		{
@@ -408,6 +474,11 @@ namespace unityutilities
 			
 			transform.rotation = rotation;
 			
+			if (teleporter.blink) {
+				FadeOut(teleporter.blinkDuration/2);
+				yield return new WaitForSeconds(4 * teleporter.blinkDuration / 5);
+			}
+
 			for (float i = 0; i < time; i+=Time.deltaTime)
 			{
 				transform.position = Vector3.MoveTowards(transform.position, position, (Time.deltaTime / time)*distance);
@@ -417,7 +488,54 @@ namespace unityutilities
 
 			transform.rotation = rotation;
 			transform.position = position;
+
+			if (teleporter.blink) {
+				FadeIn(teleporter.blinkDuration / 2);
 		}
+
+		}
+
+		/// <summary>
+		/// Fades the screen to black
+		/// </summary>
+		/// <param name="duration"></param>
+		public void FadeOut(float duration) {
+			StartCoroutine(Fade(0, 1, duration));
+		}
+
+		/// <summary>
+		/// Fades the screen from black back to normal
+		/// </summary>
+		/// <param name="duration"></param>
+		public void FadeIn(float duration) {
+			StartCoroutine(Fade(1, 0, duration));
+		}
+
+		IEnumerator Fade(float startVal, float endVal, float duration) {
+			float time = 0;
+			while (time < duration) {
+				SetBlinkOpacity(Mathf.Lerp(startVal, endVal, time / duration));
+				time += Time.deltaTime;
+				yield return null;
+			}
+			SetBlinkOpacity(endVal);
+		}
+
+		public void SetBlinkOpacity(float value) {
+			Color color = Color.black;
+			color.a = value;
+			teleporter.blinkMaterial.color = color;
+			teleporter.blinkRenderer.material = teleporter.blinkMaterial;
+
+			teleporter.blinkRenderer.enabled = value != 0;
+		}
+
+		void SceneChangeEvent(Scene oldScene, Scene newScene) {
+			SetBlinkOpacity(0);
+			FadeIn(1);
+		}
+
+		#endregion
 
 		private void RoundVelToZero()
 		{

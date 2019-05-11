@@ -16,7 +16,7 @@ namespace unityutilities {
         private static StreamWriter[] writers = new StreamWriter[0];
         private static string[] writersPaths = new string[0];
 	
-		private static bool enableLogging = true;
+		public static bool enableLogging = true;
 	
 		public static void LogRow(string fileName, IEnumerable<string> data)
 		{

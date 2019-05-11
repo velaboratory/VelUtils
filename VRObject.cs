@@ -3,11 +3,13 @@
 using UnityEngine;
 
 namespace unityutilities {
-	#if OCULUS_UTILITES_AVAILABLE
 	public class VRObject : MonoBehaviour {
+		#if OCULUS_UTILITES_AVAILABLE
 		void Update() {
-			Vector3 pos = OVRPlugin.GetNodePose(OVRPlugin.Node.DeviceObjectZero, OVRPlugin.Step.Render).ToOVRPose().position;
-			Quaternion rot = OVRPlugin.GetNodePose(OVRPlugin.Node.DeviceObjectZero, OVRPlugin.Step.Render).ToOVRPose().orientation;
+			Vector3 pos = OVRPlugin.GetNodePose(OVRPlugin.Node.DeviceObjectZero, OVRPlugin.Step.Render).ToOVRPose()
+				.position;
+			Quaternion rot = OVRPlugin.GetNodePose(OVRPlugin.Node.DeviceObjectZero, OVRPlugin.Step.Render).ToOVRPose()
+				.orientation;
 
 			bool garbageUpdate = pos == Vector3.zero;
 
@@ -16,6 +18,6 @@ namespace unityutilities {
 			t.localPosition = pos;
 			t.localRotation = rot;
 		}
+		#endif
 	}
-	#endif
 }
