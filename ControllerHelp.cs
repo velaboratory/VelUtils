@@ -1,4 +1,4 @@
-﻿#define OCULUS_UTILITES_AVAILABLE
+﻿#define OCULUS_UTILITIES_AVAILABLE
 
 using System;
 using System.Collections.Generic;

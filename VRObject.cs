@@ -1,10 +1,10 @@
-﻿#define OCULUS_UTILITES_AVAILABLE
+﻿#define OCULUS_UTILITIES_AVAILABLE
 
 using UnityEngine;
 
 namespace unityutilities {
 	public class VRObject : MonoBehaviour {
-		#if OCULUS_UTILITES_AVAILABLE
+		#if OCULUS_UTILITIES_AVAILABLE
 		void Update() {
 			Vector3 pos = OVRPlugin.GetNodePose(OVRPlugin.Node.DeviceObjectZero, OVRPlugin.Step.Render).ToOVRPose()
 				.position;

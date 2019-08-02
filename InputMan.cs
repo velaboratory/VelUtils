@@ -1,9 +1,11 @@
 #undef STEAMVR_AVAILABLE // change to #define or #undef if SteamVR utilites are installed
-#undef OCULUS_UTILITES_AVAILABLE
+#define OCULUS_UTILITIES_AVAILABLE
 
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 using UnityEngine.XR;
+using IEnumerator = System.Collections.IEnumerator;
 
 #if STEAMVR_AVAILABLE
 using Valve.VR;
@@ -117,7 +119,7 @@ public class InputMan : MonoBehaviour {
 #if STEAMVR_AVAILABLE
 			VRPackageInUse = VRPackage.SteamVR;
 #endif
-#if OCULUS_UTILITES_AVAILABLE
+#if OCULUS_UTILITIES_AVAILABLE
 		VRPackageInUse = VRPackage.Oculus;
 #endif
 
@@ -448,66 +450,91 @@ public class InputMan : MonoBehaviour {
 	/// Whether the left (0) or right (1) controllers are vibrating
 	/// </summary>
 	private static bool[] vibrating;
-	#if OCULUS_UTILITES_AVAILABLE
+	#if OCULUS_UTILITIES_AVAILABLE
 	private static OVRHapticsClip[] hapticsClip;
-	#endif
+#endif
 
 	/// <summary>
 	/// Vibrate the controller
 	/// </summary>
 	/// <param name="side">Which controller to vibrate</param>
 	/// <param name="intensity">Intensity from 0 to 1</param>
-	public static void Vibrate(Side side, float intensity) {
-		intensity = Mathf.Clamp01(intensity);
-		
-		#if OCULUS_UTILITES_AVAILABLE
-			OVRHaptics.OVRHapticsChannel channel;
-		if (side == Side.Left) {
-				channel = OVRHaptics.LeftChannel;
+	public static void Vibrate(Side side, float intensity, float duration = 1, float delay = 0) {
+
+		if (delay > 0 && instance) {
+			instance.StartVibrateDelay(side, intensity, duration, delay);
+			return;
 		}
-		else if (side == Side.Right) {
-				channel = OVRHaptics.RightChannel;
-			}
-		else {
-				Debug.LogError("Cannot vibrate on " + side);
-				return;
-			}
-	
-			int length = 10;
-			byte[] bytes = new byte[length];
+
+
+		intensity = Mathf.Clamp01(intensity);
+
+#if OCULUS_UTILITIES_AVAILABLE
+		OVRHaptics.OVRHapticsChannel channel;
+		if (side == Side.Left) {
+			channel = OVRHaptics.LeftChannel;
+		} else if (side == Side.Right) {
+			channel = OVRHaptics.RightChannel;
+		} else {
+			Debug.LogError("Cannot vibrate on " + side);
+			return;
+		}
+
+		int length = (int)(duration * 10);
+		byte[] bytes = new byte[length];
 		for (int i = 0; i < length; i++) {
-				bytes[i] = (byte)(intensity * 255);
-			}
-	
-			OVRHapticsClip clip = new OVRHapticsClip(bytes, length);
-			channel.Preempt(clip);
-# elif STEAMVR_AVAILABLE
+			bytes[i] = (byte)(intensity * 255);
+		}
+
+		OVRHapticsClip clip = new OVRHapticsClip(bytes, length);
+		channel.Preempt(clip);
+#elif STEAMVR_AVAILABLE
 			//SteamVR_Controller.Input(side == Side.Left ? 0 : 1).TriggerHapticPulse(500);
 			//SteamVR_Input._default.outActions.Haptic
 #else
-		GetXRNode(side).SendHapticImpulse(0, intensity);
+		GetXRNode(side).SendHapticImpulse(0, intensity, duration);
 #endif
 	}
 
-	#endregion
+#if OCULUS_UTILITIES_AVAILABLE
+	/// <summary>
+	/// Vibrate the controller
+	/// </summary>
+	/// <param name="side">Which controller to vibrate</param>
+	/// <param name="intensity">Intensity from 0 to 1</param>
+	public static void Vibrate(OVRInput.Controller side, float intensity, float duration = 1, float delay = 0) {
+		Vibrate(OVRController2Side(side), intensity, duration, delay);
+	}
+#endif
 
-	#region Controller Velocity
+	void StartVibrateDelay(Side side, float intensity, float duration, float delay) {
+		StartCoroutine(VibrateDelay(side, intensity, duration, delay));
+	}
+
+	IEnumerator VibrateDelay(Side side, float intensity, float duration, float delay) {
+		yield return new WaitForSeconds(delay);
+		Vibrate(side, intensity, duration, 0);
+	}
+
+#endregion
+
+#region Controller Velocity
 
 	public static Vector3 LocalControllerVelocity(Side side) {
 		Vector3 vel;
-		#if OCULUS_UTILITES_AVAILABLE
+#if OCULUS_UTILITIES_AVAILABLE
 		vel = OVRInput.GetLocalControllerVelocity(Side2OVRController(side));
 #else
 		GetXRNodeState(side).TryGetVelocity(out vel);
-		#endif
+#endif
 		
 		return vel;
 		}
 
-	#endregion
+#endregion
 
 	
-	#if STEAMVR_AVAILABLE
+#if STEAMVR_AVAILABLE
 	SteamVR_Input_Sources SideToInputSources(Side side)
 	{
 		if (side == Side.Left)
@@ -527,9 +554,9 @@ public class InputMan : MonoBehaviour {
 
 		return SteamVR_Input_Sources.Any;
 	}
-	#endif
+#endif
 
-#if OCULUS_UTILITES_AVAILABLE
+#if OCULUS_UTILITIES_AVAILABLE
 	public static Side OVRController2Side(OVRInput.Controller controller) {
 		if (controller == OVRInput.Controller.LTouch) {
 			return Side.Left;

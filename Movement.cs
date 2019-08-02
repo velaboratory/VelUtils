@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define OCULUS_UTILITIES_AVAILABLE
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,7 +77,7 @@ namespace unityutilities
 		[HideInInspector]
 		public Side currentTeleportingSide = Side.None;
 		private RaycastHit teleportHit;
-		
+
 		public delegate void EmptyEvent();
 		public delegate void TeleportEvent(Vector3 translation);
 		public delegate void SnapTurnEvent(string direction);
@@ -97,11 +99,10 @@ namespace unityutilities
 			public float smoothTeleportTime = .1f;
 			public GameObject teleportMarkerOverride;
 			public Material lineRendererMaterialOverride;
-			
+
 			[Header("Blink")]
 			public bool blink;
 			public float blinkDuration;
-			public ScreenFade screenFade;
 
 			public int renderQueue = 5000;
 			private float alpha;
@@ -299,7 +300,7 @@ namespace unityutilities
 
 			if (teleportingMovement)
 			{
-			Teleporting();
+				Teleporting();
 			}
 
 		}
@@ -318,7 +319,7 @@ namespace unityutilities
 			{
 				currentTeleportingSide = Side.Right;
 			}
-			
+
 			// if the teleport laser is visible
 			if (currentTeleportingSide != Side.None)
 			{
@@ -491,7 +492,7 @@ namespace unityutilities
 
 			if (teleporter.blink) {
 				FadeIn(teleporter.blinkDuration / 2);
-		}
+			}
 
 		}
 
@@ -753,7 +754,7 @@ namespace unityutilities
 				cpt.positionOffset = rig.rb.position - hand.position;
 				
 				InputMan.Vibrate(side, 1);
-				
+
 				// if event has subscribers, execute
 				OnGrab?.Invoke(parent, side);
 			}
