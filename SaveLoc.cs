@@ -12,7 +12,7 @@ namespace unityutilities {
 		[Space]
 		public Space coordinateSystem = Space.Self;
 
-		void Start() {
+		private void Start() {
 			if (load) {
 				Load();
 			}

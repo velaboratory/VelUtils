@@ -244,7 +244,7 @@ namespace unityutilities
 			}
 		}
 
-		void Start()
+		private void Start()
 		{
 			cpt = null;
 			if (cpt == null)
@@ -259,7 +259,7 @@ namespace unityutilities
 			
 		}
 
-		void Update()
+		private void Update()
 		{
 			// turn
 			Turn();
@@ -466,7 +466,7 @@ namespace unityutilities
 			StartCoroutine(DoSmoothTeleport(position + headPosOffset, rotation, teleporter.smoothTeleportTime));
 		}
 
-		IEnumerator DoSmoothTeleport(Vector3 position, Quaternion rotation, float time)
+		private IEnumerator DoSmoothTeleport(Vector3 position, Quaternion rotation, float time)
 		{
 			float distance = Vector3.Distance(transform.position, position);
 			float angle;
@@ -512,7 +512,7 @@ namespace unityutilities
 			StartCoroutine(Fade(1, 0, duration));
 		}
 
-		IEnumerator Fade(float startVal, float endVal, float duration) {
+		private IEnumerator Fade(float startVal, float endVal, float duration) {
 			float time = 0;
 			while (time < duration) {
 				SetBlinkOpacity(Mathf.Lerp(startVal, endVal, time / duration));
@@ -531,7 +531,7 @@ namespace unityutilities
 			teleporter.blinkRenderer.enabled = value != 0;
 		}
 
-		void SceneChangeEvent(Scene oldScene, Scene newScene) {
+		private void SceneChangeEvent(Scene oldScene, Scene newScene) {
 			SetBlinkOpacity(0);
 			FadeIn(1);
 		}
@@ -810,7 +810,7 @@ namespace unityutilities
 			}
 		}
 
-		Vector3 MedianAvg(Vector3[] inputArray)
+		private Vector3 MedianAvg(Vector3[] inputArray)
 		{
 			List<Vector3> list = new List<Vector3>(inputArray);
 			list = list.OrderBy(x => x.magnitude).ToList();

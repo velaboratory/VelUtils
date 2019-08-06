@@ -62,7 +62,7 @@ namespace unityutilities {
 			}
 		}
 
-		void FixedUpdate() {
+		private void FixedUpdate() {
 			if (!target) {
 				//Debug.Log("No target set!");
 				return;

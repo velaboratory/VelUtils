@@ -125,7 +125,7 @@ namespace unityutilities {
 		}
 
 		//close writers
-		void OnApplicationQuit() {
+		private void OnApplicationQuit() {
 			for (int x = 0; x < writers.Length; x++) {
 				writers[x].WriteLine("-------------");
 				writers[x].Close();

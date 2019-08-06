@@ -29,13 +29,13 @@ namespace unityutilities
 		public string rotateRight = "";
 
 		// Use this for initialization
-		void Start()
+		private void Start()
 		{
 
 		}
 
 		// Update is called once per frame
-		void Update()
+		private void Update()
 		{
 			float actualAmount;
 			float actualRotationAmount;

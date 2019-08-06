@@ -12,7 +12,7 @@ namespace unityutilities
 	public class ControllerHelpTester : MonoBehaviour
 	{
 		// Use this for initialization
-		void Start () {
+		private void Start () {
 			for (int i = 0; i<Enum.GetNames(typeof(ControllerHelp.ButtonHintType)).Length; i++)
 			{
 				ControllerHelp.ShowHint(Side.Both, (ControllerHelp.ButtonHintType)i, "TESTSETSET");
