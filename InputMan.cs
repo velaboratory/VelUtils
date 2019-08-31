@@ -61,7 +61,8 @@ public class InputMan : MonoBehaviour {
 		VR_Thumbstick_Y_Up,
 		VR_Thumbstick_Y_Down,
 		VR_Thumbstick_Press,
-		VR_MenuButton
+		VR_Button1,
+		VR_Button2
 	}
 
 	private static readonly Dictionary<InputStrings, string[]> inputManagerStrings = new Dictionary<InputStrings,string[]>() {
@@ -74,7 +75,8 @@ public class InputMan : MonoBehaviour {
 		{InputStrings.VR_Thumbstick_Y_Up, new[] {"VR_Thumbstick_Y_Up_Left", "VR_Thumbstick_Y_Up_Right"}},
 		{InputStrings.VR_Thumbstick_Y_Down, new[] {"VR_Thumbstick_Y_Down_Left", "VR_Thumbstick_Y_Down_Right"}},
 		{InputStrings.VR_Thumbstick_Press, new[] {"VR_Thumbstick_Press_Left", "VR_Thumbstick_Press_Right"}},
-		{InputStrings.VR_MenuButton, new[] {"VR_MenuButton_Left", "VR_MenuButton_Right"}},
+		{InputStrings.VR_Button1, new[] {"VR_Button1_Left", "VR_Button1_Right"}},
+		{InputStrings.VR_Button2, new[] {"VR_Button2_Left", "VR_Button2_Right"}},
 		
 	};
 
@@ -121,6 +123,18 @@ public class InputMan : MonoBehaviour {
 	}
 
 	private static InputMan instance;
+	private static bool init;
+
+	private static void Init() {
+		if (instance != null) {
+			Destroy(instance.gameObject);
+		}
+		
+		instance = new GameObject("InputMan").AddComponent<InputMan>();
+		DontDestroyOnLoad(instance.gameObject);
+		
+		init = true;
+	}
 
 	private void Awake() {
 		if (instance != null && instance != this) {
@@ -128,6 +142,7 @@ public class InputMan : MonoBehaviour {
 		}
 		else {
 			instance = this;
+			init = true;
 		}
 
 #if STEAMVR_AVAILABLE
@@ -137,7 +152,7 @@ public class InputMan : MonoBehaviour {
 		VRPackageInUse = VRPackage.Oculus;
 #endif
 
-		Debug.Log("InputMan loaded device: " + XRSettings.loadedDeviceName);
+		Debug.Log("InputMan loaded device: " + XRSettings.loadedDeviceName, instance);
 
 		if (XRDevice.model.Contains("Oculus")) {
 			headsetType = HeadsetType.Rift;
@@ -149,12 +164,12 @@ public class InputMan : MonoBehaviour {
 			headsetType = HeadsetType.WMR;
 		}
 
-		firstPressed.Add(InputStrings.VR_Trigger, new bool[2,2]);
-		firstPressed.Add(InputStrings.VR_Grip, new bool[2,2]);
-		firstPressed.Add(InputStrings.VR_Thumbstick_X_Left, new bool[2,2]);
-		firstPressed.Add(InputStrings.VR_Thumbstick_X_Right, new bool[2,2]);
-		firstPressed.Add(InputStrings.VR_Thumbstick_Y_Up, new bool[2,2]);
-		firstPressed.Add(InputStrings.VR_Thumbstick_Y_Down, new bool[2,2]);
+		firstPressed.Add(InputStrings.VR_Trigger, new bool[2, 3]);
+		firstPressed.Add(InputStrings.VR_Grip, new bool[2, 3]);
+		firstPressed.Add(InputStrings.VR_Thumbstick_X_Left, new bool[2, 3]);
+		firstPressed.Add(InputStrings.VR_Thumbstick_X_Right, new bool[2, 3]);
+		firstPressed.Add(InputStrings.VR_Thumbstick_Y_Up, new bool[2, 3]);
+		firstPressed.Add(InputStrings.VR_Thumbstick_Y_Down, new bool[2, 3]);
 
 		directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_X_Left, new float[] {0, 0});
 		directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_X_Right, new float[] {0, 0});
@@ -167,7 +182,8 @@ public class InputMan : MonoBehaviour {
 	/// <summary>
 	/// Contains a pair of bools for each axis input that can act as a button.
 	/// The first is true only for the first frame the axis is active
-	/// The second remains true when the button is held.
+	/// The second is true only for the first frame the axis is inactive
+	/// The third remains true when the button is held.
 	/// 	it represents whether the button was already down last frame
 	/// </summary>
 	private static Dictionary<InputStrings, bool[,]> firstPressed = new Dictionary<InputStrings, bool[,]>();
@@ -196,6 +212,10 @@ public class InputMan : MonoBehaviour {
 	
 	public static bool TriggerDown(Side side = Side.Either) {
 		return GetRawValueDown(InputStrings.VR_Trigger, side);
+	}
+
+	public static bool TriggerUp(Side side = Side.Either) {
+		return GetRawValueUp(InputStrings.VR_Trigger, side);
 	}
 
 	public static bool MainTrigger() {
@@ -352,11 +372,27 @@ public class InputMan : MonoBehaviour {
 	#region Menu buttons
 
 	public static bool MenuButton(Side side = Side.Either) {
-		return GetRawButton(InputStrings.VR_MenuButton, side);
+		return Button1(side);
 	}
 
 	public static bool MenuButtonDown(Side side = Side.Either) {
-		return GetRawButtonDown(InputStrings.VR_MenuButton, side);
+		return Button1Down(side);
+	}
+	
+	public static bool Button1(Side side = Side.Either) {
+		return GetRawButton(InputStrings.VR_Button1, side);
+	}
+
+	public static bool Button1Down(Side side = Side.Either) {
+		return GetRawButtonDown(InputStrings.VR_Button1, side);
+	}
+	
+	public static bool Button2(Side side = Side.Either) {
+		return GetRawButton(InputStrings.VR_Button2, side);
+	}
+
+	public static bool Button2Down(Side side = Side.Either) {
+		return GetRawButtonDown(InputStrings.VR_Button2, side);
 	}
 	
 	public static bool MainMenuButton() {
@@ -475,6 +511,7 @@ public class InputMan : MonoBehaviour {
 	/// <param name="duration">Duration of the vibration</param>
 	/// <param name="delay">Time before the vibration starts</param>
 	public static void Vibrate(Side side, float intensity, float duration = 1, float delay = 0) {
+		if (!init) Init();
 
 		if (delay > 0 && instance) {
 			instance.StartVibrateDelay(side, intensity, duration, delay);
@@ -533,7 +570,7 @@ public class InputMan : MonoBehaviour {
 
 	private IEnumerator VibrateDelay(Side side, float intensity, float duration, float delay) {
 		yield return new WaitForSeconds(delay);
-		Vibrate(side, intensity, duration, 0);
+		Vibrate(side, intensity, duration);
 	}
 
 #endregion
@@ -613,6 +650,8 @@ public class InputMan : MonoBehaviour {
 #endif
 
 	private static float GetRawValue(InputStrings key, Side side) {
+		if (!init) Init();
+		
 		float left, right;
 		switch (side) {
 			case Side.Both:
@@ -631,6 +670,8 @@ public class InputMan : MonoBehaviour {
 	}
 
 	private static bool GetRawValueDown(InputStrings key, Side side) {
+		if (!init) Init();
+		
 		switch (side) {
 			case Side.Both:
 				return firstPressed[key][0, 0] &&
@@ -645,7 +686,26 @@ public class InputMan : MonoBehaviour {
 		}
 	}
 	
+	private static bool GetRawValueUp(InputStrings key, Side side) {
+		if (!init) Init();
+
+		switch (side) {
+			case Side.Both:
+				return firstPressed[key][0, 1] &&
+					   firstPressed[key][1, 1];
+			case Side.Either:
+				return firstPressed[key][0, 1] ||
+					   firstPressed[key][1, 1];
+			case Side.None:
+				return false;
+			default:
+				return firstPressed[key][(int)side, 1];
+		}
+	}
+
 	private static bool GetRawButton(InputStrings key, Side side) {
+		if (!init) Init();
+		
 		switch (side) {
 			case Side.Both:
 				return Input.GetButton(inputManagerStrings[key][(int) Side.Left]) &&
@@ -661,6 +721,8 @@ public class InputMan : MonoBehaviour {
 	}
 
 	private static bool GetRawButtonDown(InputStrings key, Side side) {
+		if (!init) Init();
+		
 		switch (side) {
 			case Side.Both:
 				return Input.GetButtonDown(inputManagerStrings[key][(int) Side.Left]) &&
@@ -676,6 +738,8 @@ public class InputMan : MonoBehaviour {
 	}
 	
 	private static bool GetRawButtonUp(InputStrings key, Side side) {
+		if (!init) Init();
+		
 		switch (side) {
 			case Side.Both:
 				return Input.GetButtonUp(inputManagerStrings[key][(int) Side.Left]) &&
@@ -694,10 +758,10 @@ public class InputMan : MonoBehaviour {
 	{
 		if (currentVal)
 		{
-			if (!firstPressed[key][side,1])
+			if (!firstPressed[key][side,2])
 			{
 				firstPressed[key][side,0] = true;
-				firstPressed[key][side,1] = true;
+				firstPressed[key][side,2] = true;
 			}
 			else
 			{
@@ -706,8 +770,13 @@ public class InputMan : MonoBehaviour {
 		}
 		else
 		{
-			firstPressed[key][side,0] = false;
-			firstPressed[key][side,1] = false;
+			if (firstPressed[key][side, 2]) {
+				firstPressed[key][side, 1] = true;
+				firstPressed[key][side, 2] = false;
+			}
+			else {
+				firstPressed[key][side,1] = false;
+			}
 		}
 	}
 

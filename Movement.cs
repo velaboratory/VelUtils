@@ -106,10 +106,9 @@ namespace unityutilities
 
 			public int renderQueue = 5000;
 			private float alpha;
-			[HideInInspector] public Material blinkMaterial = null;
+			[HideInInspector] public Material blinkMaterial;
 			[HideInInspector] public MeshRenderer blinkRenderer;
 			[HideInInspector] public MeshFilter blinkMesh;
-			private bool fading = false;
 
 
 
@@ -207,23 +206,23 @@ namespace unityutilities
 				float y = 1f;
 				float distance = .5f;
 
-				Vector3[] vertices = new Vector3[4] {
+				Vector3[] vertices = {
 					new Vector3(-x, -y, distance),
 					new Vector3(x, -y, distance),
 					new Vector3(-x, y, distance),
 					new Vector3(x, y, distance)
 				};
 
-				int[] tris = new int[6] { 0, 2, 1, 2, 3, 1 };
+				int[] tris = { 0, 2, 1, 2, 3, 1 };
 
-				Vector3[] normals = new Vector3[4] {
+				Vector3[] normals = {
 					-Vector3.forward,
 					-Vector3.forward,
 					-Vector3.forward,
 					-Vector3.forward
 				};
 
-				Vector2[] uv = new Vector2[4] {
+				Vector2[] uv = {
 					new Vector2(0, 0),
 					new Vector2(1, 0),
 					new Vector2(0, 1),
@@ -351,8 +350,9 @@ namespace unityutilities
 						}
 						else
 						{
-							lineRenderer.material.shader = Shader.Find("Unlit/Color");
-							lineRenderer.material.color = Color.black;
+							Material material;
+							(material = lineRenderer.material).shader = Shader.Find("Unlit/Color");
+							material.color = Color.black;
 						}
 					}
 
@@ -373,7 +373,7 @@ namespace unityutilities
 					}
 
 					const float segmentLength = .25f;
-					const float numSegments = 100f;
+					const float numSegments = 200f;
 
 					// the teleport line will stop at a max distance
 					for (int i = 0; i < numSegments; i++)
@@ -528,7 +528,7 @@ namespace unityutilities
 			teleporter.blinkMaterial.color = color;
 			teleporter.blinkRenderer.material = teleporter.blinkMaterial;
 
-			teleporter.blinkRenderer.enabled = value != 0;
+			teleporter.blinkRenderer.enabled = value > 0.001f;
 		}
 
 		private void SceneChangeEvent(Scene oldScene, Scene newScene) {
@@ -597,7 +597,7 @@ namespace unityutilities
 					if (Vector3.Dot(rig.rb.velocity, rig.head.forward) < mainBoosterMaxSpeed)
 					{
 						// add the force
-						rig.rb.AddForce(rig.head.forward * mainBoosterForce * 100f);
+						rig.rb.AddForce(mainBoosterForce * 100f * rig.head.forward);
 					}
 
 					mainBoosterBudget -= mainBoosterCost;
@@ -618,25 +618,25 @@ namespace unityutilities
 
 			if (handBoosters)
 			{
-				if (InputMan.MenuButton(Side.Left))
+				if (InputMan.Button2(Side.Left))
 				{
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
 					if (Vector3.Dot(rig.rb.velocity, rig.leftHand.forward) < maxHandBoosterSpeed)
 					{
 						// add the force
-						rig.rb.AddForce(rig.leftHand.forward * handBoosterAccel * Time.deltaTime * 100f);
+						rig.rb.AddForce(handBoosterAccel * Time.deltaTime * 100f * rig.leftHand.forward);
 					}
 				}
 
-				if (InputMan.MenuButton(Side.Right))
+				if (InputMan.Button2(Side.Right))
 				{
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
 					if (Vector3.Dot(rig.rb.velocity, rig.rightHand.forward) < maxHandBoosterSpeed)
 					{
 						// add the force
-						rig.rb.AddForce(rig.rightHand.forward * handBoosterAccel * Time.deltaTime * 100f);
+						rig.rb.AddForce(handBoosterAccel * Time.deltaTime * 100f * rig.rightHand.forward);
 					}
 				}
 			}

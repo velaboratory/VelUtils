@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 public class DontDestroyOnLoad : MonoBehaviour {
-	private void Start() {
+	private void Awake() {
 		try {
 			DontDestroyOnLoad(gameObject);
 		} catch (Exception e) {

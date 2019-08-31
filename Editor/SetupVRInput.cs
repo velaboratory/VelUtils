@@ -22,8 +22,8 @@ public class InputAxis
 	public float dead;
 	public float sensitivity;
 
-	public bool snap = false;
-	public bool invert = false;
+	public const bool snap = false;
+	public const bool invert = false;
 
 	public AxisType type;
 
@@ -38,7 +38,7 @@ public class SetupVRInput : MonoBehaviour
 {
 	// Add a menu item named "SetupVRInput" to project settings in the menu bar.
 	[MenuItem("Tools/unityutilities/SetupVRInput", false, 2)]
-	static void DoSetupVRInput()
+	private static void DoSetupVRInput()
 	{
 		SetupInputManager();
 	}
@@ -103,8 +103,8 @@ public class SetupVRInput : MonoBehaviour
 		GetChildProperty(axisProperty, "gravity").floatValue = axis.gravity;
 		GetChildProperty(axisProperty, "dead").floatValue = axis.dead;
 		GetChildProperty(axisProperty, "sensitivity").floatValue = axis.sensitivity;
-		GetChildProperty(axisProperty, "snap").boolValue = axis.snap;
-		GetChildProperty(axisProperty, "invert").boolValue = axis.invert;
+		GetChildProperty(axisProperty, "snap").boolValue = InputAxis.snap;
+		GetChildProperty(axisProperty, "invert").boolValue = InputAxis.invert;
 		GetChildProperty(axisProperty, "type").intValue = (int) axis.type;
 		GetChildProperty(axisProperty, "axis").intValue = axis.axis - 1;
 		GetChildProperty(axisProperty, "joyNum").intValue = axis.joyNum;
@@ -112,7 +112,7 @@ public class SetupVRInput : MonoBehaviour
 		serializedObject.ApplyModifiedProperties();
 	}
 
-	public static void SetupInputManager()
+	private static void SetupInputManager()
 	{
 		// thumbstick
 		AddAxis(new InputAxis()
@@ -192,7 +192,7 @@ public class SetupVRInput : MonoBehaviour
 		// top buttons
 		AddAxis(new InputAxis()
 		{
-			name = "VR_SecondButton_Left",
+			name = "VR_Button2_Left",
 			dead = 0.001f,
 			sensitivity = 1f,
 			type = AxisType.KeyOrMouseButton,
@@ -201,7 +201,7 @@ public class SetupVRInput : MonoBehaviour
 		
 		AddAxis(new InputAxis()
 		{
-			name = "VR_SecondButton_Right",
+			name = "VR_Button2_Right",
 			dead = 0.001f,
 			sensitivity = 1f,
 			type = AxisType.KeyOrMouseButton,
@@ -210,7 +210,7 @@ public class SetupVRInput : MonoBehaviour
 		
 		AddAxis(new InputAxis()
 		{
-			name = "VR_MenuButton_Left",
+			name = "VR_Button1_Left",
 			dead = 0.001f,
 			sensitivity = 1f,
 			type = AxisType.KeyOrMouseButton,
@@ -219,7 +219,7 @@ public class SetupVRInput : MonoBehaviour
 		
 		AddAxis(new InputAxis()
 		{
-			name = "VR_MenuButton_Right",
+			name = "VR_Button1_Right",
 			dead = 0.001f,
 			sensitivity = 1f,
 			type = AxisType.KeyOrMouseButton,
