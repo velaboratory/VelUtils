@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
 using UnityEngine.XR;
+using unityutilities;
 using IEnumerator = System.Collections.IEnumerator;
 
 #if STEAMVR_AVAILABLE
@@ -14,7 +15,7 @@ using Valve.VR;
 public enum HeadsetType
 {
 	None,
-	Rift,
+	Oculus,
 	Vive,
 	WMR
 }
@@ -155,7 +156,7 @@ public class InputMan : MonoBehaviour {
 		Debug.Log("InputMan loaded device: " + XRSettings.loadedDeviceName, instance);
 
 		if (XRDevice.model.Contains("Oculus")) {
-			headsetType = HeadsetType.Rift;
+			headsetType = HeadsetType.Oculus;
 		}
 		else if (XRDevice.model.Contains("Vive")) {
 			headsetType = HeadsetType.Vive;
@@ -418,57 +419,57 @@ public class InputMan : MonoBehaviour {
 	public static bool Up(Side side = Side.Either) {
 		if (side == Side.Both || side == Side.Either) {
 			return (firstPressed[InputStrings.VR_Thumbstick_Y_Up][0,0] &&
-			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Left))) ||
+			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Left))) ||
 			       (firstPressed[InputStrings.VR_Thumbstick_Y_Up][1,0] &&
-			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Right)));
+			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Right)));
 		}
 		else {
 			return firstPressed[InputStrings.VR_Thumbstick_Y_Up][(int)side,0] &&
-			       (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+			       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
 		}
 	}
 
 	public static bool Down(Side side = Side.Either) {
 		if (side == Side.Both || side == Side.Either) {
 			return (firstPressed[InputStrings.VR_Thumbstick_Y_Down][0, 0] &&
-			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Left))) ||
+			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Left))) ||
 			       (firstPressed[InputStrings.VR_Thumbstick_Y_Down][1, 0] &&
-			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Right)));
+			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Right)));
 		}
 		else {
 			return firstPressed[InputStrings.VR_Thumbstick_Y_Down][(int) side, 0] &&
-			       (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+			       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
 		}
 	}
 
 	public static bool Left(Side side = Side.Either) {
 		if (side == Side.Both || side == Side.Either) {
 			return (firstPressed[InputStrings.VR_Thumbstick_X_Left][0, 0] &&
-			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Left))) ||
+			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Left))) ||
 			       (firstPressed[InputStrings.VR_Thumbstick_X_Left][1, 0] &&
-			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Right)));
+			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Right)));
 		}
 		else {
 			return firstPressed[InputStrings.VR_Thumbstick_X_Left][(int) side, 0] &&
-			       (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+			       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
 		}
 	}
 
 	public static bool Right(Side side = Side.Either) {
 		if (side == Side.Both || side == Side.Either) {
 			return (firstPressed[InputStrings.VR_Thumbstick_X_Right][0, 0] &&
-			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Left))) ||
+			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Left))) ||
 			       (firstPressed[InputStrings.VR_Thumbstick_X_Right][1, 0] &&
-			        (headsetType == HeadsetType.Rift || ThumbstickPress(Side.Right)));
+			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Right)));
 		}
 		else {
 			return firstPressed[InputStrings.VR_Thumbstick_X_Right][(int) side, 0] &&
-			       (headsetType == HeadsetType.Rift || ThumbstickPress(side));
+			       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
 		}
 	}
 
 	public static float Vertical(Side side = Side.Either) {
-		if (headsetType == HeadsetType.Rift) {
+		if (headsetType == HeadsetType.Oculus) {
 			return ThumbstickY();
 		}
 		else if (ThumbstickPress()) {
@@ -480,7 +481,7 @@ public class InputMan : MonoBehaviour {
 	}
 	
 	public static float Horizontal(Side side = Side.Either) {
-		if (headsetType == HeadsetType.Rift) {
+		if (headsetType == HeadsetType.Oculus) {
 			return ThumbstickX();
 		}
 		else if (ThumbstickPress()) {
@@ -685,7 +686,7 @@ public class InputMan : MonoBehaviour {
 				return firstPressed[key][(int) side, 0];
 		}
 	}
-	
+
 	private static bool GetRawValueUp(InputStrings key, Side side) {
 		if (!init) Init();
 
@@ -754,46 +755,49 @@ public class InputMan : MonoBehaviour {
 		}
 	}
 
-	private void UpdateDictionary(bool currentVal, int side, InputStrings key)
-	{
-		if (currentVal)
-		{
-			if (!firstPressed[key][side,2])
-			{
-				firstPressed[key][side,0] = true;
-				firstPressed[key][side,2] = true;
-			}
-			else
-			{
-				firstPressed[key][side,0] = false;
-			}
-		}
-		else
-		{
-			if (firstPressed[key][side, 2]) {
-				firstPressed[key][side, 1] = true;
-				firstPressed[key][side, 2] = false;
+	private void UpdateDictionary(bool currentVal, int side, InputStrings key) {
+		// if down right now
+		if (currentVal) {
+			// if it wasn't down last frame
+			if (!firstPressed[key][side, 2] && !firstPressed[key][side, 0]) {
+				// activate the down event 
+				firstPressed[key][side, 0] = true;
 			}
 			else {
-				firstPressed[key][side,1] = false;
+				// deactive the down event
+				firstPressed[key][side, 0] = false;
 			}
+			// save that the input was down for next frame
+			firstPressed[key][side, 2] = true;
+		}
+		// if up right now
+		else {
+			// if it wasn't up last frame
+			if (firstPressed[key][side, 2] && !firstPressed[key][side, 1]) {
+				// activate the up event
+				firstPressed[key][side, 1] = true;
+			}
+			else {
+				// deactivate the up event
+				firstPressed[key][side, 1] = false;
+			}
+			// save that the input was up for next frame
+			firstPressed[key][side, 2] = false;
+
+			firstPressed[key][side, 0] = false;
 		}
 	}
 
-	private void UpdateDictionaryDirection(bool currentVal, int side, InputStrings key)
-	{
-		if (currentVal)
-		{
-			if (directionalTimeoutValue[key][side] > directionalTimeout)
-			{
-				firstPressed[key][side,1] = false;
+	private void UpdateDictionaryDirection(bool currentVal, int side, InputStrings key) {
+		if (currentVal) {
+			if (directionalTimeoutValue[key][side] > directionalTimeout) {
+				firstPressed[key][side, 1] = false;
 				directionalTimeoutValue[key][side] = 0;
 			}
 
-			directionalTimeoutValue[key][side] += Time.deltaTime;
+			//directionalTimeoutValue[key][side] += Time.deltaTime;
 		}
-		else
-		{
+		else {
 			directionalTimeoutValue[key][side] = 0;
 		}
 
@@ -807,12 +811,12 @@ public class InputMan : MonoBehaviour {
 		{
 			UpdateDictionary(Trigger((Side) i), i, InputStrings.VR_Trigger);
 			UpdateDictionary(Grip((Side) i), i,InputStrings.VR_Grip);
-			
-			
-			UpdateDictionaryDirection(ThumbstickX((Side) i) < -thumbstickThreshold, i,InputStrings.VR_Thumbstick_X_Left);
-			UpdateDictionaryDirection(ThumbstickX((Side) i) > thumbstickThreshold, i,InputStrings.VR_Thumbstick_X_Right);
-			UpdateDictionaryDirection(ThumbstickY((Side) i) < -thumbstickThreshold, i,InputStrings.VR_Thumbstick_Y_Up);
-			UpdateDictionaryDirection(ThumbstickY((Side) i) > thumbstickThreshold, i, InputStrings.VR_Thumbstick_Y_Down);
+
+
+			UpdateDictionaryDirection(ThumbstickX((Side)i) < -thumbstickThreshold, i, InputStrings.VR_Thumbstick_X_Left);
+			UpdateDictionaryDirection(ThumbstickX((Side)i) > thumbstickThreshold, i, InputStrings.VR_Thumbstick_X_Right);
+			UpdateDictionaryDirection(ThumbstickY((Side)i) < -thumbstickThreshold, i, InputStrings.VR_Thumbstick_Y_Up);
+			UpdateDictionaryDirection(ThumbstickY((Side)i) > thumbstickThreshold, i, InputStrings.VR_Thumbstick_Y_Down);
 		}
 	}
 }

@@ -99,6 +99,7 @@ namespace unityutilities
 			public float smoothTeleportTime = .1f;
 			public GameObject teleportMarkerOverride;
 			public Material lineRendererMaterialOverride;
+			public LayerMask validLayers = ~0;
 
 			[Header("Blink")]
 			public bool blink;
@@ -378,7 +379,7 @@ namespace unityutilities
 					// the teleport line will stop at a max distance
 					for (int i = 0; i < numSegments; i++)
 					{
-						if (Physics.Raycast(lastPos, lastDir, out teleportHit, segmentLength, ~(1 << 2)))
+						if (Physics.Raycast(lastPos, lastDir, out teleportHit, segmentLength, teleporter.validLayers))
 						{
 							points.Add(teleportHit.point);
 

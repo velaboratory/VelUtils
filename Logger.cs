@@ -17,6 +17,9 @@ namespace unityutilities {
 		private static string[] writersPaths = new string[0];
 
 		public static bool enableLogging = true;
+		private static string debugLogFileName = "debug_log";
+		// can't change during runtime
+		public static bool enableDebugLogLogging = true;
 
 		public static void LogRow(string fileName, IEnumerable<string> data) {
 
@@ -120,12 +123,32 @@ namespace unityutilities {
 
 		}
 
+		public static void LogRow(string fileName, params string[] elements) {
+			if (elements is null) {
+				return;
+			}
+
+			LogRow(fileName, new List<string>(elements));
+		}
+
+		private void Awake() {
+			if (enableDebugLogLogging)
+				Application.logMessageReceived += LogCallback;
+		}
+
+		private void LogCallback(string condition, string stackTrace, LogType logType) {
+			LogRow(debugLogFileName, condition);
+		}
+
 		public void EnableLogging(bool enable) {
 			enableLogging = enable;
 		}
 
 		//close writers
 		private void OnApplicationQuit() {
+			if (enableDebugLogLogging)
+				Application.logMessageReceived -= LogCallback;
+
 			for (int x = 0; x < writers.Length; x++) {
 				writers[x].WriteLine("-------------");
 				writers[x].Close();

@@ -142,7 +142,7 @@ namespace unityutilities
 			{
 				//FindControllerParts();
 
-				if (InputMan.headsetType == HeadsetType.Rift)
+				if (InputMan.headsetType == HeadsetType.Oculus)
 				{
 					offsets = riftOffsets;
 				}
