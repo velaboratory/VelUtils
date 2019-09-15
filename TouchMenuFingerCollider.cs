@@ -7,7 +7,6 @@ public class TouchMenuFingerCollider : MonoBehaviour {
 	public TouchMenuHandModule handModule;
 	public bool isLeft;
 	public AudioSource audioSource;
-	public AudioSource audioSourceShort;
 
 	private void OnTriggerEnter(Collider c) {
 		Button s = c.GetComponent<Button>();

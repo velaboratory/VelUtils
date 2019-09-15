@@ -48,11 +48,11 @@ public class TouchMenuHandModule : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update() {
+		lockTimer += Time.deltaTime;
+		return;
 		if (selected) {
-			float verticalDistance = selected.transform
-				.InverseTransformPoint(isSelectedByLeft
-					? leftCollider.transform.position
-					: rightCollider.transform.position).z;
+			float verticalDistance = selected.transform.InverseTransformPoint(
+				isSelectedByLeft ? leftCollider.transform.position : rightCollider.transform.position).y;
 			if (!locked && verticalDistance > activationDistance) {
 				Invoke(nameof(ClickSelectedButton), .1f);
 				locked = true;
@@ -64,7 +64,6 @@ public class TouchMenuHandModule : MonoBehaviour {
 			}
 		}
 		
-		lockTimer += Time.deltaTime;
 	}
 
 	void ClickSelectedButton() {
@@ -75,6 +74,11 @@ public class TouchMenuHandModule : MonoBehaviour {
 		i.Select();
 		selected = i;
 		lastFinger = finger;
+		
+		if (!(lockTimer > lockTime)) return;
+		i.onClick.Invoke();
+		lockTimer = 0;
+		lastFinger.audioSource.Play();
 	}
 
 	public void SelectableExit(Button i, TouchMenuFingerCollider finger) {
