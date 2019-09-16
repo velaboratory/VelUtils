@@ -210,6 +210,38 @@ public class InputMan : MonoBehaviour {
 		return GetRawValueUp(InputStrings.VR_Trigger, side);
 	}
 	
+	public static float MainTriggerValue() {
+		return TriggerValue(DominantHand);
+	}
+
+	public static bool MainTrigger() {
+		return Trigger(DominantHand);
+	}
+	
+	public static bool MainTriggerDown() {
+		return TriggerDown(DominantHand);
+	}
+
+	public static bool MainTriggerUp() {
+		return TriggerUp(DominantHand);
+	}
+	
+	public static float SecondaryTriggerValue() {
+		return TriggerValue(NonDominantHand);
+	}
+
+	public static bool SecondaryTrigger() {
+		return Trigger(NonDominantHand);
+	}
+	
+	public static bool SecondaryTriggerDown() {
+		return TriggerDown(NonDominantHand);
+	}
+
+	public static bool SecondaryTriggerUp() {
+		return TriggerUp(NonDominantHand);
+	}
+	
 	#if OCULUS_UTILITIES_AVAILABLE
 	public static float TriggerValue(OVRInput.Controller side) {
 		return TriggerValue(OVRController2Side(side));
@@ -276,6 +308,30 @@ public class InputMan : MonoBehaviour {
 	
 	public static bool ThumbstickPressUp(Side side = Side.Either) {
 		return GetRawButtonUp(InputStrings.VR_Thumbstick_Press, side);
+	}
+	
+	public static bool MainThumbstickPress() {
+		return ThumbstickPress(DominantHand);
+	}
+
+	public static bool MainThumbstickPressDown() {
+		return ThumbstickPressDown(DominantHand);
+	}
+	
+	public static bool MainThumbstickPressUp() {
+		return ThumbstickPressUp(DominantHand);
+	}
+	
+	public static bool SecondaryThumbstickPress() {
+		return ThumbstickPress(NonDominantHand);
+	}
+
+	public static bool SecondaryThumbstickPressDown() {
+		return ThumbstickPressDown(NonDominantHand);
+	}
+	
+	public static bool SecondaryThumbstickPressUp() {
+		return ThumbstickPressUp(NonDominantHand);
 	}
 	
 	#if OCULUS_UTILITIES_AVAILABLE
@@ -395,6 +451,30 @@ public class InputMan : MonoBehaviour {
 	
 	public static bool Button2Up(Side side = Side.Either) {
 		return GetRawButtonUp(InputStrings.VR_Button2, side);
+	}
+	
+	public static bool MainMenuButton() {
+		return Button1(DominantHand);
+	}
+
+	public static bool MainMenuButtonDown() {
+		return Button1Down(DominantHand);
+	}
+	
+	public static bool MainMenuButtonUp() {
+		return Button1Up(DominantHand);
+	}
+	
+	public static bool SecondaryMenuButton() {
+		return Button1(NonDominantHand);
+	}
+
+	public static bool SecondaryMenuButtonDown() {
+		return Button1Down(NonDominantHand);
+	}
+	
+	public static bool SecondaryMenuButtonUp() {
+		return Button1Up(NonDominantHand);
 	}
 	
 	#if OCULUS_UTILITIES_AVAILABLE
