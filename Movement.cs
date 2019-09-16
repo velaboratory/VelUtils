@@ -13,6 +13,7 @@ namespace unityutilities
 	/// Adds several movement techniques while maintaining compatibility with many rig setups.
 	/// </summary>
 	[RequireComponent(typeof(Rigidbody))]
+	[AddComponentMenu("unityutilities/Movement")]
 	public class Movement : MonoBehaviour
 	{
 		public Rig rig;

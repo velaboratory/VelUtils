@@ -2,6 +2,7 @@
 
 namespace unityutilities
 {
+	[AddComponentMenu("unityutilities/Rig")]
 	public class Rig : MonoBehaviour
 	{
 		public Rigidbody rb;

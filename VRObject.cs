@@ -3,6 +3,7 @@
 using UnityEngine;
 
 namespace unityutilities {
+	[AddComponentMenu("unityutilities/VR Object")]
 	public class VRObject : MonoBehaviour {
 #if OCULUS_UTILITIES_AVAILABLE
 		private void Update() {

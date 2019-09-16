@@ -6,7 +6,7 @@ namespace unityutilities
 	/// <summary>
 	/// Provides an example for how to use the controller help texts
 	/// </summary>
-	[AddComponentMenu("unityutilities/ControllerHelpTester")]
+	[AddComponentMenu("unityutilities/Controller Help Tester")]
 	public class ControllerHelpTester : MonoBehaviour
 	{
 		// Use this for initialization

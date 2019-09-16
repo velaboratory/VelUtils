@@ -5,7 +5,7 @@ namespace unityutilities
 	/// <summary>
 	/// Nudges an object with assignable keyboard shortcuts.
 	/// </summary>
-	[AddComponentMenu("unityutilities/AdjustPos")]
+	[AddComponentMenu("unityutilities/Adjust Pos")]
 	public class AdjustPos : MonoBehaviour
 	{
 
