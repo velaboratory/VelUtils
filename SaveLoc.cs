@@ -26,44 +26,61 @@ namespace unityutilities {
 		}
 
 		public void Load() {
-			if (coordinateSystem == Space.Self) {
-				transform.localPosition = new Vector3(
-					PlayerPrefs.GetFloat(name + "_xLPos", transform.localPosition.x),
-					PlayerPrefs.GetFloat(name + "_yLPos", transform.localPosition.y),
-					PlayerPrefs.GetFloat(name + "_zLPos", transform.localPosition.z));
-				transform.localEulerAngles = new Vector3(
-					PlayerPrefs.GetFloat(name + "_xLRot", transform.localEulerAngles.x),
-					PlayerPrefs.GetFloat(name + "_yLRot", transform.localEulerAngles.y),
-					PlayerPrefs.GetFloat(name + "_zLRot", transform.localEulerAngles.z));
-			}
-			else if (coordinateSystem == Space.World) {
-				transform.position = new Vector3(
-					PlayerPrefs.GetFloat(name + "_xPos", transform.position.x),
-					PlayerPrefs.GetFloat(name + "_yPos", transform.position.y),
-					PlayerPrefs.GetFloat(name + "_zPos", transform.position.z));
-				transform.eulerAngles = new Vector3(
-					PlayerPrefs.GetFloat(name + "_xRot", transform.eulerAngles.x),
-					PlayerPrefs.GetFloat(name + "_yRot", transform.eulerAngles.y),
-					PlayerPrefs.GetFloat(name + "_zRot", transform.eulerAngles.z));
+			switch (coordinateSystem) {
+				case Space.Self:
+					var localPosition = transform.localPosition;
+					localPosition = new Vector3(
+						PlayerPrefs.GetFloat(name + "_xLPos", localPosition.x),
+						PlayerPrefs.GetFloat(name + "_yLPos", localPosition.y),
+						PlayerPrefs.GetFloat(name + "_zLPos", localPosition.z));
+					transform.localPosition = localPosition;
+					var localEulerAngles = transform.localEulerAngles;
+					localEulerAngles = new Vector3(
+						PlayerPrefs.GetFloat(name + "_xLRot", localEulerAngles.x),
+						PlayerPrefs.GetFloat(name + "_yLRot", localEulerAngles.y),
+						PlayerPrefs.GetFloat(name + "_zLRot", localEulerAngles.z));
+					transform.localEulerAngles = localEulerAngles;
+					break;
+				case Space.World:
+					var position = transform.position;
+					position = new Vector3(
+						PlayerPrefs.GetFloat(name + "_xPos", position.x),
+						PlayerPrefs.GetFloat(name + "_yPos", position.y),
+						PlayerPrefs.GetFloat(name + "_zPos", position.z));
+					transform.position = position;
+					var eulerAngles = transform.eulerAngles;
+					eulerAngles = new Vector3(
+						PlayerPrefs.GetFloat(name + "_xRot", eulerAngles.x),
+						PlayerPrefs.GetFloat(name + "_yRot", eulerAngles.y),
+						PlayerPrefs.GetFloat(name + "_zRot", eulerAngles.z));
+					transform.eulerAngles = eulerAngles;
+					break;
 			}
 		}
 
+		// ReSharper disable once MemberCanBePrivate.Global
 		public void Save() {
-			if (coordinateSystem == Space.Self) {
-				PlayerPrefs.SetFloat(name + "_xLPos", transform.localPosition.x);
-				PlayerPrefs.SetFloat(name + "_yLPos", transform.localPosition.y);
-				PlayerPrefs.SetFloat(name + "_zLPos", transform.localPosition.z);
-				PlayerPrefs.SetFloat(name + "_xLRot", transform.localEulerAngles.x);
-				PlayerPrefs.SetFloat(name + "_yLRot", transform.localEulerAngles.y);
-				PlayerPrefs.SetFloat(name + "_zLRot", transform.localEulerAngles.z);
-			}
-			else if (coordinateSystem == Space.World) {
-				PlayerPrefs.SetFloat(name + "_xPos", transform.position.x);
-				PlayerPrefs.SetFloat(name + "_yPos", transform.position.y);
-				PlayerPrefs.SetFloat(name + "_zPos", transform.position.z);
-				PlayerPrefs.SetFloat(name + "_xRot", transform.eulerAngles.x);
-				PlayerPrefs.SetFloat(name + "_yRot", transform.eulerAngles.y);
-				PlayerPrefs.SetFloat(name + "_zRot", transform.eulerAngles.z);
+			switch (coordinateSystem) {
+				case Space.Self:
+					var localPosition = transform.localPosition;
+					PlayerPrefs.SetFloat(name + "_xLPos", localPosition.x);
+					PlayerPrefs.SetFloat(name + "_yLPos", localPosition.y);
+					PlayerPrefs.SetFloat(name + "_zLPos", localPosition.z);
+					var localEulerAngles = transform.localEulerAngles;
+					PlayerPrefs.SetFloat(name + "_xLRot", localEulerAngles.x);
+					PlayerPrefs.SetFloat(name + "_yLRot", localEulerAngles.y);
+					PlayerPrefs.SetFloat(name + "_zLRot", localEulerAngles.z);
+					break;
+				case Space.World:
+					var position = transform.position;
+					PlayerPrefs.SetFloat(name + "_xPos", position.x);
+					PlayerPrefs.SetFloat(name + "_yPos", position.y);
+					PlayerPrefs.SetFloat(name + "_zPos", position.z);
+					var eulerAngles = transform.eulerAngles;
+					PlayerPrefs.SetFloat(name + "_xRot", eulerAngles.x);
+					PlayerPrefs.SetFloat(name + "_yRot", eulerAngles.y);
+					PlayerPrefs.SetFloat(name + "_zRot", eulerAngles.z);
+					break;
 			}
 		}
 	}
@@ -81,9 +98,8 @@ namespace unityutilities {
 			EditorGUILayout.Space();
 			EditorGUILayout.Space();
 
-			if (GUILayout.Button("Load from PlayerPrefs")) {
-				sl.Load();
-			}
+			if (!GUILayout.Button("Load from PlayerPrefs")) return;
+			if (sl != null) sl.Load();
 
 		}
 	}

@@ -1,10 +1,10 @@
-﻿#define OCULUS_UTILITIES_AVAILABLE
+﻿#define OCULUS_UTILITIES_AVAILABLE // change to #define or #undef if Oculus utilites are installed
 
 using UnityEngine;
 
 namespace unityutilities {
 	public class VRObject : MonoBehaviour {
-		#if OCULUS_UTILITIES_AVAILABLE
+#if OCULUS_UTILITIES_AVAILABLE
 		private void Update() {
 			Vector3 pos = OVRPlugin.GetNodePose(OVRPlugin.Node.DeviceObjectZero, OVRPlugin.Step.Render).ToOVRPose()
 				.position;
@@ -18,6 +18,6 @@ namespace unityutilities {
 			t.localPosition = pos;
 			t.localRotation = rot;
 		}
-		#endif
+#endif
 	}
 }

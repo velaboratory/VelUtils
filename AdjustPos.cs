@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR;
 
 namespace unityutilities
 {
@@ -27,12 +24,6 @@ namespace unityutilities
 		[Header("Rotations (global)")]
 		public string rotateLeft = "";
 		public string rotateRight = "";
-
-		// Use this for initialization
-		private void Start()
-		{
-
-		}
 
 		// Update is called once per frame
 		private void Update()

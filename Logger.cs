@@ -10,8 +10,8 @@ namespace unityutilities {
 	/// </summary>
 	public class Logger : MonoBehaviour {
 		private static string logFolder = "Log";
-		private static string fileExtension = ".tsv";
-		private static string delimiter = "\t";
+		private const string fileExtension = ".tsv";
+		private const string delimiter = "\t";
 
 		private static StreamWriter[] writers = new StreamWriter[0];
 		private static string[] writersPaths = new string[0];

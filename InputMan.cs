@@ -1,16 +1,18 @@
 #undef STEAMVR_AVAILABLE // change to #define or #undef if SteamVR utilites are installed
 #define OCULUS_UTILITIES_AVAILABLE
 
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 using UnityEngine.XR;
-using unityutilities;
-using IEnumerator = System.Collections.IEnumerator;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 #if STEAMVR_AVAILABLE
 using Valve.VR;
 #endif
+
+namespace unityutilities {
 
 public enum HeadsetType
 {
@@ -38,19 +40,11 @@ public enum Axis
 	Y
 }
 
-public enum VRPackage
-{
-	none,
-	SteamVR,
-	Oculus
-}
-
 /// <summary>
 /// Makes input from VR devices accessible from a unified set of methods. Can treat axes as button down.
 /// </summary>
 public class InputMan : MonoBehaviour {
 	public static HeadsetType headsetType;
-	private static VRPackage VRPackageInUse;
 
 	private enum InputStrings {
 		VR_Trigger,
@@ -97,6 +91,7 @@ public class InputMan : MonoBehaviour {
 		}
 	}
 
+	#if !OCULUS_UTILITIES_AVAILABLE
 	private InputDevice[] xRNodes;
 	private XRNodeState[] xrNodeStates;
 
@@ -104,6 +99,7 @@ public class InputMan : MonoBehaviour {
 		return InputDevices.GetDeviceAtXRNode(side == Side.Left ? XRNode.LeftHand : XRNode.RightHand);
 	}
 
+	
 	private static XRNodeState GetXRNodeState(Side side)
 	{
 		List<XRNodeState> nodes = new List<XRNodeState>();
@@ -122,6 +118,7 @@ public class InputMan : MonoBehaviour {
 		}
 		return nodes[0];
 	}
+	#endif
 
 	private static InputMan instance;
 	private static bool init;
@@ -145,13 +142,6 @@ public class InputMan : MonoBehaviour {
 			instance = this;
 			init = true;
 		}
-
-#if STEAMVR_AVAILABLE
-			VRPackageInUse = VRPackage.SteamVR;
-#endif
-#if OCULUS_UTILITIES_AVAILABLE
-		VRPackageInUse = VRPackage.Oculus;
-#endif
 
 		Debug.Log("InputMan loaded device: " + XRSettings.loadedDeviceName, instance);
 
@@ -178,7 +168,7 @@ public class InputMan : MonoBehaviour {
 		directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_Y_Down, new float[] {0, 0});
 	}
 
-	#region navigation vars
+	#region Navigation Vars
 
 	/// <summary>
 	/// Contains a pair of bools for each axis input that can act as a button.
@@ -218,30 +208,24 @@ public class InputMan : MonoBehaviour {
 	public static bool TriggerUp(Side side = Side.Either) {
 		return GetRawValueUp(InputStrings.VR_Trigger, side);
 	}
+	
+	#if OCULUS_UTILITIES_AVAILABLE
+	public static float TriggerValue(OVRInput.Controller side) {
+		return TriggerValue(OVRController2Side(side));
+	}
 
-	public static bool MainTrigger() {
-		return Trigger(DominantHand);
+	public static bool Trigger(OVRInput.Controller side) {
+		return Trigger(OVRController2Side(side));
 	}
 	
-	public static float MainTriggerValue() {
-		return TriggerValue(DominantHand);
+	public static bool TriggerDown(OVRInput.Controller side) {
+		return TriggerDown(OVRController2Side(side));
 	}
 
-	public static bool MainTriggerDown() {
-		return TriggerDown(DominantHand);
+	public static bool TriggerUp(OVRInput.Controller side) {
+		return TriggerUp(OVRController2Side(side));
 	}
-
-	public static bool SecondaryTrigger() {
-		return Trigger(NonDominantHand);
-	}
-
-	public static float SecondaryTriggerValue() {
-		return TriggerValue(NonDominantHand);
-	}
-
-	public static bool SecondaryTriggerDown() {
-		return TriggerDown(NonDominantHand);
-	}
+	#endif
 
 	#endregion
 
@@ -256,6 +240,26 @@ public class InputMan : MonoBehaviour {
 	public static bool GripDown(Side side = Side.Either) {
 		return GetRawValueDown(InputStrings.VR_Grip, side);
 	}
+	
+	public static bool GripUp(Side side = Side.Either) {
+		return GetRawValueUp(InputStrings.VR_Grip, side);
+	}
+	
+	#if OCULUS_UTILITIES_AVAILABLE
+	public static float GripValue(OVRInput.Controller side) {
+		return GripValue(OVRController2Side(side));
+	}
+	public static bool Grip(OVRInput.Controller side) {
+		return Grip(OVRController2Side(side));
+	}
+	public static bool GripDown(OVRInput.Controller side) {
+		return GripDown(OVRController2Side(side));
+	}
+	
+	public static bool GripUp(OVRInput.Controller side) {
+		return GripUp(OVRController2Side(side));
+	}
+	#endif
 
 	#endregion
 
@@ -272,18 +276,31 @@ public class InputMan : MonoBehaviour {
 	public static bool ThumbstickPressUp(Side side = Side.Either) {
 		return GetRawButtonUp(InputStrings.VR_Thumbstick_Press, side);
 	}
+	
+	#if OCULUS_UTILITIES_AVAILABLE
+	public static bool ThumbstickPress(OVRInput.Controller side) {
+		return ThumbstickPress(OVRController2Side(side));
+	}
+
+	public static bool ThumbstickPressDown(OVRInput.Controller side) {
+		return ThumbstickPressDown(OVRController2Side(side));
+	}
+	
+	public static bool ThumbstickPressUp(OVRInput.Controller side) {
+		return ThumbstickPressUp(OVRController2Side(side));
+	}
+	#endif
 
 	public static bool ThumbstickIdle(Side side, Axis axis) {
 		if (axis == Axis.X) {
 			return ThumbstickIdleX(side);
 		}
-		else if (axis == Axis.Y) {
+
+		if (axis == Axis.Y) {
 			return ThumbstickIdleY(side);
 		}
-		else {
-			Debug.LogError("More axes than possible.");
-			return false;
-		}
+		Debug.LogError("More axes than possible.");
+		return false;
 	}
 
 	public static bool ThumbstickIdleX(Side side = Side.Either) {
@@ -302,13 +319,12 @@ public class InputMan : MonoBehaviour {
 		if (axis == Axis.X) {
 			return ThumbstickX(side);
 		}
-		else if (axis == Axis.Y) {
+
+		if (axis == Axis.Y) {
 			return ThumbstickY(side);
 		}
-		else {
-			Debug.LogError("More axes than possible.");
-			return 0;
-		}
+		Debug.LogError("More axes than possible.");
+		return 0;
 	}
 
 	public static float ThumbstickX(Side side = Side.Either) {
@@ -317,22 +333,6 @@ public class InputMan : MonoBehaviour {
 
 	public static float ThumbstickY(Side side = Side.Either) {
 		return GetRawValue(InputStrings.VR_Thumbstick_Y, side);
-	}
-
-	public static bool MainThumbstickPress() {
-		return ThumbstickPress(DominantHand);
-	}
-	
-	public static bool MainThumbstickPressDown() {
-		return ThumbstickPressDown(DominantHand);
-	}
-
-	public static bool SecondaryThumbstickPress() {
-		return ThumbstickPress(NonDominantHand);
-	}
-
-	public static bool SecondaryThumbstickPressDown() {
-		return ThumbstickPressDown(NonDominantHand);
 	}
 
 	// aux methods for pad
@@ -372,20 +372,16 @@ public class InputMan : MonoBehaviour {
 
 	#region Menu buttons
 
-	public static bool MenuButton(Side side = Side.Either) {
-		return Button1(side);
-	}
-
-	public static bool MenuButtonDown(Side side = Side.Either) {
-		return Button1Down(side);
-	}
-	
 	public static bool Button1(Side side = Side.Either) {
 		return GetRawButton(InputStrings.VR_Button1, side);
 	}
 
 	public static bool Button1Down(Side side = Side.Either) {
 		return GetRawButtonDown(InputStrings.VR_Button1, side);
+	}
+	
+	public static bool Button1Up(Side side = Side.Either) {
+		return GetRawButtonUp(InputStrings.VR_Button1, side);
 	}
 	
 	public static bool Button2(Side side = Side.Either) {
@@ -396,20 +392,42 @@ public class InputMan : MonoBehaviour {
 		return GetRawButtonDown(InputStrings.VR_Button2, side);
 	}
 	
-	public static bool MainMenuButton() {
-		return MenuButton(DominantHand);
+	public static bool Button2Up(Side side = Side.Either) {
+		return GetRawButtonUp(InputStrings.VR_Button2, side);
+	}
+	
+	#if OCULUS_UTILITIES_AVAILABLE
+	public static bool Button1(OVRInput.Controller side) {
+		return Button1(OVRController2Side(side));
 	}
 
-	public static bool MainMenuButtonDown() {
-		return MenuButtonDown(DominantHand);
-		}
-
-	public static bool SecondaryMenuButton() {
-		return MenuButton(NonDominantHand);
+	public static bool Button1Down(OVRInput.Controller side) {
+		return Button1Down(OVRController2Side(side));
+	}
+	
+	public static bool Button1Up(OVRInput.Controller side) {
+		return Button1Up(OVRController2Side(side));
+	}
+	
+	public static bool Button2(OVRInput.Controller side) {
+		return Button2(OVRController2Side(side));
 	}
 
-	public static bool SecondaryMenuButtonDown() {
-		return MenuButtonDown(NonDominantHand);
+	public static bool Button2Down(OVRInput.Controller side) {
+		return Button2Down(OVRController2Side(side));
+	}
+	
+	public static bool Button2Up(OVRInput.Controller side) {
+		return Button2Up(OVRController2Side(side));
+	}
+	#endif
+	
+	public static bool MenuButton(Side side = Side.Either) {
+		return Button1(side);
+	}
+
+	public static bool MenuButtonDown(Side side = Side.Either) {
+		return Button1Down(side);
 	}
 
 	#endregion
@@ -423,10 +441,9 @@ public class InputMan : MonoBehaviour {
 			       (firstPressed[InputStrings.VR_Thumbstick_Y_Up][1,0] &&
 			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Right)));
 		}
-		else {
-			return firstPressed[InputStrings.VR_Thumbstick_Y_Up][(int)side,0] &&
-			       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
-		}
+
+		return firstPressed[InputStrings.VR_Thumbstick_Y_Up][(int)side,0] &&
+		       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
 	}
 
 	public static bool Down(Side side = Side.Either) {
@@ -436,10 +453,9 @@ public class InputMan : MonoBehaviour {
 			       (firstPressed[InputStrings.VR_Thumbstick_Y_Down][1, 0] &&
 			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Right)));
 		}
-		else {
-			return firstPressed[InputStrings.VR_Thumbstick_Y_Down][(int) side, 0] &&
-			       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
-		}
+
+		return firstPressed[InputStrings.VR_Thumbstick_Y_Down][(int) side, 0] &&
+		       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
 	}
 
 	public static bool Left(Side side = Side.Either) {
@@ -449,10 +465,9 @@ public class InputMan : MonoBehaviour {
 			       (firstPressed[InputStrings.VR_Thumbstick_X_Left][1, 0] &&
 			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Right)));
 		}
-		else {
-			return firstPressed[InputStrings.VR_Thumbstick_X_Left][(int) side, 0] &&
-			       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
-		}
+
+		return firstPressed[InputStrings.VR_Thumbstick_X_Left][(int) side, 0] &&
+		       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
 	}
 
 	public static bool Right(Side side = Side.Either) {
@@ -462,34 +477,51 @@ public class InputMan : MonoBehaviour {
 			       (firstPressed[InputStrings.VR_Thumbstick_X_Right][1, 0] &&
 			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Right)));
 		}
-		else {
-			return firstPressed[InputStrings.VR_Thumbstick_X_Right][(int) side, 0] &&
-			       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
-		}
+
+		return firstPressed[InputStrings.VR_Thumbstick_X_Right][(int) side, 0] &&
+		       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
 	}
+
+	#if OCULUS_UTILITIES_AVAILABLE
+	public static bool Up(OVRInput.Controller side) {
+		return Up(OVRController2Side(side));
+	}
+	
+	public static bool Down(OVRInput.Controller side) {
+		return Down(OVRController2Side(side));
+	}
+	
+	public static bool Left(OVRInput.Controller side) {
+		return Left(OVRController2Side(side));
+	}
+	
+	public static bool Right(OVRInput.Controller side) {
+		return Right(OVRController2Side(side));
+	}
+	#endif
 
 	public static float Vertical(Side side = Side.Either) {
 		if (headsetType == HeadsetType.Oculus) {
-			return ThumbstickY();
+			return ThumbstickY(side);
 		}
-		else if (ThumbstickPress()) {
-			return ThumbstickY();
+
+		if (ThumbstickPress()) {
+			return ThumbstickY(side);
 		}
-		else {
-			return 0;
-		}
+		
+		return 0;
 	}
 	
 	public static float Horizontal(Side side = Side.Either) {
 		if (headsetType == HeadsetType.Oculus) {
-			return ThumbstickX();
+			return ThumbstickX(side);
 		}
-		else if (ThumbstickPress()) {
-			return ThumbstickX();
+
+		if (ThumbstickPress()) {
+			return ThumbstickX(side);
 		}
-		else {
-			return 0;
-		}
+
+		return 0;
 	}
 
 	#endregion
@@ -579,15 +611,14 @@ public class InputMan : MonoBehaviour {
 #region Controller Velocity
 
 	public static Vector3 LocalControllerVelocity(Side side) {
-		Vector3 vel;
-#if OCULUS_UTILITIES_AVAILABLE
-		vel = OVRInput.GetLocalControllerVelocity(Side2OVRController(side));
-#else
-		GetXRNodeState(side).TryGetVelocity(out vel);
-#endif
+		#if OCULUS_UTILITIES_AVAILABLE
+		Vector3 vel = OVRInput.GetLocalControllerVelocity(Side2OVRController(side));
+		#else
+		Vector3 vel = GetXRNodeState(side).TryGetVelocity(out vel);
+		#endif
 		
 		return vel;
-		}
+	}
 
 #endregion
 
@@ -614,41 +645,37 @@ public class InputMan : MonoBehaviour {
 	}
 #endif
 
-#if OCULUS_UTILITIES_AVAILABLE
-	public static Side OVRController2Side(OVRInput.Controller controller) {
-		if (controller == OVRInput.Controller.LTouch) {
-			return Side.Left;
+	#if OCULUS_UTILITIES_AVAILABLE
+	private static Side OVRController2Side(OVRInput.Controller controller) {
+		switch (controller) {
+			case OVRInput.Controller.LTouch:
+				return Side.Left;
+			case OVRInput.Controller.RTouch:
+				return Side.Right;
+			case OVRInput.Controller.None:
+				return Side.None;
+			case OVRInput.Controller.All:
+				return Side.Both;
+			default:
+				return Side.None;
 		}
-		else if (controller == OVRInput.Controller.RTouch) {
-			return Side.Right;
-		}
-		else if (controller == OVRInput.Controller.None) {
-			return Side.None;
-		}
-		else if (controller == OVRInput.Controller.All) {
-			return Side.Both;
-		}
-
-		return Side.None;
 	}
 
-	public static OVRInput.Controller Side2OVRController(Side side) {
-		if (side == Side.Left) {
-			return OVRInput.Controller.LTouch;
+	private static OVRInput.Controller Side2OVRController(Side side) {
+		switch (side) {
+			case Side.Left:
+				return OVRInput.Controller.LTouch;
+			case Side.Right:
+				return OVRInput.Controller.RTouch;
+			case Side.None:
+				return OVRInput.Controller.None;
+			case Side.Both:
+				return OVRInput.Controller.All;
+			default:
+				return OVRInput.Controller.None;
 		}
-		else if (side == Side.Right) {
-			return OVRInput.Controller.RTouch;
-		}
-		else if (side == Side.None) {
-			return OVRInput.Controller.None;
-		}
-		else if (side == Side.Both) {
-			return OVRInput.Controller.All;
-		}
-
-		return OVRInput.Controller.None;
 	}
-#endif
+	#endif
 
 	private static float GetRawValue(InputStrings key, Side side) {
 		if (!init) Init();
@@ -819,4 +846,5 @@ public class InputMan : MonoBehaviour {
 			UpdateDictionaryDirection(ThumbstickY((Side)i) > thumbstickThreshold, i, InputStrings.VR_Thumbstick_Y_Down);
 		}
 	}
+}
 }

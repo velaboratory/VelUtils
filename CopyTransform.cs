@@ -112,8 +112,7 @@ namespace unityutilities {
 					Vector3 dir = t - transform.position;
 					float mass = rb.mass;
 					rb.AddForce(
-						Vector3.ClampMagnitude(dir * Vector3.Magnitude(dir) * positionForceMult * (mass) / timeStep,
-							5000 * mass));
+						Vector3.ClampMagnitude(dir * (Vector3.Magnitude(dir) * positionForceMult * (mass) / timeStep),5000 * mass));
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -139,8 +138,7 @@ namespace unityutilities {
 					transform.rotation = Quaternion.Slerp(transform.rotation, t, 1 - smoothness);
 					break;
 				case FollowType.Velocity:
-					float angle1;
-					var angularVel1 = AngularVel(timeStep, t, out angle1);
+					var angularVel1 = AngularVel(timeStep, t, out var angle1);
 					if (Mathf.Abs(snapIfAngleGreaterThan) > .01f && angle1 > snapIfAngleGreaterThan) {
 						transform.rotation = t;
 					}
@@ -148,8 +146,7 @@ namespace unityutilities {
 					rb.angularVelocity = Vector3.ClampMagnitude(angularVel1 * (1 - smoothness), 100);
 					break;
 				case FollowType.Force:
-					float angle2;
-					var angularVel2 = AngularVel(timeStep, t, out angle2);
+					var angularVel2 = AngularVel(timeStep, t, out var angle2);
 					if (Mathf.Abs(snapIfAngleGreaterThan) > .01f && angle2 > snapIfAngleGreaterThan) {
 						transform.rotation = t;
 					}
@@ -164,9 +161,8 @@ namespace unityutilities {
 
 		private Vector3 AngularVel(float timeStep, Quaternion t, out float angle) {
 			Quaternion rot = t * Quaternion.Inverse(transform.rotation);
-			Vector3 axis;
-			rot.ToAngleAxis(out angle, out axis);
-			Vector3 angularVel = axis * angle * Mathf.Deg2Rad / timeStep;
+			rot.ToAngleAxis(out angle, out var axis);
+			Vector3 angularVel = axis * (angle * Mathf.Deg2Rad / timeStep);
 			return angularVel;
 		}
 
@@ -174,15 +170,15 @@ namespace unityutilities {
 		/// Set the target transform and set offsets at the same time, so that the obj doesn't move.
 		/// Also sets the obj to follow pos and rot.
 		/// </summary>
-		/// <param name="target">The target to follow</param>
-		public void SetTarget(Transform target) {
-			this.target = target;
+		/// <param name="newTarget">The target to follow</param>
+		public void SetTarget(Transform newTarget) {
+			target = newTarget;
 			positionOffsetCoordinateSystem = Space.Self;
-			positionOffset = target.InverseTransformPoint(transform.position);
+			positionOffset = newTarget.InverseTransformPoint(transform.position);
 
 
 			rotationOffsetCoordinateSystem = Space.Self;
-			rotationOffset = Quaternion.Inverse(target.transform.rotation) * transform.rotation;
+			rotationOffset = Quaternion.Inverse(newTarget.transform.rotation) * transform.rotation;
 		}
 	}
 
@@ -197,21 +193,23 @@ namespace unityutilities {
 
 			EditorGUILayout.Space();
 			EditorGUILayout.Space();
+			
+			if (rbf == null) return;
 
-			if (rbf.target == null) {
+			if (rbf != null && rbf.target == null) {
 				EditorGUILayout.HelpBox(
 					"No target assigned. Please assign a target to follow.", MessageType.Error);
 			}
 
-			rbf.target = (Transform)EditorGUILayout.ObjectField(
-					"Target", rbf.target, typeof(Transform), true);
+			rbf.target = (Transform) EditorGUILayout.ObjectField(
+				"Target", rbf.target, typeof(Transform), true);
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Position", EditorStyles.boldLabel);
 			rbf.followPosition = GUILayout.Toggle(rbf.followPosition, "Follow Position");
 			using (new EditorGUI.DisabledScope(!rbf.followPosition)) {
 				rbf.positionFollowType =
-					(CopyTransform.FollowType)EditorGUILayout.EnumPopup("Position Follow Type",
+					(CopyTransform.FollowType) EditorGUILayout.EnumPopup("Position Follow Type",
 						rbf.positionFollowType);
 
 				if (rbf.positionFollowType != CopyTransform.FollowType.Copy) {
@@ -234,11 +232,11 @@ namespace unityutilities {
 
 				if (rbf.positionFollowType == CopyTransform.FollowType.Force) {
 					rbf.positionForceMult =
-						EditorGUILayout.FloatField("Position Force Mult", rbf.positionForceMult);
+						EditorGUILayout.FloatField("Position Force Multiplier", rbf.positionForceMult);
 				}
 
 				if (rbf.positionFollowType == CopyTransform.FollowType.Velocity ||
-					rbf.positionFollowType == CopyTransform.FollowType.Force) {
+				    rbf.positionFollowType == CopyTransform.FollowType.Force) {
 					rbf.snapIfDistanceGreaterThan =
 						EditorGUILayout.FloatField(
 							new GUIContent("Snap Distance",
@@ -247,7 +245,7 @@ namespace unityutilities {
 				}
 
 				rbf.positionOffset = EditorGUILayout.Vector3Field("Position Offset", rbf.positionOffset);
-				rbf.positionOffsetCoordinateSystem = (Space)EditorGUILayout.EnumPopup("Offset Coordinate System",
+				rbf.positionOffsetCoordinateSystem = (Space) EditorGUILayout.EnumPopup("Offset Coordinate System",
 					rbf.positionOffsetCoordinateSystem);
 			}
 
@@ -258,7 +256,7 @@ namespace unityutilities {
 			using (new EditorGUI.DisabledScope(!rbf.followRotation)) {
 				EditorGUILayout.LabelField("Rotation", EditorStyles.boldLabel);
 				rbf.rotationFollowType =
-					(CopyTransform.FollowType)EditorGUILayout.EnumPopup("Rotation Follow Type",
+					(CopyTransform.FollowType) EditorGUILayout.EnumPopup("Rotation Follow Type",
 						rbf.rotationFollowType);
 
 				if (rbf.rotationFollowType != CopyTransform.FollowType.Copy) {
@@ -280,11 +278,11 @@ namespace unityutilities {
 				rbf.useFixedUpdateRot = GUILayout.Toggle(rbf.useFixedUpdateRot, "Use Fixed Update");
 				if (rbf.rotationFollowType == CopyTransform.FollowType.Force) {
 					rbf.rotationForceMult =
-						EditorGUILayout.FloatField("Rotation Force Mult", rbf.rotationForceMult);
+						EditorGUILayout.FloatField("Rotation Force Multiplier", rbf.rotationForceMult);
 				}
 
 				if (rbf.rotationFollowType == CopyTransform.FollowType.Velocity ||
-					rbf.rotationFollowType == CopyTransform.FollowType.Force) {
+				    rbf.rotationFollowType == CopyTransform.FollowType.Force) {
 					rbf.snapIfAngleGreaterThan = EditorGUILayout.FloatField(
 						new GUIContent("Snap Angle",
 							"If the object needs to rotate farther than this angle in one frame, it will snap immediately. 0 to disable."),
@@ -304,8 +302,8 @@ namespace unityutilities {
 				}
 
 				rbf.rotationOffsetCoordinateSystem =
-					(Space)EditorGUILayout.EnumPopup("Offset Coordinate System",
-					rbf.rotationOffsetCoordinateSystem);
+					(Space) EditorGUILayout.EnumPopup("Offset Coordinate System",
+						rbf.rotationOffsetCoordinateSystem);
 			}
 
 			EditorGUILayout.Space();

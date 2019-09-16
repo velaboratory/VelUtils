@@ -136,7 +136,7 @@ namespace unityutilities
 
 			public bool Active
 			{
-				get { return active; }
+				get => active;
 				set
 				{
 					if (active != value)
@@ -167,7 +167,7 @@ namespace unityutilities
 
 			public Vector3 Pos
 			{
-				get { return pos; }
+				get => pos;
 				set
 				{
 					pos = value;
@@ -180,7 +180,7 @@ namespace unityutilities
 
 			public Vector3 Dir
 			{
-				get { return dir; }
+				get => dir;
 				set
 				{
 					dir = value;
@@ -446,6 +446,7 @@ namespace unityutilities
 			}
 		}
 
+		// ReSharper disable once MemberCanBePrivate.Global
 		public void TeleportTo(Vector3 position, Vector3 direction)
 		{
 			TeleportTo(position, Quaternion.LookRotation(direction));
@@ -470,9 +471,6 @@ namespace unityutilities
 		private IEnumerator DoSmoothTeleport(Vector3 position, Quaternion rotation, float time)
 		{
 			float distance = Vector3.Distance(transform.position, position);
-			float angle;
-			Vector3 axis;
-			rotation.ToAngleAxis(out angle, out axis);
 			
 			transform.rotation = rotation;
 			
