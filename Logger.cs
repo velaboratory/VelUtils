@@ -8,6 +8,7 @@ namespace unityutilities {
 	/// <summary>
 	/// Logs any data to a file.
 	/// </summary>
+	[AddComponentMenu("unityutilities/Logger")]
 	public class Logger : MonoBehaviour {
 		private static string logFolder = "Log";
 		private const string fileExtension = ".tsv";

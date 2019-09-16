@@ -6,6 +6,7 @@ namespace unityutilities {
 	/// <summary>
 	/// Saves the location and rotation of an object to playerprefs. Local or global coordinates. Requires a unique object name.
 	/// </summary>
+	[AddComponentMenu("unityutilities/SaveLoc")]
 	public class SaveLoc : MonoBehaviour {
 
 		public bool save = true;

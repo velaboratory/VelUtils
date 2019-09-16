@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("unityutilities/Don't Destroy On Load")]
 public class DontDestroyOnLoad : MonoBehaviour {
 	private void Awake() {
 		try {

@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 namespace unityutilities
 {
+	[AddComponentMenu("unityutilities/ControllerHelp")]
 	public class ControllerHelp : MonoBehaviour
 	{
 		public Rig rig;

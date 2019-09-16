@@ -43,6 +43,7 @@ public enum Axis
 /// <summary>
 /// Makes input from VR devices accessible from a unified set of methods. Can treat axes as button down.
 /// </summary>
+[AddComponentMenu("unityutilities/InputMan")]
 public class InputMan : MonoBehaviour {
 	public static HeadsetType headsetType;
 

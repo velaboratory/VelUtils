@@ -6,6 +6,7 @@ namespace unityutilities {
 	/// <summary>
 	/// One object copies the position and/or rotation of another using a variety of techniques. Global or local offsets can be set.
 	/// </summary>
+	[AddComponentMenu("unityutilities/CopyTransform")]
 	public class CopyTransform : MonoBehaviour {
 		public enum FollowType {
 			Copy,
