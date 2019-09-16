@@ -1,4 +1,4 @@
-﻿#define OCULUS_UTILITIES_AVAILABLE // change to #define or #undef if Oculus utilites are installed
+﻿#undef OCULUS_UTILITIES_AVAILABLE // change to #define or #undef if Oculus utilites are installed
 
 using UnityEngine;
 

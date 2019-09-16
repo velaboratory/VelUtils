@@ -1,5 +1,5 @@
 #undef STEAMVR_AVAILABLE // change to #define or #undef if SteamVR utilites are installed
-#define OCULUS_UTILITIES_AVAILABLE
+#undef OCULUS_UTILITIES_AVAILABLE
 
 using System.Collections;
 using System.Collections.Generic;
@@ -614,7 +614,7 @@ public class InputMan : MonoBehaviour {
 		#if OCULUS_UTILITIES_AVAILABLE
 		Vector3 vel = OVRInput.GetLocalControllerVelocity(Side2OVRController(side));
 		#else
-		Vector3 vel = GetXRNodeState(side).TryGetVelocity(out vel);
+		GetXRNodeState(side).TryGetVelocity(out Vector3 vel);
 		#endif
 		
 		return vel;

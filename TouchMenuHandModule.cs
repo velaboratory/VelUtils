@@ -1,7 +1,10 @@
-﻿using System.Collections;
+﻿#undef OCULUS_UTILITIES_AVAILABLE
+
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+#if OCULUS_UTILITIES_AVAILABLE
 [RequireComponent(typeof(OvrAvatar))]
 public class TouchMenuHandModule : MonoBehaviour {
 	private OvrAvatar avatar;
@@ -88,3 +91,4 @@ public class TouchMenuHandModule : MonoBehaviour {
 		selected = null;
 	}
 }
+#endif
