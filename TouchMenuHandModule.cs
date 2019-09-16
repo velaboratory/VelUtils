@@ -6,7 +6,9 @@ using UnityEngine.UI;
 
 #if OCULUS_UTILITIES_AVAILABLE
 [RequireComponent(typeof(OvrAvatar))]
+#endif
 public class TouchMenuHandModule : MonoBehaviour {
+#if OCULUS_UTILITIES_AVAILABLE
 	private OvrAvatar avatar;
 	private OvrAvatarHand leftHand;
 	private OvrAvatarHand rightHand;
@@ -72,7 +74,9 @@ public class TouchMenuHandModule : MonoBehaviour {
 		selected.onClick.Invoke();
 	}
 
+#endif
 	public void SelectableEnter(Button i, TouchMenuFingerCollider finger) {
+#if OCULUS_UTILITIES_AVAILABLE
 		i.Select();
 		selected = i;
 		lastFinger = finger;
@@ -81,14 +85,18 @@ public class TouchMenuHandModule : MonoBehaviour {
 		i.onClick.Invoke();
 		lockTimer = 0;
 		lastFinger.audioSource.Play();
+#endif
 	}
 
 	public void SelectableExit(Button i, TouchMenuFingerCollider finger) {
+#if OCULUS_UTILITIES_AVAILABLE
 		Invoke(nameof(SetSelectedToNull), .2f);
+#endif
 	}
 
+#if OCULUS_UTILITIES_AVAILABLE
 	void SetSelectedToNull() {
 		selected = null;
 	}
-}
 #endif
+}

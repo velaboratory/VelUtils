@@ -3,7 +3,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-#if OCULUS_UTILITIES_AVAILABLE
 public class TouchMenuFingerCollider : MonoBehaviour {
 	public TouchMenuHandModule handModule;
 	public bool isLeft;
@@ -23,4 +22,3 @@ public class TouchMenuFingerCollider : MonoBehaviour {
 		}
 	}
 }
-#endif
