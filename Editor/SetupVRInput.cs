@@ -34,13 +34,154 @@ public class InputAxis
 /// <summary>
 /// Adds a dropdown menu option for automatically populating the Input system for use with the InputMan script for use with a VR device.
 /// </summary>
-public class SetupVRInput : MonoBehaviour
+public class SetupVRInput : EditorWindow
 {
-	// Add a menu item named "SetupVRInput" to project settings in the menu bar.
-	[MenuItem("Tools/unityutilities/SetupVRInput", false, 2)]
-	private static void DoSetupVRInput()
+	private static InputAxis[] allAxes = new[] {
+		// thumbstick
+		new InputAxis() {
+			name = "VR_Thumbstick_X_Left",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.JoystickAxis,
+			axis = 1
+		},
+		new InputAxis() {
+			name = "VR_Thumbstick_X_Right",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.JoystickAxis,
+			axis = 4
+		},
+
+		new InputAxis() {
+			name = "VR_Thumbstick_Y_Left",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.JoystickAxis,
+			axis = 2
+		},
+
+		new InputAxis() {
+			name = "VR_Thumbstick_Y_Right",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.JoystickAxis,
+			axis = 5
+		},
+
+		// trigger
+		new InputAxis() {
+			name = "VR_Trigger_Left",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.JoystickAxis,
+			axis = 9
+		},
+
+		new InputAxis() {
+			name = "VR_Trigger_Right",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.JoystickAxis,
+			axis = 10
+		},
+
+		// grip button
+		new InputAxis() {
+			name = "VR_Grip_Left",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.JoystickAxis,
+			axis = 11
+		},
+
+		new InputAxis() {
+			name = "VR_Grip_Right",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.JoystickAxis,
+			axis = 12
+		},
+
+		// top buttons
+		new InputAxis() {
+			name = "VR_Button2_Left",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.KeyOrMouseButton,
+			positiveButton = "joystick button 3"
+		},
+
+		new InputAxis() {
+			name = "VR_Button2_Right",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.KeyOrMouseButton,
+			positiveButton = "joystick button 1"
+		},
+
+		new InputAxis() {
+			name = "VR_Button1_Left",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.KeyOrMouseButton,
+			positiveButton = "joystick button 2"
+		},
+
+		new InputAxis() {
+			name = "VR_Button1_Right",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.KeyOrMouseButton,
+			positiveButton = "joystick button 0"
+		},
+
+		// thumbstick/touchpad click
+		new InputAxis() {
+			name = "VR_Thumbstick_Press_Left",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.KeyOrMouseButton,
+			positiveButton = "joystick button 8"
+		},
+
+		new InputAxis() {
+			name = "VR_Thumbstick_Press_Right",
+			dead = 0.001f,
+			sensitivity = 1f,
+			type = AxisType.KeyOrMouseButton,
+			positiveButton = "joystick button 9"
+		}
+	};
+
+
+	private static bool allDefined = false;
+	
+	[MenuItem("Window/Setup VR Input")]
+	public static void ShowWindow() {
+		allDefined = CheckAllDefined();
+		EditorWindow.GetWindow(typeof(SetupVRInput));
+	}
+ 
+	public void OnGUI()
 	{
-		SetupInputManager();
+		GUILayout.Space(20);
+
+		if (!allDefined) {
+			GUILayout.Label("Not all required input axes are defined.\nClick the button to add them.");
+		}
+		if (GUILayout.Button("Add the missing inputs"))
+		{
+			SetupInputManager();
+			allDefined = CheckAllDefined();
+		}
+		
+		GUILayout.Space(20);
+		
+		if (GUILayout.Button("Refresh", GUILayout.MaxWidth(80))) {
+			allDefined = CheckAllDefined();
+		}
+		
 	}
 
 	private static SerializedProperty GetChildProperty(SerializedProperty parent, string name)
@@ -79,6 +220,13 @@ public class SetupVRInput : MonoBehaviour
 		return false;
 	}
 
+	private static bool CheckAllDefined() {
+		foreach (InputAxis axis in allAxes) {
+			if (!AxisDefined(axis.name)) return false;
+		}
+
+		return true;
+	}
 
 	private static void AddAxis(InputAxis axis)
 	{
@@ -112,137 +260,12 @@ public class SetupVRInput : MonoBehaviour
 		serializedObject.ApplyModifiedProperties();
 	}
 
+	
+
 	private static void SetupInputManager()
 	{
-		// thumbstick
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Thumbstick_X_Left",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.JoystickAxis,
-			axis = 1
-		});
-		
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Thumbstick_X_Right",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.JoystickAxis,
-			axis = 4
-		});
-		
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Thumbstick_Y_Left",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.JoystickAxis,
-			axis = 2
-		});
-		
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Thumbstick_Y_Right",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.JoystickAxis,
-			axis = 5
-		});
-		
-		// trigger
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Trigger_Left",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.JoystickAxis,
-			axis = 9
-		});
-		
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Trigger_Right",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.JoystickAxis,
-			axis = 10
-		});
-		
-		// grip button
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Grip_Left",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.JoystickAxis,
-			axis = 11
-		});
-		
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Grip_Right",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.JoystickAxis,
-			axis = 12
-		});
-		
-		// top buttons
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Button2_Left",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.KeyOrMouseButton,
-			positiveButton = "joystick button 3"
-		});
-		
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Button2_Right",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.KeyOrMouseButton,
-			positiveButton = "joystick button 1"
-		});
-		
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Button1_Left",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.KeyOrMouseButton,
-			positiveButton = "joystick button 2"
-		});
-		
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Button1_Right",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.KeyOrMouseButton,
-			positiveButton = "joystick button 0"
-		});
-		
-		// thumbstick/touchpad click
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Thumbstick_Press_Left",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.KeyOrMouseButton,
-			positiveButton = "joystick button 8"
-		});
-		
-		AddAxis(new InputAxis()
-		{
-			name = "VR_Thumbstick_Press_Right",
-			dead = 0.001f,
-			sensitivity = 1f,
-			type = AxisType.KeyOrMouseButton,
-			positiveButton = "joystick button 9"
-		});
+		foreach (InputAxis axis in allAxes) {
+			AddAxis(axis);
+		}
 	}
 }
