@@ -45,9 +45,10 @@ Camera:
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_GateFitMode: 2
   m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
@@ -141,7 +142,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7313773171011755184}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 123a7733b47d48243854c1b70e4e7122, type: 3}
+  m_Script: {fileID: 11500000, guid: de61a4dc3269c33429ec31e1cfb47219, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 7938913794003630012}
@@ -157,19 +158,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 7313773171011755184}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39ef79cede20de54e830ac910d11495e, type: 3}
+  m_Script: {fileID: 11500000, guid: 5f3bd7088a117dc46ac391e3c0e3f89c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   rig: {fileID: 8208687673189042915}
   grabWalls: 0
-  grabAir: 0
+  grabAir: 1
   stickBoostBrake: 0
   handBoosters: 0
   yaw: 1
   pitch: 0
   roll: 0
   slidingMovement: 0
-  teleportingMovement: 1
+  teleportingMovement: 0
   turnInput: 3
   continuousRotation: 0
   continuousRotationSpeed: 100
@@ -195,6 +196,15 @@ MonoBehaviour:
     smoothTeleportTime: 0.1
     teleportMarkerOverride: {fileID: 0}
     lineRendererMaterialOverride: {fileID: 0}
+    validLayers:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    blink: 0
+    blinkDuration: 0
+    renderQueue: 5000
+    blinkMaterial: {fileID: 0}
+    blinkRenderer: {fileID: 0}
+    blinkMesh: {fileID: 0}
     teleportMarkerInstance: {fileID: 0}
 --- !u!54 &7938913794003630012
 Rigidbody:
@@ -221,7 +231,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9110631598171955284}
-  - component: {fileID: 7642645287656627119}
   m_Layer: 0
   m_Name: Right Hand
   m_TagString: Untagged
@@ -243,24 +252,6 @@ Transform:
   m_Father: {fileID: 6777277523045891329}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7642645287656627119
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7400124074617274568}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1742909100, guid: ed7343f30e3843b3afda8f8b02669cea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Device: 1
-  m_PoseSource: 5
-  m_PoseProviderComponent: {fileID: 0}
-  m_TrackingType: 0
-  m_UpdateType: 0
-  m_UseRelativeTransform: 1
 --- !u!1 &7578919740422347464
 GameObject:
   m_ObjectHideFlags: 0
@@ -270,7 +261,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6597687686141777384}
-  - component: {fileID: 1405267309824887822}
   m_Layer: 0
   m_Name: Left Hand
   m_TagString: Untagged
@@ -292,21 +282,3 @@ Transform:
   m_Father: {fileID: 6777277523045891329}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1405267309824887822
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7578919740422347464}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1742909100, guid: ed7343f30e3843b3afda8f8b02669cea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Device: 1
-  m_PoseSource: 4
-  m_PoseProviderComponent: {fileID: 0}
-  m_TrackingType: 0
-  m_UpdateType: 0
-  m_UseRelativeTransform: 1

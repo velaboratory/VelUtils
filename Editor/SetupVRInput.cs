@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using UnityEditor;
 using UnityEngine;
 
@@ -269,3 +271,5 @@ public class SetupVRInput : EditorWindow
 		}
 	}
 }
+
+#endif

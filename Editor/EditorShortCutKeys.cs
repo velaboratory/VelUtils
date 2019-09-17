@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+
+using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
@@ -42,5 +44,6 @@ public class EditorShortCutKeys : ScriptableObject {
 			EditorSceneManager.OpenScene("Assets/Scenes/HubWorld.unity");
 		}
 	}
-
 }
+
+#endif
