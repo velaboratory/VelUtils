@@ -34,7 +34,8 @@ namespace unityutilities
 		public bool continuousRotation;
 		public float continuousRotationSpeed = 100f;
 		public float snapRotationAmount = 30f;
-		public float turnNullZone = .1f;
+		public float turnNullZone = .3f;
+		private bool snapTurnedThisFrame;
 		
 		
 		[Header("Tuning")]
@@ -50,11 +51,8 @@ namespace unityutilities
 		public float slidingSpeed = 3f;
 		public float minVel = .1f;
 		
-
-		public delegate void GrabEvent(Transform obj, Side side);
-
-		public event GrabEvent OnGrab;
-		public event GrabEvent OnRelease;
+		public Action<Transform, Side> OnGrab;
+		public Action<Transform, Side> OnRelease;
 
 		[HideInInspector]
 		public Transform leftHandGrabbedObj;
@@ -71,6 +69,7 @@ namespace unityutilities
 		private CopyTransform cpt;
 
 		private Side grabbingSide = Side.None;
+		private bool wasKinematic;
 		
 		
 		// teleporting vars
@@ -79,13 +78,22 @@ namespace unityutilities
 		public Side currentTeleportingSide = Side.None;
 		private RaycastHit teleportHit;
 
-		public delegate void EmptyEvent();
-		public delegate void TeleportEvent(Vector3 translation);
-		public delegate void SnapTurnEvent(string direction);
-		public event EmptyEvent TeleportStart = delegate { };
-		public event TeleportEvent TeleportEnd = delegate { };
-		public event SnapTurnEvent SnapTurn = delegate { };
+		/// <summary>
+		/// Called when the teleporter is activated.
+		/// </summary>
+		public Action TeleportStart;
+
+		/// <summary>
+		/// Called when the teleport happens.
+		/// Contains the translation offset vector. 
+		/// </summary>
+		public Action<Vector3> TeleportEnd;
 		
+		/// <summary>
+		/// Contains the direction of the snap turn.
+		/// </summary>
+		public Action<string> SnapTurn;
+
 		/// <summary>
 		/// The current chosen spot to teleport to
 		/// </summary>
@@ -196,53 +204,53 @@ namespace unityutilities
 		public Teleporter teleporter = new Teleporter();
 
 		private void Awake() {
-			if (teleportingMovement && teleporter.blink) {
-				teleporter.blinkMaterial = new Material(Shader.Find("unityutilities/UnlitTransparent"));
-				teleporter.blinkMesh = rig.head.gameObject.AddComponent<MeshFilter>();
-				teleporter.blinkRenderer = rig.head.gameObject.AddComponent<MeshRenderer>();
+			if (!teleportingMovement || !teleporter.blink) return;
+			
+			teleporter.blinkMaterial = new Material(Shader.Find("unityutilities/UnlitTransparent"));
+			teleporter.blinkMesh = rig.head.gameObject.AddComponent<MeshFilter>();
+			teleporter.blinkRenderer = rig.head.gameObject.AddComponent<MeshRenderer>();
 
-				Mesh mesh = new Mesh();
-				teleporter.blinkMesh.mesh = mesh;
+			Mesh mesh = new Mesh();
+			teleporter.blinkMesh.mesh = mesh;
 
-				float x = 1f;
-				float y = 1f;
-				float distance = .5f;
+			float x = 1f;
+			float y = 1f;
+			float distance = .5f;
 
-				Vector3[] vertices = {
-					new Vector3(-x, -y, distance),
-					new Vector3(x, -y, distance),
-					new Vector3(-x, y, distance),
-					new Vector3(x, y, distance)
-				};
+			Vector3[] vertices = {
+				new Vector3(-x, -y, distance),
+				new Vector3(x, -y, distance),
+				new Vector3(-x, y, distance),
+				new Vector3(x, y, distance)
+			};
 
-				int[] tris = { 0, 2, 1, 2, 3, 1 };
+			int[] tris = { 0, 2, 1, 2, 3, 1 };
 
-				Vector3[] normals = {
-					-Vector3.forward,
-					-Vector3.forward,
-					-Vector3.forward,
-					-Vector3.forward
-				};
+			Vector3[] normals = {
+				-Vector3.forward,
+				-Vector3.forward,
+				-Vector3.forward,
+				-Vector3.forward
+			};
 
-				Vector2[] uv = {
-					new Vector2(0, 0),
-					new Vector2(1, 0),
-					new Vector2(0, 1),
-					new Vector2(1, 1)
-				};
+			Vector2[] uv = {
+				new Vector2(0, 0),
+				new Vector2(1, 0),
+				new Vector2(0, 1),
+				new Vector2(1, 1)
+			};
 
-				mesh.vertices = vertices;
-				mesh.triangles = tris;
-				mesh.normals = normals;
-				mesh.uv = uv;
+			mesh.vertices = vertices;
+			mesh.triangles = tris;
+			mesh.normals = normals;
+			mesh.uv = uv;
 
-				teleporter.blinkMaterial.renderQueue = teleporter.renderQueue;
-				teleporter.blinkRenderer.material = teleporter.blinkMaterial;
+			teleporter.blinkMaterial.renderQueue = teleporter.renderQueue;
+			teleporter.blinkRenderer.material = teleporter.blinkMaterial;
 
-				SetBlinkOpacity(0);
+			SetBlinkOpacity(0);
 
-				SceneManager.activeSceneChanged += SceneChangeEvent;
-			}
+			SceneManager.activeSceneChanged += SceneChangeEvent;
 		}
 
 		private void Start()
@@ -278,7 +286,7 @@ namespace unityutilities
 					GrabMove(ref rig.rightHand, ref rightHandGrabPos, Side.Right, rightHandGrabbedObj);
 				}
 			}
-			else if (grabAir)
+			else if (grabAir && !snapTurnedThisFrame)
 			{
 				GrabMove(ref rig.leftHand, ref leftHandGrabPos, Side.Left);
 				GrabMove(ref rig.rightHand, ref rightHandGrabPos, Side.Right);
@@ -304,6 +312,7 @@ namespace unityutilities
 				Teleporting();
 			}
 
+			snapTurnedThisFrame = false;
 		}
 
 		#region Teleporting
@@ -725,6 +734,14 @@ namespace unityutilities
 
 				if (snapTurnDirection != "") {
 					SnapTurn?.Invoke(snapTurnDirection);
+
+					cpt.enabled = false;
+					snapTurnedThisFrame = true;
+
+					if (grabbingSide != Side.None) {
+						cpt.positionOffset = rig.rb.position - 
+						  (grabbingSide == Side.Left ? rig.leftHand.position : rig.rightHand.position);
+					}
 				}
 			}
 		}
@@ -752,6 +769,9 @@ namespace unityutilities
 				grabPos.transform.SetParent(parent);
 				cpt.target = grabPos.transform;
 				cpt.positionOffset = rig.rb.position - hand.position;
+				cpt.snapIfDistanceGreaterThan = 1f;
+				wasKinematic = rig.rb.isKinematic;
+				rig.rb.isKinematic = false;
 				
 				InputMan.Vibrate(side, 1);
 
@@ -763,6 +783,9 @@ namespace unityutilities
 				if (InputMan.Grip(side))
 				{
 					cpt.positionOffset = rig.rb.position - hand.position;
+					if (!snapTurnedThisFrame) {
+						cpt.enabled = true;
+					}
 				}
 				else
 				{
@@ -779,6 +802,7 @@ namespace unityutilities
 						//rig.rb.velocity = MedianAvg(lastVels);
 						rig.rb.velocity = -transform.TransformVector(InputMan.LocalControllerVelocity(side));
 						RoundVelToZero();
+						rig.rb.isKinematic = wasKinematic;
 					}
 				}
 			}

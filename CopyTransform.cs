@@ -172,6 +172,7 @@ namespace unityutilities {
 		/// Also sets the obj to follow pos and rot.
 		/// </summary>
 		/// <param name="newTarget">The target to follow</param>
+		// ReSharper disable once UnusedMember.Global
 		public void SetTarget(Transform newTarget) {
 			target = newTarget;
 			positionOffsetCoordinateSystem = Space.Self;
@@ -216,7 +217,10 @@ namespace unityutilities {
 				if (rbf.positionFollowType != CopyTransform.FollowType.Copy) {
 					if (!rbf.GetComponent<Rigidbody>()) {
 						EditorGUILayout.HelpBox("No rigidbody attached.", MessageType.Error);
-						// TODO add button to automatically add a rigidbody
+						// add button to automatically add a rigidbody
+						if (GUILayout.Button("Add Rigidbody")) {
+							rbf.gameObject.AddComponent<Rigidbody>();
+						}
 					}
 					else {
 						float mass = rbf.GetComponent<Rigidbody>().mass;
@@ -263,7 +267,10 @@ namespace unityutilities {
 				if (rbf.rotationFollowType != CopyTransform.FollowType.Copy) {
 					if (!rbf.GetComponent<Rigidbody>()) {
 						EditorGUILayout.HelpBox("No rigidbody attached.", MessageType.Error);
-						// TODO add button to automatically add a rigidbody
+						// add button to automatically add a rigidbody
+						if (GUILayout.Button("Add Rigidbody")) {
+							rbf.gameObject.AddComponent<Rigidbody>();
+						}
 					}
 					else {
 						float mass = rbf.GetComponent<Rigidbody>().mass;

@@ -661,7 +661,7 @@ public class InputMan : MonoBehaviour {
 			//SteamVR_Controller.Input(side == Side.Left ? 0 : 1).TriggerHapticPulse(500);
 			//SteamVR_Input._default.outActions.Haptic
 #else
-		GetXRNode(side).SendHapticImpulse(0, intensity, duration);
+		GetXRNode(side).SendHapticImpulse(0, intensity, duration/40f);
 #endif
 	}
 
