@@ -32,6 +32,20 @@ namespace unityutilities
 			{ButtonHintType.OtherObject, new[] {new Vector3(0, 0f, 0f), new Vector3(0f,.2f,0f)}}
 		};
 
+		private readonly Dictionary<ButtonHintType, Vector3[]> riftSQuestOffsets = new Dictionary<ButtonHintType, Vector3[]>
+		{
+			// format for vector3 is origin, direction
+			{ButtonHintType.Trigger, new[] {new Vector3(-0.0003f, -0.0209f, 0.0207f), new Vector3(0,0f,.1f)}},
+			{ButtonHintType.Grip, new[] {new Vector3(-0.0008f, -0.0311f, -0.0246f), new Vector3(.07f,-.020f,-.07f)}},
+			{ButtonHintType.MenuButton, new[] {new Vector3(0.0019f, 0f, -0.0074f), new Vector3(0.1f,.08f,-0.07f)}},
+			{ButtonHintType.SecondaryMenuButton, new[] {new Vector3(0.009f, 0f, 0.0055f), new Vector3(0.1f,.1f,0f)}},
+			{ButtonHintType.Thumbstick, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
+			{ButtonHintType.ThumbstickClick, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
+			{ButtonHintType.ThumbstickX, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
+			{ButtonHintType.ThumbstickY, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
+			{ButtonHintType.OtherObject, new[] {new Vector3(0, 0f, 0f), new Vector3(0f,.2f,0f)}}
+		};
+
 		private static Dictionary<ButtonHintType, Vector3[]> offsets;
 
 		private class ControllerLabel
@@ -142,9 +156,12 @@ namespace unityutilities
 			{
 				//FindControllerParts();
 
-				if (InputMan.headsetType == HeadsetType.Oculus)
+				if (InputMan.controllerStyle == HeadsetControllerStyle.Rift)
 				{
 					offsets = riftOffsets;
+				} 
+				else if (InputMan.controllerStyle == HeadsetControllerStyle.RiftSQuest) {
+					offsets = riftSQuestOffsets;
 				}
 				else
 				{

@@ -14,13 +14,21 @@ using Valve.VR;
 
 namespace unityutilities {
 
-public enum HeadsetType
-{
-	None,
-	Oculus,
-	Vive,
-	WMR
-}
+	public enum HeadsetSystem
+	{
+		None,
+		Oculus,
+		SteamVR
+	}
+
+	public enum HeadsetControllerStyle {
+		None,
+		Rift,
+		RiftSQuest,
+		Vive,
+		Index,
+		WMR
+	}
 
 /// <summary>
 /// Both and None are not supported by most operations
@@ -45,7 +53,8 @@ public enum Axis
 /// </summary>
 [AddComponentMenu("unityutilities/InputMan")]
 public class InputMan : MonoBehaviour {
-	public static HeadsetType headsetType;
+	public static HeadsetSystem headsetSystem;
+	public static HeadsetControllerStyle controllerStyle;
 
 	private enum InputStrings {
 		VR_Trigger,
@@ -144,16 +153,23 @@ public class InputMan : MonoBehaviour {
 			init = true;
 		}
 
-		Debug.Log("InputMan loaded device: " + XRSettings.loadedDeviceName, instance);
+		Debug.Log("InputMan loaded device: " + XRSettings.loadedDeviceName + " (" + XRDevice.model + ")", instance);
 
-		if (XRDevice.model.Contains("Oculus")) {
-			headsetType = HeadsetType.Oculus;
+		if (XRDevice.model.Contains("Oculus Rift S")) {
+			headsetSystem = HeadsetSystem.Oculus;
+			controllerStyle = HeadsetControllerStyle.RiftSQuest;
+		}
+		else if (XRDevice.model.Contains("Oculus Rift")) {
+			headsetSystem = HeadsetSystem.Oculus;
+			controllerStyle = HeadsetControllerStyle.Rift;
 		}
 		else if (XRDevice.model.Contains("Vive")) {
-			headsetType = HeadsetType.Vive;
+		headsetSystem = HeadsetSystem.SteamVR;
+		controllerStyle = HeadsetControllerStyle.Vive;
 		}
 		else if (XRDevice.model.Contains("Mixed") || XRDevice.model.Contains("WMR")) {
-			headsetType = HeadsetType.WMR;
+			headsetSystem = HeadsetSystem.SteamVR;
+			controllerStyle = HeadsetControllerStyle.WMR;
 		}
 
 		firstPressed.Add(InputStrings.VR_Trigger, new bool[2, 3]);
@@ -518,49 +534,49 @@ public class InputMan : MonoBehaviour {
 	public static bool Up(Side side = Side.Either) {
 		if (side == Side.Both || side == Side.Either) {
 			return (firstPressed[InputStrings.VR_Thumbstick_Y_Up][0,0] &&
-			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Left))) ||
+			        (headsetSystem == HeadsetSystem.Oculus || ThumbstickPress(Side.Left))) ||
 			       (firstPressed[InputStrings.VR_Thumbstick_Y_Up][1,0] &&
-			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Right)));
+			        (headsetSystem == HeadsetSystem.Oculus || ThumbstickPress(Side.Right)));
 		}
 
 		return firstPressed[InputStrings.VR_Thumbstick_Y_Up][(int)side,0] &&
-		       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
+		       (headsetSystem == HeadsetSystem.Oculus || ThumbstickPress(side));
 	}
 
 	public static bool Down(Side side = Side.Either) {
 		if (side == Side.Both || side == Side.Either) {
 			return (firstPressed[InputStrings.VR_Thumbstick_Y_Down][0, 0] &&
-			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Left))) ||
+			        (headsetSystem == HeadsetSystem.Oculus || ThumbstickPress(Side.Left))) ||
 			       (firstPressed[InputStrings.VR_Thumbstick_Y_Down][1, 0] &&
-			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Right)));
+			        (headsetSystem == HeadsetSystem.Oculus || ThumbstickPress(Side.Right)));
 		}
 
 		return firstPressed[InputStrings.VR_Thumbstick_Y_Down][(int) side, 0] &&
-		       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
+		       (headsetSystem == HeadsetSystem.Oculus || ThumbstickPress(side));
 	}
 
 	public static bool Left(Side side = Side.Either) {
 		if (side == Side.Both || side == Side.Either) {
 			return (firstPressed[InputStrings.VR_Thumbstick_X_Left][0, 0] &&
-			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Left))) ||
+			        (headsetSystem == HeadsetSystem.Oculus || ThumbstickPress(Side.Left))) ||
 			       (firstPressed[InputStrings.VR_Thumbstick_X_Left][1, 0] &&
-			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Right)));
+			        (headsetSystem == HeadsetSystem.Oculus || ThumbstickPress(Side.Right)));
 		}
 
 		return firstPressed[InputStrings.VR_Thumbstick_X_Left][(int) side, 0] &&
-		       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
+		       (headsetSystem == HeadsetSystem.Oculus || ThumbstickPress(side));
 	}
 
 	public static bool Right(Side side = Side.Either) {
 		if (side == Side.Both || side == Side.Either) {
 			return (firstPressed[InputStrings.VR_Thumbstick_X_Right][0, 0] &&
-			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Left))) ||
+			        (headsetSystem == HeadsetSystem.Oculus || ThumbstickPress(Side.Left))) ||
 			       (firstPressed[InputStrings.VR_Thumbstick_X_Right][1, 0] &&
-			        (headsetType == HeadsetType.Oculus || ThumbstickPress(Side.Right)));
+			        (headsetSystem == HeadsetSystem.Oculus || ThumbstickPress(Side.Right)));
 		}
 
 		return firstPressed[InputStrings.VR_Thumbstick_X_Right][(int) side, 0] &&
-		       (headsetType == HeadsetType.Oculus || ThumbstickPress(side));
+		       (headsetSystem == HeadsetSystem.Oculus || ThumbstickPress(side));
 	}
 
 	#if OCULUS_UTILITIES_AVAILABLE
@@ -582,7 +598,7 @@ public class InputMan : MonoBehaviour {
 	#endif
 
 	public static float Vertical(Side side = Side.Either) {
-		if (headsetType == HeadsetType.Oculus) {
+		if (headsetSystem == HeadsetSystem.Oculus) {
 			return ThumbstickY(side);
 		}
 
@@ -594,7 +610,7 @@ public class InputMan : MonoBehaviour {
 	}
 	
 	public static float Horizontal(Side side = Side.Either) {
-		if (headsetType == HeadsetType.Oculus) {
+		if (headsetSystem == HeadsetSystem.Oculus) {
 			return ThumbstickX(side);
 		}
 
