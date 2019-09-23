@@ -265,7 +265,7 @@ namespace unityutilities
 			cpt.positionFollowType = CopyTransform.FollowType.Velocity;
 			normalDrag = rig.rb.drag;
 
-			
+			wasKinematic = rig.rb.isKinematic;
 		}
 
 		private void Update()
@@ -770,7 +770,6 @@ namespace unityutilities
 				cpt.target = grabPos.transform;
 				cpt.positionOffset = rig.rb.position - hand.position;
 				cpt.snapIfDistanceGreaterThan = 1f;
-				wasKinematic = rig.rb.isKinematic;
 				rig.rb.isKinematic = false;
 				
 				InputMan.Vibrate(side, 1);
