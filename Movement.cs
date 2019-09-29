@@ -117,6 +117,7 @@ namespace unityutilities
 			public int renderQueue = 5000;
 			private float alpha;
 			[HideInInspector] public Material blinkMaterial;
+			public Shader blinkShader;
 			[HideInInspector] public MeshRenderer blinkRenderer;
 			[HideInInspector] public MeshFilter blinkMesh;
 
@@ -205,8 +206,7 @@ namespace unityutilities
 
 		private void Awake() {
 			if (!teleportingMovement || !teleporter.blink) return;
-			
-			teleporter.blinkMaterial = new Material(Shader.Find("unityutilities/UnlitTransparent"));
+			teleporter.blinkMaterial = new Material(teleporter.blinkShader);
 			teleporter.blinkMesh = rig.head.gameObject.AddComponent<MeshFilter>();
 			teleporter.blinkRenderer = rig.head.gameObject.AddComponent<MeshRenderer>();
 

@@ -155,7 +155,7 @@ public class InputMan : MonoBehaviour {
 
 		Debug.Log("InputMan loaded device: " + XRSettings.loadedDeviceName + " (" + XRDevice.model + ")", instance);
 
-		if (XRDevice.model.Contains("Oculus Rift S")) {
+		if (XRDevice.model.Contains("Oculus Rift S") || XRDevice.model.Contains("Quest")) {
 			headsetSystem = HeadsetSystem.Oculus;
 			controllerStyle = HeadsetControllerStyle.RiftSQuest;
 		}
