@@ -807,7 +807,7 @@ namespace unityutilities
 						Destroy(grabPos.gameObject);
 						cpt.target = null;
 						//rig.rb.velocity = MedianAvg(lastVels);
-						rig.rb.velocity = -InputMan.ControllerVelocity(side);
+						rig.rb.velocity = -rig.transform.TransformVector(InputMan.ControllerVelocity(side));
 						RoundVelToZero();
 						rig.rb.isKinematic = wasKinematic;
 					}

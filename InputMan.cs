@@ -607,6 +607,8 @@ namespace unityutilities
 
 		public static bool Up(Side side = Side.Either)
 		{
+			if (!init) Init();
+
 			if (side == Side.Both || side == Side.Either)
 			{
 				return (firstPressed[InputStrings.VR_Thumbstick_Y_Up][0, 0] &&
@@ -621,6 +623,8 @@ namespace unityutilities
 
 		public static bool Down(Side side = Side.Either)
 		{
+			if (!init) Init();
+
 			if (side == Side.Both || side == Side.Either)
 			{
 				return (firstPressed[InputStrings.VR_Thumbstick_Y_Down][0, 0] &&
@@ -635,6 +639,8 @@ namespace unityutilities
 
 		public static bool Left(Side side = Side.Either)
 		{
+			if (!init) Init();
+
 			if (side == Side.Both || side == Side.Either)
 			{
 				return (firstPressed[InputStrings.VR_Thumbstick_X_Left][0, 0] &&
@@ -649,6 +655,8 @@ namespace unityutilities
 
 		public static bool Right(Side side = Side.Either)
 		{
+			if (!init) Init();
+
 			if (side == Side.Both || side == Side.Either)
 			{
 				return (firstPressed[InputStrings.VR_Thumbstick_X_Right][0, 0] &&
