@@ -18,10 +18,11 @@ namespace unityutilities
 		private static ControllerHelp instance;
 
 		
+		// These offsets are only valid for the left hand. They are modified to fit the right hand.
 		private readonly Dictionary<ButtonHintType, Vector3[]> riftOffsets = new Dictionary<ButtonHintType, Vector3[]>
 		{
 			// format for vector3 is origin, direction
-			{ButtonHintType.Trigger, new[] {new Vector3(-0.0003f, -0.0209f, 0.0207f), new Vector3(0,0f,.1f)}},
+			{ButtonHintType.Trigger, new[] {new Vector3(-0.0003f, -0.0209f, 0.0207f), new Vector3(-0.01f,0f,.1f)}},
 			{ButtonHintType.Grip, new[] {new Vector3(-0.0008f, -0.0311f, -0.0246f), new Vector3(.07f,-.020f,-.07f)}},
 			{ButtonHintType.MenuButton, new[] {new Vector3(0.0019f, 0f, -0.0074f), new Vector3(0.1f,.08f,-0.07f)}},
 			{ButtonHintType.SecondaryMenuButton, new[] {new Vector3(0.009f, 0f, 0.0055f), new Vector3(0.1f,.1f,0f)}},
@@ -35,7 +36,7 @@ namespace unityutilities
 		private readonly Dictionary<ButtonHintType, Vector3[]> riftSQuestOffsets = new Dictionary<ButtonHintType, Vector3[]>
 		{
 			// format for vector3 is origin, direction
-			{ButtonHintType.Trigger, new[] {new Vector3(-0.0003f, -0.0209f, 0.0207f), new Vector3(0,0f,.1f)}},
+			{ButtonHintType.Trigger, new[] {new Vector3(-0.0003f, -0.0209f, 0.0207f), new Vector3(-0.01f, 0f,.1f)}},
 			{ButtonHintType.Grip, new[] {new Vector3(-0.0008f, -0.0311f, -0.0246f), new Vector3(.07f,-.020f,-.07f)}},
 			{ButtonHintType.MenuButton, new[] {new Vector3(0.0019f, 0f, -0.0074f), new Vector3(0.1f,.08f,-0.07f)}},
 			{ButtonHintType.SecondaryMenuButton, new[] {new Vector3(0.009f, 0f, 0.0055f), new Vector3(0.1f,.1f,0f)}},
@@ -48,7 +49,7 @@ namespace unityutilities
 
 		private static Dictionary<ButtonHintType, Vector3[]> offsets;
 
-		private class ControllerLabel
+		public class ControllerLabel
 		{
 			public readonly Side side;
 			public readonly ButtonHintType type;
@@ -66,7 +67,7 @@ namespace unityutilities
 			/// </summary>
 			private const float scale = 1f;
 
-			private readonly Vector3[] offset;
+			public Vector3[] offset;
 
 
 			/// <summary>
@@ -105,12 +106,10 @@ namespace unityutilities
 			public void UpdatePos()
 			{
 				Vector3 pos = controller.TransformPoint(offset[0] * scale);
-				
-				//Vector3 dir = -(controller.position - pos).normalized;
 				Vector3 dir = controller.TransformPoint(offset[1] * scale);
 				labelObj.transform.position = dir;
 				canvasObj.pivot = new Vector2(0,.5f);
-				if (offset[1].x < 0)
+				if (offset[1].x <= 0)
 				{
 					canvasObj.pivot = new Vector2(1,.5f);
 				}
@@ -186,7 +185,7 @@ namespace unityutilities
 		/// <param name="side">Which controller</param>
 		/// <param name="hintType">The type of input to show the hint for</param>
 		/// <param name="text">The text to show on the hint</param>
-		public static void ShowHint(Side side, ButtonHintType hintType, string text)
+		public static ControllerLabel[] ShowHint(Side side, ButtonHintType hintType, string text)
 		{
 			if (!instance.initialized)
 			{
@@ -196,19 +195,29 @@ namespace unityutilities
 			instance.instantiatedLabels.FindAll(e => e.type == hintType).ForEach(e => e.Remove());
 			instance.instantiatedLabels.RemoveAll(e => e.type == hintType);
 
+			List<ControllerLabel> labels = new List<ControllerLabel>();
+
+			InputMan.Vibrate(side, 1);
 
 			if (side == Side.Left || side == Side.Both)
 			{
 				ControllerLabel label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.leftHand, instance.labelPrefab, offsets[hintType]);
 				label.SetText(text);
 				instance.instantiatedLabels.Add(label);
-			} else if (side == Side.Right || side == Side.Both)
+				labels.Add(label);
+			}
+			if (side == Side.Right || side == Side.Both)
 			{
-				ControllerLabel label = new ControllerLabel(side, hintType, instance.transform, instance.rig.rightHand, instance.labelPrefab, offsets[hintType]);
+				Vector3[] flippedOffsets = new Vector3[] { offsets[hintType][0], offsets[hintType][1] };
+				flippedOffsets[0].x *= -1;
+				flippedOffsets[1].x *= -1;
+				ControllerLabel label = new ControllerLabel(side, hintType, instance.transform, instance.rig.rightHand, instance.labelPrefab, flippedOffsets);
 				label.SetText(text);
 				instance.instantiatedLabels.Add(label);
+				labels.Add(label);
 			}
-			
+
+			return labels.ToArray();
 		}
 
 		/// <summary>

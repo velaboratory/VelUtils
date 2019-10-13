@@ -105,6 +105,7 @@ namespace unityutilities
 			public float maxTeleportableSlope = 20f;
 			public float lineRendererWidth = .01f;
 			public float teleportCurve = .01f;
+			public float teleportArcInitialVel = .5f;
 			public float smoothTeleportTime = .1f;
 			public GameObject teleportMarkerOverride;
 			public Material lineRendererMaterialOverride;
@@ -370,6 +371,7 @@ namespace unityutilities
 					// simulate the curved ray
 					Vector3 lastPos;
 					Vector3 lastDir;
+					float velocity = teleporter.teleportArcInitialVel;
 					List<Vector3> points = new List<Vector3>();
 
 					if (currentTeleportingSide == Side.Left)
@@ -383,7 +385,10 @@ namespace unityutilities
 						lastDir = rig.rightHand.forward;
 					}
 
-					const float segmentLength = .25f;
+					Vector3 xVelocity = Vector3.ProjectOnPlane(lastDir, Vector3.up) * velocity;
+					float yVelocity = Vector3.Dot(lastDir, Vector3.up) * velocity;
+
+					float segmentLength = .25f;
 					const float numSegments = 200f;
 
 					// the teleport line will stop at a max distance
@@ -432,8 +437,11 @@ namespace unityutilities
 							points.Add(lastPos);
 
 							// calculate the next ray
-							lastPos += lastDir * segmentLength;
-							lastDir = Vector3.RotateTowards(lastDir, Vector3.down, teleporter.teleportCurve, 0);
+							Vector3 newPos = lastPos + xVelocity + Vector3.up * yVelocity;
+							lastDir = newPos - lastPos;
+							segmentLength = (newPos - lastPos).magnitude;
+							lastPos = newPos;
+							yVelocity -= .01f;
 						}
 					}
 
@@ -799,7 +807,7 @@ namespace unityutilities
 						Destroy(grabPos.gameObject);
 						cpt.target = null;
 						//rig.rb.velocity = MedianAvg(lastVels);
-						rig.rb.velocity = -transform.TransformVector(InputMan.LocalControllerVelocity(side));
+						rig.rb.velocity = -InputMan.ControllerVelocity(side);
 						RoundVelToZero();
 						rig.rb.isKinematic = wasKinematic;
 					}
