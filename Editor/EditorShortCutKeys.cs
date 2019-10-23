@@ -8,13 +8,16 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// Adds `F5` shortcut to enter play mode.
 /// </summary>
-public class EditorShortCutKeys : ScriptableObject {
+public class EditorShortCutKeys : ScriptableObject
+{
 
 	static Scene lastOpenedScene;
 
 	[MenuItem("Edit/Run _F5")] // shortcut key F5 to Play (and exit playmode also)
-	static void PlayGame() {
-		if (!Application.isPlaying) {
+	static void PlayGame()
+	{
+		if (!Application.isPlaying)
+		{
 			EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), "", false);
 			OpenMainScene();
 		}
@@ -25,24 +28,37 @@ public class EditorShortCutKeys : ScriptableObject {
 		//}
 	}
 
-	static void OpenMainScene() {
+	static void OpenMainScene()
+	{
 		lastOpenedScene = SceneManager.GetActiveScene();
 		EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-		if (SceneManager.GetActiveScene().path != "Assets/Scenes/_Loading.unity") {
+		if (SceneManager.GetActiveScene().path != "Assets/Scenes/_Loading.unity")
+		{
 			EditorSceneManager.OpenScene("Assets/Scenes/_Loading.unity");
 		}
 	}
 
-	static void ReloadLastScene() {
+	static void ReloadLastScene()
+	{
 		EditorSceneManager.OpenScene(lastOpenedScene.path);
 	}
+}
 
-	[MenuItem("Edit/OpenHubWorld _F6")]
-	static void OpenMainGameScene() {
-		EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-		if (SceneManager.GetActiveScene().path != "Assets/Scenes/_HubWorld.unity") {
-			EditorSceneManager.OpenScene("Assets/Scenes/HubWorld.unity");
-		}
+public class ReadOnlyAttribute : PropertyAttribute { }
+
+[CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
+public class ReadOnly : PropertyDrawer
+{
+	public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+	{
+		return EditorGUI.GetPropertyHeight(property, label, true);
+	}
+
+	public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+	{
+		GUI.enabled = false;
+		EditorGUI.PropertyField(position, property, label, true);
+		GUI.enabled = true;
 	}
 }
 
