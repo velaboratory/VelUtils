@@ -18,15 +18,43 @@ namespace unityutilities
 	{
 		public Rig rig;
 
-		[Header("Features")] public bool grabWalls;
+		[Header("Features")]
+
+		[Tooltip("Whether to move with hands when colliding with an object. " +
+			"Only really makes sense when \"Grab Air\" is false.")]
+		public bool grabWalls;
+
+		[Tooltip("Allows for hand-based movement by holding grip.")]
 		public bool grabAir = true;
+
+		[Tooltip("Press left and right stick to boost and brake in head direction.")]
 		public bool stickBoostBrake = true;
+
+		[Tooltip("Press Y and B to boost in the hand pointing directions.")]
 		public bool handBoosters = true;
+
+		[Tooltip("Enable thumbstick turning for left/right.")]
 		public bool yaw = true;
+
+		[Tooltip("Enable thumbstick turning for up/down.")]
 		public bool pitch;
+
+		[Tooltip("Enable thumbstick turning for roll.")]
 		public bool roll;
+
+		[Tooltip("Enable thumbstick movement like and FPS controller.")]
 		public bool slidingMovement;
+
+		[Tooltip("Enable thumbstick teleporting.")]
 		public bool teleportingMovement;
+
+		[Tooltip("Values > 1 increase the effect of head translation on movement in space.")]
+		public float translationalGain = 1;
+
+		[Tooltip("The \"Tracking Space\" object for Oculus rigs works well.")]
+		public Transform translationalGainOffsetObj;
+
+
 
 		[Header("Rotation")] 
 		[Tooltip("Not used if pitch is enabled.")]
@@ -37,6 +65,8 @@ namespace unityutilities
 		public float turnNullZone = .3f;
 		private bool snapTurnedThisFrame;
 		
+
+
 		
 		[Header("Tuning")]
 		public float mainBoosterMaxSpeed = 5f;
@@ -139,6 +169,12 @@ namespace unityutilities
 				Dir = dir;
 				Active = true;
 			}
+			public Teleporter(Teleporter t) {
+				Pos = t.Pos;
+				Dir = t.Dir;
+			}
+
+
 
 			private bool active;
 			
@@ -314,6 +350,9 @@ namespace unityutilities
 			}
 
 			snapTurnedThisFrame = false;
+
+			TranslationalGain();
+
 		}
 
 		#region Teleporting
@@ -542,7 +581,7 @@ namespace unityutilities
 		public void SetBlinkOpacity(float value) {
 			Color color = Color.black;
 			color.a = value;
-			teleporter.blinkMaterial.color = color;
+			teleporter.blinkMaterial.SetColor("_Color", color);
 			teleporter.blinkRenderer.material = teleporter.blinkMaterial;
 
 			teleporter.blinkRenderer.enabled = value > 0.001f;
@@ -554,6 +593,17 @@ namespace unityutilities
 		}
 
 		#endregion
+
+		private void TranslationalGain() {
+			if (translationalGain == 1) {
+				return;
+			}
+
+			Vector3 trackingPosOffset = rig.head.localPosition;
+			trackingPosOffset.y = 0;
+
+			translationalGainOffsetObj.localPosition = trackingPosOffset * (translationalGain - 1);
+		}
 
 		private void RoundVelToZero()
 		{
