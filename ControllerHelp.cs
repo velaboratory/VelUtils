@@ -17,6 +17,16 @@ namespace unityutilities
 
 		private static ControllerHelp instance;
 
+		[Tooltip("Button meshes for highlighting. Order should be:\nTrigger\nGrip\nThumbstick\nButton1\nButton2")]
+		public Mesh[] leftButtonMeshes = new Mesh[5];
+		[Tooltip("Button meshes for highlighting. Order should be:\nTrigger\nGrip\nThumbstick\nButton1\nButton2")]
+		public Mesh[] rightButtonMeshes = new Mesh[5];
+
+		public Material highlightMaterial;
+
+		private static Dictionary<ButtonHintType, Mesh> leftButtonMeshesDict;
+		private static Dictionary<ButtonHintType, Mesh> rightButtonMeshesDict;
+
 		
 		// These offsets are only valid for the left hand. They are modified to fit the right hand.
 		private readonly Dictionary<ButtonHintType, Vector3[]> riftOffsets = new Dictionary<ButtonHintType, Vector3[]>
@@ -24,8 +34,8 @@ namespace unityutilities
 			// format for vector3 is origin, direction
 			{ButtonHintType.Trigger, new[] {new Vector3(-0.0003f, -0.0209f, 0.0207f), new Vector3(-0.01f,0f,.1f)}},
 			{ButtonHintType.Grip, new[] {new Vector3(-0.0008f, -0.0311f, -0.0246f), new Vector3(.07f,-.020f,-.07f)}},
-			{ButtonHintType.MenuButton, new[] {new Vector3(0.0019f, 0f, -0.0074f), new Vector3(0.1f,.08f,-0.07f)}},
-			{ButtonHintType.SecondaryMenuButton, new[] {new Vector3(0.009f, 0f, 0.0055f), new Vector3(0.1f,.1f,0f)}},
+			{ButtonHintType.Button1, new[] {new Vector3(0.0019f, 0f, -0.0074f), new Vector3(0.1f,.08f,-0.07f)}},
+			{ButtonHintType.Button2, new[] {new Vector3(0.009f, 0f, 0.0055f), new Vector3(0.1f,.1f,0f)}},
 			{ButtonHintType.Thumbstick, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
 			{ButtonHintType.ThumbstickClick, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
 			{ButtonHintType.ThumbstickX, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
@@ -38,8 +48,8 @@ namespace unityutilities
 			// format for vector3 is origin, direction
 			{ButtonHintType.Trigger, new[] {new Vector3(-0.0003f, -0.0209f, 0.0207f), new Vector3(-0.01f, 0f,.1f)}},
 			{ButtonHintType.Grip, new[] {new Vector3(-0.0008f, -0.0311f, -0.0246f), new Vector3(.07f,-.020f,-.07f)}},
-			{ButtonHintType.MenuButton, new[] {new Vector3(0.0019f, 0f, -0.0074f), new Vector3(0.1f,.08f,-0.07f)}},
-			{ButtonHintType.SecondaryMenuButton, new[] {new Vector3(0.009f, 0f, 0.0055f), new Vector3(0.1f,.1f,0f)}},
+			{ButtonHintType.Button1, new[] {new Vector3(0.0019f, 0f, -0.0074f), new Vector3(0.1f,.08f,-0.07f)}},
+			{ButtonHintType.Button2, new[] {new Vector3(0.009f, 0f, 0.0055f), new Vector3(0.1f,.1f,0f)}},
 			{ButtonHintType.Thumbstick, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
 			{ButtonHintType.ThumbstickClick, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
 			{ButtonHintType.ThumbstickX, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
@@ -69,6 +79,8 @@ namespace unityutilities
 
 			public Vector3[] offset;
 
+			public GameObject meshHighlight;
+
 
 			/// <summary>
 			/// Creates a new controller label
@@ -80,7 +92,7 @@ namespace unityutilities
 			/// <param name="side">Which controller</param>
 			/// <param name="type">Type of input</param>
 			/// <param name="offset">Position and direction of label offset</param>
-			public ControllerLabel(Side side, ButtonHintType type, Transform parent, Transform controller, GameObject labelPrefab, Vector3[] offset)
+			public ControllerLabel(Side side, ButtonHintType type, Transform parent, Transform controller, GameObject labelPrefab, Vector3[] offset, Mesh mesh = null, Material meshMaterial = null)
 			{
 				labelObj = Instantiate(labelPrefab, parent);
 				canvasObj = labelObj.GetComponentInChildren<Canvas>().GetComponent<RectTransform>();
@@ -96,11 +108,19 @@ namespace unityutilities
 				line.material.color = lineColor;
 				line.positionCount = 2;
 				cam = Camera.main;
+
+				meshHighlight = new GameObject("Highlight");
+				meshHighlight.transform.SetParent(controller);
+				meshHighlight.transform.localPosition = Vector3.zero;
+				meshHighlight.transform.localRotation = Quaternion.identity;
+				meshHighlight.AddComponent<MeshFilter>().mesh = mesh;
+				meshHighlight.AddComponent<MeshRenderer>().material = meshMaterial;
 			}
 
 			public void Remove()
 			{
 				Destroy(labelObj);
+				Destroy(meshHighlight);
 			}
 
 			public void UpdatePos()
@@ -139,8 +159,8 @@ namespace unityutilities
 			ThumbstickX,
 			ThumbstickY,
 			ThumbstickClick,
-			MenuButton,
-			SecondaryMenuButton,
+			Button1,
+			Button2,
 			OtherObject
 		}
 
@@ -166,6 +186,22 @@ namespace unityutilities
 				{
 					offsets = riftOffsets;
 				}
+
+				leftButtonMeshesDict = new Dictionary<ButtonHintType, Mesh> {
+					{ ButtonHintType.Trigger, leftButtonMeshes[0] },
+					{ ButtonHintType.Grip, leftButtonMeshes[1] },
+					{ ButtonHintType.Thumbstick, leftButtonMeshes[2] },
+					{ ButtonHintType.Button1, leftButtonMeshes[3] },
+					{ ButtonHintType.Button2, leftButtonMeshes[4] }
+				};
+
+				rightButtonMeshesDict = new Dictionary<ButtonHintType, Mesh> {
+					{ ButtonHintType.Trigger, rightButtonMeshes[0] },
+					{ ButtonHintType.Grip, rightButtonMeshes[1] },
+					{ ButtonHintType.Thumbstick, rightButtonMeshes[2] },
+					{ ButtonHintType.Button1, rightButtonMeshes[3] },
+					{ ButtonHintType.Button2, rightButtonMeshes[4] }
+				};
 			}
 
 			initialized = true;
@@ -201,7 +237,7 @@ namespace unityutilities
 
 			if (side == Side.Left || side == Side.Both)
 			{
-				ControllerLabel label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.leftHand, instance.labelPrefab, offsets[hintType]);
+				ControllerLabel label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.leftHand, instance.labelPrefab, offsets[hintType], leftButtonMeshesDict[hintType], instance.highlightMaterial);
 				label.SetText(text);
 				instance.instantiatedLabels.Add(label);
 				labels.Add(label);
@@ -211,7 +247,7 @@ namespace unityutilities
 				Vector3[] flippedOffsets = new Vector3[] { offsets[hintType][0], offsets[hintType][1] };
 				flippedOffsets[0].x *= -1;
 				flippedOffsets[1].x *= -1;
-				ControllerLabel label = new ControllerLabel(side, hintType, instance.transform, instance.rig.rightHand, instance.labelPrefab, flippedOffsets);
+				ControllerLabel label = new ControllerLabel(side, hintType, instance.transform, instance.rig.rightHand, instance.labelPrefab, flippedOffsets, rightButtonMeshesDict[hintType], instance.highlightMaterial);
 				label.SetText(text);
 				instance.instantiatedLabels.Add(label);
 				labels.Add(label);
