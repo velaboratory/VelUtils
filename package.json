@@ -1,6 +1,6 @@
 {
   "name": "com.franzco.unityutilities",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "displayName": "unityutilities",
   "description": "A collection of flexible utilities for VR projects.\n\nAdjustPos.cs\nNudges an object with assignable keyboard shortcuts.\n\nInputMan.cs\nMakes input\nfrom VR devices accessible from a unified set of methods. Can treat axes as button down.\n\nLogger.cs\nLogs any data to a file.\n\nCopyTransform.cs\nOne object copies the position and/or rotation of another using a variety of techniques. Global or local offsets can be set.\n\nSaveLoc.cs\nSaves the location and rotation of an object to playerprefs. Local or global coordinates.\n\nMovement.cs\nAdds several movement techniques while maintaining compatibility with many rig setups.\n\nEditor/SetupVRInput.cs\nAdds a dropdown menu option for automatically populating the Input system for use with the InputMan script for use with a VR device.\n\nEditor/EditorShortcutKeys.cs\nAdds F5 shortcut to enter play mode.",
   "unity": "2017.1",

@@ -44,6 +44,7 @@ public class EditorShortCutKeys : ScriptableObject
 	}
 }
 
+
 public class ReadOnlyAttribute : PropertyAttribute { }
 
 [CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
