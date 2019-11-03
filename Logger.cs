@@ -113,9 +113,9 @@ namespace unityutilities {
 					if (!Directory.Exists(directoryPath)) {
 						Directory.CreateDirectory(directoryPath);
 					}
-#endif
 
 					filePath = Path.Combine(directoryPath, fileName + fileExtension);
+#endif
 
 					// create writer if it doesn't exist
 					if (!streamWriters.ContainsKey(fileName)) {
