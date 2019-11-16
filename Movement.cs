@@ -111,18 +111,18 @@ namespace unityutilities
 		/// <summary>
 		/// Called when the teleporter is activated.
 		/// </summary>
-		public Action TeleportStart;
+		public Action<Side> TeleportStart;
 
 		/// <summary>
 		/// Called when the teleport happens.
 		/// Contains the translation offset vector. 
 		/// </summary>
-		public Action<Vector3> TeleportEnd;
+		public Action<Side, Vector3> TeleportEnd;
 		
 		/// <summary>
 		/// Contains the direction of the snap turn.
 		/// </summary>
-		public Action<string> SnapTurn;
+		public Action<Side, string> SnapTurn;
 
 		/// <summary>
 		/// The current chosen spot to teleport to
@@ -132,11 +132,11 @@ namespace unityutilities
 		{
 			// inspector values
 			public bool rotateOnTeleport;
-			public float maxTeleportableSlope = 20f;
+			public float maxTeleportableSlope = 45f;
 			public float lineRendererWidth = .01f;
 			public float teleportCurve = .01f;
 			public float teleportArcInitialVel = .5f;
-			public float smoothTeleportTime = .1f;
+			public float smoothTeleportTime = 0f;
 			public GameObject teleportMarkerOverride;
 			public Material lineRendererMaterialOverride;
 			public LayerMask validLayers = ~0;
@@ -172,6 +172,8 @@ namespace unityutilities
 			public Teleporter(Teleporter t) {
 				Pos = t.Pos;
 				Dir = t.Dir;
+				blinkShader = t.blinkShader;
+				validLayers = t.validLayers;
 			}
 
 
@@ -362,11 +364,17 @@ namespace unityutilities
 			// check for start of teleports
 			if (InputMan.Up(Side.Left))
 			{
+				if (currentTeleportingSide == Side.None) {
+					TeleportStart.Invoke(Side.Left);
+				}
 				currentTeleportingSide = Side.Left;
 			}
 
 			if (InputMan.Up(Side.Right))
 			{
+				if (currentTeleportingSide == Side.None) {
+					TeleportStart.Invoke(Side.Right);
+				}
 				currentTeleportingSide = Side.Right;
 			}
 
@@ -380,7 +388,7 @@ namespace unityutilities
 				{
 					// complete the teleport
 					TeleportTo(teleporter);
-					TeleportEnd?.Invoke(teleporter.Pos + rig.head.transform.position - transform.position);
+					TeleportEnd?.Invoke(currentTeleportingSide, teleporter.Pos + rig.head.transform.position - transform.position);
 					currentTeleportingSide = Side.None;
 
 					// delete the line renderer
@@ -791,7 +799,7 @@ namespace unityutilities
 				}
 
 				if (snapTurnDirection != "") {
-					SnapTurn?.Invoke(snapTurnDirection);
+					SnapTurn?.Invoke(turnInput, snapTurnDirection);
 
 					cpt.enabled = false;
 					snapTurnedThisFrame = true;
