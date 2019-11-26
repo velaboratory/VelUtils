@@ -14,7 +14,6 @@ namespace unityutilities {
 	[AddComponentMenu("unityutilities/Logger")]
 	public class Logger : MonoBehaviour {
 		private static string logFolder = "Log";
-		public static List<string> subFolders = new List<string>();
 		private const string fileExtension = ".tsv";
 		private const string delimiter = "\t";
 		private const string dateFormat = "yyyy/MM/dd HH:mm:ss.fff";
@@ -22,6 +21,7 @@ namespace unityutilities {
 		public string webLogURL = "http://";
 		private const string passwordField = "password";
 		public string webLogPassword;
+		public static List<string> subFolders = new List<string>();
 
 		/// <summary>
 		/// How many lines to wait before actually logging
@@ -29,6 +29,8 @@ namespace unityutilities {
 		public int lineLogInterval = 50;
 		private static int numLinesLogged;
 
+		public static bool usePerDeviceFolder = true;
+		public static bool usePerLaunchFolder = true;
 		public static bool enableLogging = true;
 		public static bool enableLoggingLocal = true;
 		public static bool enableLoggingRemote = true;
@@ -60,6 +62,8 @@ namespace unityutilities {
 			try {
 				StringBuilder strBuilder = new StringBuilder();
 				strBuilder.Append(DateTime.Now.ToString(dateFormat));
+				strBuilder.Append(delimiter);
+				strBuilder.Append(SystemInfo.deviceUniqueIdentifier);
 				strBuilder.Append(delimiter);
 				foreach (var elem in data) {
 					if (elem.Contains(delimiter)) {
@@ -163,6 +167,15 @@ namespace unityutilities {
 				}
 			}
 
+		}
+
+		/// <summary>
+		/// Not used currently
+		/// </summary>
+		private void UpdateSubFolders() {
+			subFolders.Clear();
+			subFolders.Add(SystemInfo.deviceUniqueIdentifier);
+			subFolders.Add(DateTime.Now.ToString("yyyy-MM-dd_hh-mm"));
 		}
 
 		private void Update() {
