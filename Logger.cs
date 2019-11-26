@@ -14,6 +14,7 @@ namespace unityutilities {
 	[AddComponentMenu("unityutilities/Logger")]
 	public class Logger : MonoBehaviour {
 		private static string logFolder = "Log";
+		public static List<string> subFolders = new List<string>();
 		private const string fileExtension = ".tsv";
 		private const string delimiter = "\t";
 		private const string dateFormat = "yyyy/MM/dd HH:mm:ss.fff";
