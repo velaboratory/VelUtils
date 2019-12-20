@@ -3,6 +3,10 @@
 *Anton Franzluebbers*
 
 This is a collection of utility scripts and assets that I have created that are applicable to a variety of projects.
+Also includes prefabs to quickly start a new project.
+
+## Usage
+Clone and use the package manager to add `package.json`, or add the git url to `Packages/manifest.json`.
 
 ## Scripts included
 
@@ -22,7 +26,11 @@ One object copies the position and/or rotation of another using a variety of tec
 Saves the location and rotation of an object to playerprefs. Local or global coordinates.
 
 ### `Movement.cs`
-Adds several movement techniques while maintaining compatibility with many rig setups. (Only contains echo movement for now)
+Adds several movement techniques while maintaining compatibility with many rig setups.
+Techniques supported:
+ - Teleporting
+ - Hand movement (Echo style)
+ - Translational gain
 
 ### `Editor/SetupVRInput.cs`
 Adds a dropdown menu option for automatically populating the Input system for use with the InputMan script for use with a VR device.
@@ -30,14 +38,20 @@ Adds a dropdown menu option for automatically populating the Input system for us
 ### `Editor/EditorShortcutKeys.cs`
 Adds `F5` shortcut to enter play mode.
 
-### `Editor/CopyTransformEditor.cs`
-Sets up the interface for the CopyTransform script.
+### `ControllerHelp.cs` and `ControllerHelpTester.cs`
+Adds functionality to highlight controller buttons and show hints.
+
+### `DontDestroyOnLoad.cs`
+That's it
+
+### `Rig.cs`
+Basically a data structure for VR rigs.
+
+### `VRObject.cs`
+Track an Oculus VRObject
 
 
-## Usage
-Use `mklink Link Target` to use without copying, but this isn't compatible with git.
+## Interaction Scripts
 
-## TODO
- - add support for local space offsets in CopyTransorm
- - add vibration support in InputMan
- - finish all methods in InputMan
+### `PointForceGrabbable.cs`
+A versatile grab script that can work for positional dials and general physics grabbing.

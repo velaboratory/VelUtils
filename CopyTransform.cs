@@ -160,8 +160,8 @@ namespace unityutilities {
 			}
 		}
 
-		private Vector3 AngularVel(float timeStep, Quaternion t, out float angle) {
-			Quaternion rot = t * Quaternion.Inverse(transform.rotation);
+		private Vector3 AngularVel(float timeStep, Quaternion goalRotation, out float angle) {
+			Quaternion rot = goalRotation * Quaternion.Inverse(transform.rotation);
 			rot.ToAngleAxis(out angle, out var axis);
 			Vector3 angularVel = axis * (angle * Mathf.Deg2Rad / timeStep);
 			return angularVel;
