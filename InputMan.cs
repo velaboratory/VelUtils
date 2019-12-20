@@ -50,6 +50,12 @@ namespace unityutilities
 		Y
 	}
 
+	public enum VRInput {
+		None,
+		Trigger,
+		Grip
+	}
+
 	/// <summary>
 	/// Makes input from VR devices accessible from a unified set of methods. Can treat axes as button down.
 	/// </summary>

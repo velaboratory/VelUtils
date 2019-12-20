@@ -6,16 +6,15 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.XR.Interaction.Toolkit;
 
-namespace unityutilities
-{
+namespace unityutilities {
 	/// <summary>
 	/// Adds several movement techniques while maintaining compatibility with many rig setups.
 	/// </summary>
 	[RequireComponent(typeof(Rigidbody))]
 	[AddComponentMenu("unityutilities/Movement")]
-	public class Movement : MonoBehaviour
-	{
+	public class Movement : MonoBehaviour {
 		public Rig rig;
 
 		[Header("Features")]
@@ -26,6 +25,7 @@ namespace unityutilities
 
 		[Tooltip("Allows for hand-based movement by holding grip.")]
 		public bool grabAir = true;
+		public VRInput grabInput = VRInput.Grip;
 
 		[Tooltip("Press left and right stick to boost and brake in head direction.")]
 		public bool stickBoostBrake = true;
@@ -56,7 +56,7 @@ namespace unityutilities
 
 
 
-		[Header("Rotation")] 
+		[Header("Rotation")]
 		[Tooltip("Not used if pitch is enabled.")]
 		public Side turnInput = Side.Either;
 		public bool continuousRotation;
@@ -64,10 +64,10 @@ namespace unityutilities
 		public float snapRotationAmount = 30f;
 		public float turnNullZone = .3f;
 		private bool snapTurnedThisFrame;
-		
 
 
-		
+
+
 		[Header("Tuning")]
 		public float mainBoosterMaxSpeed = 5f;
 		public float mainBrakeDrag = 2f;
@@ -80,7 +80,7 @@ namespace unityutilities
 		public float slidingAccel = 1f;
 		public float slidingSpeed = 3f;
 		public float minVel = .1f;
-		
+
 		public Action<Transform, Side> OnGrab;
 		public Action<Transform, Side> OnRelease;
 
@@ -100,8 +100,8 @@ namespace unityutilities
 
 		private Side grabbingSide = Side.None;
 		private bool wasKinematic;
-		
-		
+
+
 		// teleporting vars
 		private LineRenderer lineRenderer;
 		[HideInInspector]
@@ -118,7 +118,7 @@ namespace unityutilities
 		/// Contains the translation offset vector. 
 		/// </summary>
 		public Action<Side, Vector3> TeleportEnd;
-		
+
 		/// <summary>
 		/// Contains the direction of the snap turn.
 		/// </summary>
@@ -128,8 +128,7 @@ namespace unityutilities
 		/// The current chosen spot to teleport to
 		/// </summary>
 		[Serializable]
-		public class Teleporter
-		{
+		public class Teleporter {
 			// inspector values
 			public bool rotateOnTeleport;
 			public float maxTeleportableSlope = 45f;
@@ -156,15 +155,13 @@ namespace unityutilities
 
 			[HideInInspector]
 			public GameObject teleportMarkerInstance;
-			
-			
-			public Teleporter()
-			{
+
+
+			public Teleporter() {
 				Active = false;
 			}
-			
-			public Teleporter(Vector3 pos, Vector3 dir)
-			{
+
+			public Teleporter(Vector3 pos, Vector3 dir) {
 				Pos = pos;
 				Dir = dir;
 				Active = true;
@@ -179,32 +176,25 @@ namespace unityutilities
 
 
 			private bool active;
-			
+
 			private Vector3 pos;
 			private Vector3 dir;
 
-			public bool Active
-			{
+			public bool Active {
 				get => active;
-				set
-				{
-					if (active != value)
-					{
-						if (teleportMarkerInstance != null)
-						{
+				set {
+					if (active != value) {
+						if (teleportMarkerInstance != null) {
 							teleportMarkerInstance.SetActive(value);
 						}
-						else
-						{
-							if (teleportMarkerOverride != null)
-							{
+						else {
+							if (teleportMarkerOverride != null) {
 								teleportMarkerInstance = Instantiate(teleportMarkerOverride);
 							}
-							else
-							{
+							else {
 								teleportMarkerInstance = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
 								Destroy(teleportMarkerInstance.GetComponent<Collider>());
-								teleportMarkerInstance.transform.localScale = new Vector3(.1f,.01f,.1f);
+								teleportMarkerInstance.transform.localScale = new Vector3(.1f, .01f, .1f);
 								teleportMarkerInstance.GetComponent<MeshRenderer>().material.color = Color.black;
 							}
 						}
@@ -214,27 +204,21 @@ namespace unityutilities
 				}
 			}
 
-			public Vector3 Pos
-			{
+			public Vector3 Pos {
 				get => pos;
-				set
-				{
+				set {
 					pos = value;
-					if (teleportMarkerInstance != null)
-					{
+					if (teleportMarkerInstance != null) {
 						teleportMarkerInstance.transform.position = pos;
 					}
 				}
 			}
 
-			public Vector3 Dir
-			{
+			public Vector3 Dir {
 				get => dir;
-				set
-				{
+				set {
 					dir = value;
-					if (teleportMarkerInstance != null)
-					{
+					if (teleportMarkerInstance != null) {
 						teleportMarkerInstance.transform.rotation = Quaternion.LookRotation(dir);
 					}
 				}
@@ -292,11 +276,9 @@ namespace unityutilities
 			SceneManager.activeSceneChanged += SceneChangeEvent;
 		}
 
-		private void Start()
-		{
+		private void Start() {
 			cpt = null;
-			if (cpt == null)
-			{
+			if (cpt == null) {
 				cpt = gameObject.AddComponent<CopyTransform>();
 			}
 
@@ -305,49 +287,53 @@ namespace unityutilities
 			normalDrag = rig.rb.drag;
 
 			wasKinematic = rig.rb.isKinematic;
+
+
+			// Set up listeners for XRInteraction
+			if (rig.leftHand.GetComponent<XRBaseInteractor>()) {
+				rig.leftHand.GetComponent<XRBaseInteractor>().onHoverEnter.AddListener(InteractorHoverEnterLeft);
+				rig.leftHand.GetComponent<XRBaseInteractor>().onHoverExit.AddListener(InteractorHoverExitLeft);
+			}
+			if (rig.rightHand.GetComponent<XRBaseInteractor>()) {
+				rig.rightHand.GetComponent<XRBaseInteractor>().onHoverEnter.AddListener(InteractorHoverEnterRight);
+				rig.rightHand.GetComponent<XRBaseInteractor>().onHoverExit.AddListener(InteractorHoverExitRight);
+			}
 		}
 
-		private void Update()
-		{
+		private void Update() {
 			// turn
 			Turn();
-			
+
 			// grab walls and air
-			if (grabWalls && !grabAir)
-			{
-				if (leftHandGrabbedObj != null || grabbingSide == Side.Left)
-				{
+			if (grabWalls && !grabAir) {
+				if (leftHandGrabbedObj != null || grabbingSide == Side.Left) {
 					GrabMove(ref rig.leftHand, ref leftHandGrabPos, Side.Left, leftHandGrabbedObj);
 				}
 
-				if (rightHandGrabbedObj != null || grabbingSide == Side.Right)
-				{
+				if (rightHandGrabbedObj != null || grabbingSide == Side.Right) {
 					GrabMove(ref rig.rightHand, ref rightHandGrabPos, Side.Right, rightHandGrabbedObj);
 				}
 			}
-			else if (grabAir && !snapTurnedThisFrame)
-			{
+			else if (grabAir && !snapTurnedThisFrame) {
 				GrabMove(ref rig.leftHand, ref leftHandGrabPos, Side.Left);
 				GrabMove(ref rig.rightHand, ref rightHandGrabPos, Side.Right);
 			}
 
 			Boosters();
 
-			if (slidingMovement)
-			{
+			if (slidingMovement) {
 				SlidingMovement();
 			}
 
 			// update lastVels
 			lastVels[lastVelsIndex] = rig.rb.velocity;
 			lastVelsIndex = ++lastVelsIndex % 5;
-			
+
 			// update last frame's grabbed objs
 			lastLeftHandGrabbedObj = leftHandGrabbedObj;
 			lastRightHandGrabbedObj = rightHandGrabbedObj;
 
-			if (teleportingMovement)
-			{
+			if (teleportingMovement) {
 				Teleporting();
 			}
 
@@ -359,19 +345,16 @@ namespace unityutilities
 
 		#region Teleporting
 
-		private void Teleporting()
-		{
+		private void Teleporting() {
 			// check for start of teleports
-			if (InputMan.Up(Side.Left))
-			{
+			if (InputMan.Up(Side.Left)) {
 				if (currentTeleportingSide == Side.None) {
 					TeleportStart.Invoke(Side.Left);
 				}
 				currentTeleportingSide = Side.Left;
 			}
 
-			if (InputMan.Up(Side.Right))
-			{
+			if (InputMan.Up(Side.Right)) {
 				if (currentTeleportingSide == Side.None) {
 					TeleportStart.Invoke(Side.Right);
 				}
@@ -379,13 +362,11 @@ namespace unityutilities
 			}
 
 			// if the teleport laser is visible
-			if (currentTeleportingSide != Side.None)
-			{
+			if (currentTeleportingSide != Side.None) {
 
 				// check for end of teleport
 				if (currentTeleportingSide == Side.Left && InputMan.ThumbstickIdle(Side.Left) ||
-				    currentTeleportingSide == Side.Right && InputMan.ThumbstickIdle(Side.Right))
-				{
+					currentTeleportingSide == Side.Right && InputMan.ThumbstickIdle(Side.Right)) {
 					// complete the teleport
 					TeleportTo(teleporter);
 					TeleportEnd?.Invoke(currentTeleportingSide, teleporter.Pos + rig.head.transform.position - transform.position);
@@ -395,20 +376,16 @@ namespace unityutilities
 					Destroy(lineRenderer);
 					teleporter.Active = false;
 				}
-				else
-				{
+				else {
 
 					// add a new linerenderer if needed
-					if (lineRenderer == null)
-					{
+					if (lineRenderer == null) {
 						lineRenderer = gameObject.AddComponent<LineRenderer>();
 						lineRenderer.widthMultiplier = teleporter.lineRendererWidth;
-						if (teleporter.lineRendererMaterialOverride != null)
-						{
+						if (teleporter.lineRendererMaterialOverride != null) {
 							lineRenderer.material = teleporter.lineRendererMaterialOverride;
 						}
-						else
-						{
+						else {
 							Material material;
 							(material = lineRenderer.material).shader = Shader.Find("Unlit/Color");
 							material.color = Color.black;
@@ -421,13 +398,11 @@ namespace unityutilities
 					float velocity = teleporter.teleportArcInitialVel;
 					List<Vector3> points = new List<Vector3>();
 
-					if (currentTeleportingSide == Side.Left)
-					{
+					if (currentTeleportingSide == Side.Left) {
 						lastPos = rig.leftHand.position;
 						lastDir = rig.leftHand.forward;
 					}
-					else
-					{
+					else {
 						lastPos = rig.rightHand.position;
 						lastDir = rig.rightHand.forward;
 					}
@@ -439,21 +414,17 @@ namespace unityutilities
 					const float numSegments = 200f;
 
 					// the teleport line will stop at a max distance
-					for (int i = 0; i < numSegments; i++)
-					{
-						if (Physics.Raycast(lastPos, lastDir, out teleportHit, segmentLength, teleporter.validLayers))
-						{
+					for (int i = 0; i < numSegments; i++) {
+						if (Physics.Raycast(lastPos, lastDir, out teleportHit, segmentLength, teleporter.validLayers)) {
 							points.Add(teleportHit.point);
 
 							// if the hit point is valid
-							if (Vector3.Angle(teleportHit.normal, Vector3.up) < teleporter.maxTeleportableSlope)
-							{
+							if (Vector3.Angle(teleportHit.normal, Vector3.up) < teleporter.maxTeleportableSlope) {
 								// define the point as a good teleportable point
 								teleporter.Pos = teleportHit.point;
 								Vector3 dir = rig.head.forward;
 								dir = Vector3.ProjectOnPlane(dir, Vector3.up);
-								if (teleporter.rotateOnTeleport)
-								{
+								if (teleporter.rotateOnTeleport) {
 									Vector3 thumbstickDir = new Vector3(
 										InputMan.ThumbstickX(currentTeleportingSide),
 										0,
@@ -469,8 +440,7 @@ namespace unityutilities
 								teleporter.Active = true;
 
 							}
-							else
-							{
+							else {
 								// if the hit point is close enough to the last valid point
 								teleporter.Active = !(Vector3.Distance(teleporter.Pos, teleportHit.point) > .1f);
 							}
@@ -478,8 +448,7 @@ namespace unityutilities
 
 							break;
 						}
-						else
-						{
+						else {
 							// add the point to the line renderer
 							points.Add(lastPos);
 
@@ -498,55 +467,49 @@ namespace unityutilities
 				}
 			}
 		}
-		
+
 		/// <summary>
 		/// May not actually teleport if goal is not active
 		/// </summary>
 		/// <param name="goal">The target pos</param>
-		private void TeleportTo(Teleporter goal)
-		{
-			if (goal.Active)
-			{
+		private void TeleportTo(Teleporter goal) {
+			if (goal.Active) {
 				TeleportTo(goal.Pos, goal.Dir);
 			}
 		}
 
 		// ReSharper disable once MemberCanBePrivate.Global
-		public void TeleportTo(Vector3 position, Vector3 direction)
-		{
+		public void TeleportTo(Vector3 position, Vector3 direction) {
 			TeleportTo(position, Quaternion.LookRotation(direction));
 		}
-		
-		public void TeleportTo(Vector3 position, Quaternion rotation)
-		{
-			float headRotOffset = Vector3.SignedAngle(transform.forward, Vector3.ProjectOnPlane(rig.head.transform.forward,Vector3.up), Vector3.up);
-			rotation = Quaternion.Euler(0,-headRotOffset,0) * rotation;
+
+		public void TeleportTo(Vector3 position, Quaternion rotation) {
+			float headRotOffset = Vector3.SignedAngle(transform.forward, Vector3.ProjectOnPlane(rig.head.transform.forward, Vector3.up), Vector3.up);
+			rotation = Quaternion.Euler(0, -headRotOffset, 0) * rotation;
 			Quaternion origRot = transform.rotation;
 			transform.rotation = rotation;
-		
+
 			Vector3 headPosOffset = transform.position - rig.head.transform.position;
 			headPosOffset.y = 0;
 			//transform.position = position + headPosOffset;
-			
+
 			transform.rotation = origRot;
-			
+
 			StartCoroutine(DoSmoothTeleport(position + headPosOffset, rotation, teleporter.smoothTeleportTime));
 		}
 
-		private IEnumerator DoSmoothTeleport(Vector3 position, Quaternion rotation, float time)
-		{
+		private IEnumerator DoSmoothTeleport(Vector3 position, Quaternion rotation, float time) {
 			float distance = Vector3.Distance(transform.position, position);
-			
+
 			transform.rotation = rotation;
-			
+
 			if (teleporter.blink) {
-				FadeOut(teleporter.blinkDuration/2);
+				FadeOut(teleporter.blinkDuration / 2);
 				yield return new WaitForSeconds(4 * teleporter.blinkDuration / 5);
 			}
 
-			for (float i = 0; i < time; i+=Time.deltaTime)
-			{
-				transform.position = Vector3.MoveTowards(transform.position, position, (Time.deltaTime / time)*distance);
+			for (float i = 0; i < time; i += Time.deltaTime) {
+				transform.position = Vector3.MoveTowards(transform.position, position, (Time.deltaTime / time) * distance);
 				//transform.RotateAround(rig.head.position, axis,angle*(Time.deltaTime/time));
 				yield return null;
 			}
@@ -613,16 +576,13 @@ namespace unityutilities
 			translationalGainOffsetObj.localPosition = trackingPosOffset * (translationalGain - 1);
 		}
 
-		private void RoundVelToZero()
-		{
-			if (rig.rb.velocity.magnitude < minVel)
-			{
+		private void RoundVelToZero() {
+			if (rig.rb.velocity.magnitude < minVel) {
 				rig.rb.velocity = Vector3.zero;
 			}
 		}
 
-		private void SlidingMovement()
-		{
+		private void SlidingMovement() {
 			bool useForce = false;
 			Vector3 forward = -rig.head.forward;
 			forward.y = 0;
@@ -631,22 +591,18 @@ namespace unityutilities
 			Vector3 right = new Vector3(-forward.z, 0, forward.x);
 
 
-			if (useForce)
-			{
+			if (useForce) {
 				Vector3 forwardForce = Time.deltaTime * InputMan.ThumbstickY(Side.Left) * forward * 1000f;
-				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.forward)) < slidingSpeed)
-				{
+				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.forward)) < slidingSpeed) {
 					rig.rb.AddForce(forwardForce);
 				}
 
 				Vector3 rightForce = Time.deltaTime * InputMan.ThumbstickX(Side.Left) * right * 1000f;
-				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.right)) < slidingSpeed)
-				{
+				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.right)) < slidingSpeed) {
 					rig.rb.AddForce(rightForce);
 				}
 			}
-			else
-			{
+			else {
 				Vector3 currentSpeed = rig.rb.velocity;
 				Vector3 forwardSpeed = InputMan.ThumbstickY(Side.Left) * forward;
 				Vector3 rightSpeed = InputMan.ThumbstickX(Side.Left) * right;
@@ -655,22 +611,18 @@ namespace unityutilities
 			}
 		}
 
-		private void Boosters()
-		{
+		private void Boosters() {
 			// update timers
 			mainBoosterBudget += Time.deltaTime;
 			mainBoosterBudget = Mathf.Clamp01(mainBoosterBudget);
 
 			// use main booster
-			if (stickBoostBrake && InputMan.ThumbstickPressDown(Side.Left) && InputMan.ThumbstickIdle(Side.Left))
-			{
+			if (stickBoostBrake && InputMan.ThumbstickPressDown(Side.Left) && InputMan.ThumbstickIdle(Side.Left)) {
 				// add timeout
-				if (mainBoosterBudget - mainBoosterCost > 0)
-				{
+				if (mainBoosterBudget - mainBoosterCost > 0) {
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
-					if (Vector3.Dot(rig.rb.velocity, rig.head.forward) < mainBoosterMaxSpeed)
-					{
+					if (Vector3.Dot(rig.rb.velocity, rig.head.forward) < mainBoosterMaxSpeed) {
 						// add the force
 						rig.rb.AddForce(mainBoosterForce * 100f * rig.head.forward);
 					}
@@ -680,36 +632,29 @@ namespace unityutilities
 			}
 
 			// use main brake
-			if (stickBoostBrake && InputMan.PadClick(Side.Right))
-			{
+			if (stickBoostBrake && InputMan.PadClick(Side.Right)) {
 				// add a bunch of drag
 				rig.rb.drag = mainBrakeDrag;
 			}
-			else if (InputMan.PadClickUp(Side.Right))
-			{
+			else if (InputMan.PadClickUp(Side.Right)) {
 				rig.rb.drag = normalDrag;
 				RoundVelToZero();
 			}
 
-			if (handBoosters)
-			{
-				if (InputMan.Button2(Side.Left))
-				{
+			if (handBoosters) {
+				if (InputMan.Button2(Side.Left)) {
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
-					if (Vector3.Dot(rig.rb.velocity, rig.leftHand.forward) < maxHandBoosterSpeed)
-					{
+					if (Vector3.Dot(rig.rb.velocity, rig.leftHand.forward) < maxHandBoosterSpeed) {
 						// add the force
 						rig.rb.AddForce(handBoosterAccel * Time.deltaTime * 100f * rig.leftHand.forward);
 					}
 				}
 
-				if (InputMan.Button2(Side.Right))
-				{
+				if (InputMan.Button2(Side.Right)) {
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
-					if (Vector3.Dot(rig.rb.velocity, rig.rightHand.forward) < maxHandBoosterSpeed)
-					{
+					if (Vector3.Dot(rig.rb.velocity, rig.rightHand.forward) < maxHandBoosterSpeed) {
 						// add the force
 						rig.rb.AddForce(handBoosterAccel * Time.deltaTime * 100f * rig.rightHand.forward);
 					}
@@ -717,83 +662,66 @@ namespace unityutilities
 			}
 		}
 
-		private void Turn()
-		{
+		private void Turn() {
 			// don't turn if currently teleporting
-			if (currentTeleportingSide != Side.None)
-			{
+			if (currentTeleportingSide != Side.None) {
 				return;
 			}
-			
+
 			Vector3 pivot = rig.head.position;
-			if (grabbingSide == Side.Left)
-			{
+			if (grabbingSide == Side.Left) {
 				pivot = rig.leftHand.position;
 			}
-			else if (grabbingSide == Side.Right)
-			{
+			else if (grabbingSide == Side.Right) {
 				pivot = rig.rightHand.position;
 			}
 
-			if (continuousRotation)
-			{
+			if (continuousRotation) {
 				Side turnInputLocal = turnInput;
-				if (roll)
-				{
+				if (roll) {
 					turnInputLocal = Side.Right;
 				}
-				if (yaw && Mathf.Abs(InputMan.ThumbstickX(turnInputLocal)) > turnNullZone)
-				{
+				if (yaw && Mathf.Abs(InputMan.ThumbstickX(turnInputLocal)) > turnNullZone) {
 					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up,
 						InputMan.ThumbstickX(turnInputLocal) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
-				else if (pitch && Mathf.Abs(InputMan.ThumbstickY(turnInputLocal)) > turnNullZone)
-				{
+				else if (pitch && Mathf.Abs(InputMan.ThumbstickY(turnInputLocal)) > turnNullZone) {
 					rig.rb.transform.RotateAround(pivot, rig.head.right,
 						InputMan.ThumbstickY(turnInputLocal) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
-				else if (roll && Mathf.Abs(InputMan.ThumbstickX(Side.Left)) > turnNullZone)
-				{
+				else if (roll && Mathf.Abs(InputMan.ThumbstickX(Side.Left)) > turnNullZone) {
 					rig.rb.transform.RotateAround(pivot, rig.head.forward,
 						InputMan.ThumbstickX(Side.Left) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
 			}
-			else
-			{
+			else {
 				Side turnInputLocal = turnInput;
 				string snapTurnDirection = "";
 
-				if (roll)
-				{
+				if (roll) {
 					turnInputLocal = Side.Right;
 				}
-				if (yaw && InputMan.Left(turnInputLocal))
-				{
+				if (yaw && InputMan.Left(turnInputLocal)) {
 					snapTurnDirection = "left";
 					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up, -snapRotationAmount);
 				}
-				else if (yaw && InputMan.Right(turnInputLocal))
-				{
+				else if (yaw && InputMan.Right(turnInputLocal)) {
 					snapTurnDirection = "right";
 					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up, snapRotationAmount);
 				}
-				else if (pitch && InputMan.Up(turnInputLocal))
-				{
+				else if (pitch && InputMan.Up(turnInputLocal)) {
 					snapTurnDirection = "up";
 					rig.rb.transform.RotateAround(pivot, rig.head.transform.forward, -snapRotationAmount);
 				}
-				else if (pitch && InputMan.Down(turnInputLocal))
-				{
+				else if (pitch && InputMan.Down(turnInputLocal)) {
 					snapTurnDirection = "down";
 					rig.rb.transform.RotateAround(pivot, rig.head.transform.forward, snapRotationAmount);
 				}
-				else if (roll && InputMan.Left(Side.Left))
-				{
+				else if (roll && InputMan.Left(Side.Left)) {
 					snapTurnDirection = "roll-left";
 					rig.rb.transform.RotateAround(pivot, rig.head.transform.right, -snapRotationAmount);
 				}
-				else if (roll && InputMan.Right(Side.Left))
-				{
+				else if (roll && InputMan.Right(Side.Left)) {
 					snapTurnDirection = "roll-right";
 					rig.rb.transform.RotateAround(pivot, rig.head.transform.right, snapRotationAmount);
 				}
@@ -805,28 +733,37 @@ namespace unityutilities
 					snapTurnedThisFrame = true;
 
 					if (grabbingSide != Side.None) {
-						cpt.positionOffset = rig.rb.position - 
+						cpt.positionOffset = rig.rb.position -
 						  (grabbingSide == Side.Left ? rig.leftHand.position : rig.rightHand.position);
 					}
 				}
 			}
 		}
 
-		public void ResetOrientation()
-		{
+		public void ResetOrientation() {
 			rig.rb.transform.localRotation = Quaternion.identity;
 		}
 
-		private void GrabMove(ref Transform hand, ref GameObject grabPos, Side side, Transform parent = null)
-		{
-			if (InputMan.GripDown(side) || (InputMan.Grip(side) && 
-                ((side == Side.Left && leftHandGrabbedObj != null && lastLeftHandGrabbedObj == null) || 
-                (side == Side.Right && rightHandGrabbedObj != null && lastRightHandGrabbedObj == null))))
-			{
+		private void GrabMove(ref Transform hand, ref GameObject grabPos, Side side, Transform parent = null) {
+			bool grabDown = false;
+			bool grab = false;
+			switch (grabInput) {
+				case VRInput.Trigger:
+					grabDown = InputMan.TriggerDown(side);
+					grab = InputMan.Trigger(side);
+					break;
+				case VRInput.Grip:
+					grabDown = InputMan.GripDown(side);
+					grab = InputMan.Grip(side);
+					break;
+			}
+
+			if (grabDown || (grab &&
+				((side == Side.Left && leftHandGrabbedObj != null && lastLeftHandGrabbedObj == null) ||
+				(side == Side.Right && rightHandGrabbedObj != null && lastRightHandGrabbedObj == null)))) {
 				grabbingSide = side;
 
-				if (grabPos != null)
-				{
+				if (grabPos != null) {
 					Destroy(grabPos.gameObject);
 				}
 
@@ -837,30 +774,25 @@ namespace unityutilities
 				cpt.positionOffset = rig.rb.position - hand.position;
 				cpt.snapIfDistanceGreaterThan = 1f;
 				rig.rb.isKinematic = false;
-				
+
 				InputMan.Vibrate(side, 1);
 
 				// if event has subscribers, execute
 				OnGrab?.Invoke(parent, side);
 			}
-			else if (side == grabbingSide)
-			{
-				if (InputMan.Grip(side))
-				{
+			else if (side == grabbingSide) {
+				if (grab) {
 					cpt.positionOffset = rig.rb.position - hand.position;
 					if (!snapTurnedThisFrame) {
 						cpt.enabled = true;
 					}
 				}
-				else
-				{
-					if (side == grabbingSide)
-					{
+				else {
+					if (side == grabbingSide) {
 						grabbingSide = Side.None;
 					}
 
-					if (grabPos != null)
-					{
+					if (grabPos != null) {
 						OnRelease?.Invoke(grabPos.transform, side);
 						Destroy(grabPos.gameObject);
 						cpt.target = null;
@@ -873,34 +805,48 @@ namespace unityutilities
 			}
 		}
 
-		public void SetGrabbedObj(Transform obj, Side side)
-		{
-			if (side == Side.Left)
-			{
-				if (obj == null)
-				{
+		public void SetGrabbedObj(Transform obj, Side side) {
+			if (side == Side.Left) {
+				if (obj == null) {
 					leftHandGrabbedObj = null;
 				}
-				else
-				{
+				else {
 					leftHandGrabbedObj = obj;
 				}
 			}
-			else if (side == Side.Right)
-			{
-				if (obj == null)
-				{
+			else if (side == Side.Right) {
+				if (obj == null) {
 					rightHandGrabbedObj = null;
 				}
-				else
-				{
+				else {
 					rightHandGrabbedObj = obj;
 				}
 			}
 		}
 
-		private Vector3 MedianAvg(Vector3[] inputArray)
-		{
+		/// <summary>
+		/// Sets the grabbed object from an event from an XRInteractor.
+		/// Should use HoverEnter and HoverExit
+		/// </summary>
+		public void InteractorHoverEnterLeft(XRBaseInteractable interactable) {
+			if (interactable is Climbable)
+				leftHandGrabbedObj = interactable.transform;
+		}
+		public void InteractorHoverEnterRight(XRBaseInteractable interactable) {
+			if (interactable is Climbable)
+				rightHandGrabbedObj = interactable.transform;
+		}
+		public void InteractorHoverExitLeft(XRBaseInteractable interactable) {
+			if (interactable is Climbable)
+				leftHandGrabbedObj = null;
+		}
+		public void InteractorHoverExitRight(XRBaseInteractable interactable) {
+			if (interactable is Climbable)
+				rightHandGrabbedObj = null;
+		}
+
+
+		private Vector3 MedianAvg(Vector3[] inputArray) {
 			List<Vector3> list = new List<Vector3>(inputArray);
 			list = list.OrderBy(x => x.magnitude).ToList();
 			list.RemoveAt(0);
