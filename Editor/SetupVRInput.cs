@@ -1,44 +1,41 @@
-#if UNITY_EDITOR
-
 using UnityEditor;
 using UnityEngine;
 
-public enum AxisType
-{
-	KeyOrMouseButton = 0,
-	MouseMovement = 1,
-	JoystickAxis = 2
-};
+namespace unityutilities {
 
-public class InputAxis
-{
-	public string name;
-	public string descriptiveName;
-	public string descriptiveNegativeName;
-	public string negativeButton;
-	public string positiveButton;
-	public string altNegativeButton;
-	public string altPositiveButton;
+	public enum AxisType {
+		KeyOrMouseButton = 0,
+		MouseMovement = 1,
+		JoystickAxis = 2
+	};
 
-	public float gravity;
-	public float dead;
-	public float sensitivity;
+	public class InputAxis {
+		public string name;
+		public string descriptiveName;
+		public string descriptiveNegativeName;
+		public string negativeButton;
+		public string positiveButton;
+		public string altNegativeButton;
+		public string altPositiveButton;
 
-	public const bool snap = false;
-	public const bool invert = false;
+		public float gravity;
+		public float dead;
+		public float sensitivity;
 
-	public AxisType type;
+		public const bool snap = false;
+		public const bool invert = false;
 
-	public int axis;
-	public int joyNum;
-}
+		public AxisType type;
 
-/// <summary>
-/// Adds a dropdown menu option for automatically populating the Input system for use with the InputMan script for use with a VR device.
-/// </summary>
-public class SetupVRInput : EditorWindow
-{
-	private static InputAxis[] allAxes = new[] {
+		public int axis;
+		public int joyNum;
+	}
+
+	/// <summary>
+	/// Adds a dropdown menu option for automatically populating the Input system for use with the InputMan script for use with a VR device.
+	/// </summary>
+	public class SetupVRInput : EditorWindow {
+		private static InputAxis[] allAxes = new[] {
 		// thumbstick
 		new InputAxis() {
 			name = "VR_Thumbstick_X_Left",
@@ -157,119 +154,116 @@ public class SetupVRInput : EditorWindow
 	};
 
 
-	private static bool allDefined = false;
-	
-	[MenuItem("Window/Setup VR Input")]
-	public static void ShowWindow() {
-		allDefined = CheckAllDefined();
-		EditorWindow.GetWindow(typeof(SetupVRInput));
-	}
- 
-	public void OnGUI()
-	{
-		GUILayout.Space(20);
+		private static bool allDefined = false;
 
-		if (!allDefined) {
-			GUILayout.Label("Not all required input axes are defined.\nClick the button to add them.");
-		}
-		if (GUILayout.Button("Add the missing inputs"))
-		{
-			SetupInputManager();
+		[MenuItem("Window/Setup VR Input")]
+		public static void ShowWindow() {
 			allDefined = CheckAllDefined();
+			GetWindow(typeof(SetupVRInput));
 		}
-		
-		GUILayout.Space(20);
-		
-		if (GUILayout.Button("Refresh", GUILayout.MaxWidth(80))) {
+
+		[InitializeOnLoadMethod]
+		public static void AutoSetup() {
 			allDefined = CheckAllDefined();
-		}
-		
-	}
-
-	private static SerializedProperty GetChildProperty(SerializedProperty parent, string name)
-	{
-		SerializedProperty child = parent.Copy();
-		child.Next(true);
-		do
-		{
-			if (child.name == name)
-			{
-				return child;
-			}
-		} while (child.Next(false));
-
-		return null;
-	}
-
-	private static bool AxisDefined(string axisName)
-	{
-		SerializedObject serializedObject =
-			new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/InputManager.asset")[0]);
-		SerializedProperty axesProperty = serializedObject.FindProperty("m_Axes");
-
-		axesProperty.Next(true);
-		axesProperty.Next(true);
-		while (axesProperty.Next(false))
-		{
-			SerializedProperty axis = axesProperty.Copy();
-			axis.Next(true);
-			if (axis.stringValue == axisName)
-			{
-				return true;
+			if (!allDefined) {
+				SetupInputManager();
 			}
 		}
 
-		return false;
-	}
+		public void OnGUI() {
+			GUILayout.Space(20);
 
-	private static bool CheckAllDefined() {
-		foreach (InputAxis axis in allAxes) {
-			if (!AxisDefined(axis.name)) return false;
+			if (!allDefined) {
+				GUILayout.Label("Not all required input axes are defined.\nClick the button to add them.");
+			}
+			if (GUILayout.Button("Add the missing inputs")) {
+				SetupInputManager();
+				allDefined = CheckAllDefined();
+			}
+
+			GUILayout.Space(20);
+
+			if (GUILayout.Button("Refresh", GUILayout.MaxWidth(80))) {
+				allDefined = CheckAllDefined();
+			}
+
 		}
 
-		return true;
-	}
+		private static SerializedProperty GetChildProperty(SerializedProperty parent, string name) {
+			SerializedProperty child = parent.Copy();
+			child.Next(true);
+			do {
+				if (child.name == name) {
+					return child;
+				}
+			} while (child.Next(false));
 
-	private static void AddAxis(InputAxis axis)
-	{
-		if (AxisDefined(axis.name)) return;
+			return null;
+		}
 
-		SerializedObject serializedObject =
-			new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/InputManager.asset")[0]);
-		SerializedProperty axesProperty = serializedObject.FindProperty("m_Axes");
+		private static bool AxisDefined(string axisName) {
+			SerializedObject serializedObject =
+				new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/InputManager.asset")[0]);
+			SerializedProperty axesProperty = serializedObject.FindProperty("m_Axes");
 
-		axesProperty.arraySize++;
-		serializedObject.ApplyModifiedProperties();
+			axesProperty.Next(true);
+			axesProperty.Next(true);
+			while (axesProperty.Next(false)) {
+				SerializedProperty axis = axesProperty.Copy();
+				axis.Next(true);
+				if (axis.stringValue == axisName) {
+					return true;
+				}
+			}
 
-		SerializedProperty axisProperty = axesProperty.GetArrayElementAtIndex(axesProperty.arraySize - 1);
+			return false;
+		}
 
-		GetChildProperty(axisProperty, "m_Name").stringValue = axis.name;
-		GetChildProperty(axisProperty, "descriptiveName").stringValue = axis.descriptiveName;
-		GetChildProperty(axisProperty, "descriptiveNegativeName").stringValue = axis.descriptiveNegativeName;
-		GetChildProperty(axisProperty, "negativeButton").stringValue = axis.negativeButton;
-		GetChildProperty(axisProperty, "positiveButton").stringValue = axis.positiveButton;
-		GetChildProperty(axisProperty, "altNegativeButton").stringValue = axis.altNegativeButton;
-		GetChildProperty(axisProperty, "altPositiveButton").stringValue = axis.altPositiveButton;
-		GetChildProperty(axisProperty, "gravity").floatValue = axis.gravity;
-		GetChildProperty(axisProperty, "dead").floatValue = axis.dead;
-		GetChildProperty(axisProperty, "sensitivity").floatValue = axis.sensitivity;
-		GetChildProperty(axisProperty, "snap").boolValue = InputAxis.snap;
-		GetChildProperty(axisProperty, "invert").boolValue = InputAxis.invert;
-		GetChildProperty(axisProperty, "type").intValue = (int) axis.type;
-		GetChildProperty(axisProperty, "axis").intValue = axis.axis - 1;
-		GetChildProperty(axisProperty, "joyNum").intValue = axis.joyNum;
+		private static bool CheckAllDefined() {
+			foreach (InputAxis axis in allAxes) {
+				if (!AxisDefined(axis.name)) return false;
+			}
 
-		serializedObject.ApplyModifiedProperties();
-	}
+			return true;
+		}
 
-	
+		private static void AddAxis(InputAxis axis) {
+			if (AxisDefined(axis.name)) return;
 
-	private static void SetupInputManager()
-	{
-		foreach (InputAxis axis in allAxes) {
-			AddAxis(axis);
+			SerializedObject serializedObject =
+				new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/InputManager.asset")[0]);
+			SerializedProperty axesProperty = serializedObject.FindProperty("m_Axes");
+
+			axesProperty.arraySize++;
+			serializedObject.ApplyModifiedProperties();
+
+			SerializedProperty axisProperty = axesProperty.GetArrayElementAtIndex(axesProperty.arraySize - 1);
+
+			GetChildProperty(axisProperty, "m_Name").stringValue = axis.name;
+			GetChildProperty(axisProperty, "descriptiveName").stringValue = axis.descriptiveName;
+			GetChildProperty(axisProperty, "descriptiveNegativeName").stringValue = axis.descriptiveNegativeName;
+			GetChildProperty(axisProperty, "negativeButton").stringValue = axis.negativeButton;
+			GetChildProperty(axisProperty, "positiveButton").stringValue = axis.positiveButton;
+			GetChildProperty(axisProperty, "altNegativeButton").stringValue = axis.altNegativeButton;
+			GetChildProperty(axisProperty, "altPositiveButton").stringValue = axis.altPositiveButton;
+			GetChildProperty(axisProperty, "gravity").floatValue = axis.gravity;
+			GetChildProperty(axisProperty, "dead").floatValue = axis.dead;
+			GetChildProperty(axisProperty, "sensitivity").floatValue = axis.sensitivity;
+			GetChildProperty(axisProperty, "snap").boolValue = InputAxis.snap;
+			GetChildProperty(axisProperty, "invert").boolValue = InputAxis.invert;
+			GetChildProperty(axisProperty, "type").intValue = (int)axis.type;
+			GetChildProperty(axisProperty, "axis").intValue = axis.axis - 1;
+			GetChildProperty(axisProperty, "joyNum").intValue = axis.joyNum;
+
+			serializedObject.ApplyModifiedProperties();
+		}
+
+
+
+		private static void SetupInputManager() {
+			foreach (InputAxis axis in allAxes) {
+				AddAxis(axis);
+			}
 		}
 	}
 }
-
-#endif
