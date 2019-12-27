@@ -1,6 +1,6 @@
 {
 	"name": "FranzCo.unityutilities",
 	"references": [
-        "Unity.XR.Interaction.Toolkit"
-    ]
+		"Unity.XR.Interaction.Toolkit"
+	]
 }

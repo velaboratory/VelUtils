@@ -11,11 +11,11 @@ namespace unityutilities {
 
 		protected override void Start() {
 			base.Start();
-			DontDestroyOnLoad(gameObject);
+			//DontDestroyOnLoad(gameObject);
 			canvas = GetComponent<Canvas>();
 			canvas.worldCamera = Camera.main;
 
-			SceneManager.sceneLoaded += OnSceneChange;
+			//SceneManager.sceneLoaded += OnSceneChange;
 		}
 
 		private void OnSceneChange(Scene scene, LoadSceneMode mode) {
