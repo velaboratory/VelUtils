@@ -6,6 +6,7 @@ namespace unityutilities {
 	[CustomEditor(typeof(GrabInteractableWithPositionOffset))]
 	class GrabInteractableWithPositionOffsetEditor : Editor {
 		SerializedProperty distanceOffsetForRemoteGrab;
+		SerializedProperty maxAngularVelocity;
 		SerializedProperty m_AttachTransform;
 		SerializedProperty m_AttachEaseInTime;
 		SerializedProperty m_MovementType;
@@ -37,6 +38,7 @@ namespace unityutilities {
 
 
 		static class Tooltips {
+			public static readonly GUIContent maxAngularVelocity = new GUIContent("Overrides the rigidbody maxAngularVelocity if set to something other than 0.");
 			public static readonly GUIContent distanceOffsetForRemoteGrab = new GUIContent("Distance Offset for Remote Grab", "How far the hand has to be from the object before \"Remote Grabbing\" mode kicks in.");
 			public static readonly GUIContent attachTransform = new GUIContent("Attach Transform", "Attach point to use on this Interactable (will use RigidBody center if none set).");
 			public static readonly GUIContent attachEaseInTime = new GUIContent("Attach Ease In Time", "Time it takes to ease in the attach (time of 0.0 indicates no easing).");
@@ -61,6 +63,7 @@ namespace unityutilities {
 
 		void OnEnable() {
 			distanceOffsetForRemoteGrab = serializedObject.FindProperty("distanceOffsetForRemoteGrab");
+			maxAngularVelocity = serializedObject.FindProperty("maxAngularVelocity");
 			m_AttachTransform = serializedObject.FindProperty("m_AttachTransform");
 			m_MovementType = serializedObject.FindProperty("m_MovementType");
 			m_AttachEaseInTime = serializedObject.FindProperty("m_AttachEaseInTime");
@@ -99,6 +102,8 @@ namespace unityutilities {
 			EditorGUILayout.PropertyField(m_AttachTransform, Tooltips.attachTransform);
 			EditorGUILayout.PropertyField(m_AttachEaseInTime, Tooltips.attachEaseInTime);
 			EditorGUILayout.PropertyField(m_MovementType, Tooltips.movementType);
+
+			EditorGUILayout.PropertyField(maxAngularVelocity);
 
 			EditorGUILayout.PropertyField(m_Colliders, Tooltips.colliders, true);
 
