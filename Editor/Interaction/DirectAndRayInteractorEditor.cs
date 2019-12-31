@@ -2,10 +2,10 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
-namespace unityutilities {
+namespace unityutilities.Editor {
     [CustomEditor(typeof(DirectAndRayInteractor))]
     [CanEditMultipleObjects]
-    internal class DirectInteractorWithUISupportEditor : Editor {
+    internal class DirectAndRayInteractorEditor : UnityEditor.Editor {
         SerializedProperty m_InteractionManager;
         SerializedProperty m_InteractionLayerMask;
         SerializedProperty m_AttachTransform;

@@ -1,6 +1,4 @@
-﻿#define OCULUS_UTILITIES_AVAILABLE
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,21 +15,45 @@ namespace unityutilities {
 	public class Movement : MonoBehaviour {
 		public Rig rig;
 
-		[Header("Features")]
+
+		[Header("Hand-based Movement")]
 
 		[Tooltip("Whether to move with hands when colliding with an object. " +
 			"Only really makes sense when \"Grab Air\" is false.")]
 		public bool grabWalls;
 
 		[Tooltip("Allows for hand-based movement by holding grip.")]
-		public bool grabAir = true;
+		public bool grabAir;
 		public VRInput grabInput = VRInput.Grip;
 
 		[Tooltip("Press left and right stick to boost and brake in head direction.")]
-		public bool stickBoostBrake = true;
+		public bool stickBoostBrake;
 
 		[Tooltip("Press Y and B to boost in the hand pointing directions.")]
-		public bool handBoosters = true;
+		public bool handBoosters;
+
+		public float mainBoosterMaxSpeed = 5f;
+		public float mainBrakeDrag = 2f;
+		public float maxHandBoosterSpeed = 4f;
+		public float mainBoosterForce = 1f;
+		public float handBoosterAccel = 1f;
+		public float mainBoosterCost = 1f;
+		private float mainBoosterBudget = 1f;
+		public float minVel = .1f;
+
+
+
+
+
+		[Header("Stick-based Movement")]
+
+		[Tooltip("Which controller to use for snap turn. Always `Right` if roll is enabled.")]
+		public Side turnInput = Side.Either;
+		public bool continuousRotation;
+		public float continuousRotationSpeed = 100f;
+		public float snapRotationAmount = 30f;
+		public float turnNullZone = .3f;
+		private bool snapTurnedThisFrame;
 
 		[Tooltip("Enable thumbstick turning for left/right.")]
 		public bool yaw = true;
@@ -45,8 +67,26 @@ namespace unityutilities {
 		[Tooltip("Enable thumbstick movement like and FPS controller.")]
 		public bool slidingMovement;
 
+		public float slidingAccel = 1f;
+		public float slidingSpeed = 3f;
+
+
+
+
+
+
+		[Header("Teleporting")]
+
 		[Tooltip("Enable thumbstick teleporting.")]
 		public bool teleportingMovement;
+
+		public Teleporter teleporter = new Teleporter();
+
+
+
+
+
+		[Header("Weird Movement")]
 
 		[Tooltip("Values > 1 increase the effect of head translation on movement in space.")]
 		public float translationalGain = 1;
@@ -55,31 +95,10 @@ namespace unityutilities {
 		public Transform translationalGainOffsetObj;
 
 
+		
+		// Private junk
 
-		[Header("Rotation")]
-		[Tooltip("Not used if pitch is enabled.")]
-		public Side turnInput = Side.Either;
-		public bool continuousRotation;
-		public float continuousRotationSpeed = 100f;
-		public float snapRotationAmount = 30f;
-		public float turnNullZone = .3f;
-		private bool snapTurnedThisFrame;
-
-
-
-
-		[Header("Tuning")]
-		public float mainBoosterMaxSpeed = 5f;
-		public float mainBrakeDrag = 2f;
-		public float maxHandBoosterSpeed = 4f;
-		public float mainBoosterForce = 1f;
-		public float handBoosterAccel = 1f;
-		public float mainBoosterCost = 1f;
-		private float mainBoosterBudget = 1f;
 		private float normalDrag;
-		public float slidingAccel = 1f;
-		public float slidingSpeed = 3f;
-		public float minVel = .1f;
 
 		public Action<Transform, Side> OnGrab;
 		public Action<Transform, Side> OnRelease;
@@ -141,11 +160,10 @@ namespace unityutilities {
 			public LayerMask validLayers = ~0;
 
 			[Header("Blink")]
-			public bool blink;
-			public float blinkDuration;
+			public bool blink = true;
+			public float blinkDuration = .1f;
 
 			public int renderQueue = 5000;
-			private float alpha;
 			[HideInInspector] public Material blinkMaterial;
 			public Shader blinkShader;
 			[HideInInspector] public MeshRenderer blinkRenderer;
@@ -171,6 +189,7 @@ namespace unityutilities {
 				Dir = t.Dir;
 				blinkShader = t.blinkShader;
 				validLayers = t.validLayers;
+				blinkShader = t.blinkShader;
 			}
 
 
@@ -225,10 +244,9 @@ namespace unityutilities {
 			}
 		}
 
-		public Teleporter teleporter = new Teleporter();
 
 		private void Awake() {
-			if (!teleportingMovement || !teleporter.blink) return;
+			if (!teleportingMovement || !teleporter.blink || teleporter.blinkShader == null) return;
 			teleporter.blinkMaterial = new Material(teleporter.blinkShader);
 			teleporter.blinkMesh = rig.head.gameObject.AddComponent<MeshFilter>();
 			teleporter.blinkRenderer = rig.head.gameObject.AddComponent<MeshRenderer>();
@@ -349,14 +367,14 @@ namespace unityutilities {
 			// check for start of teleports
 			if (InputMan.Up(Side.Left)) {
 				if (currentTeleportingSide == Side.None) {
-					TeleportStart.Invoke(Side.Left);
+					TeleportStart?.Invoke(Side.Left);
 				}
 				currentTeleportingSide = Side.Left;
 			}
 
 			if (InputMan.Up(Side.Right)) {
 				if (currentTeleportingSide == Side.None) {
-					TeleportStart.Invoke(Side.Right);
+					TeleportStart?.Invoke(Side.Right);
 				}
 				currentTeleportingSide = Side.Right;
 			}

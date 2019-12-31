@@ -2,9 +2,9 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
-namespace unityutilities {
+namespace unityutilities.Editor {
 	[CustomEditor(typeof(GrabInteractableWithPositionOffset))]
-	class GrabInteractableWithPositionOffsetEditor : Editor {
+	class GrabInteractableWithPositionOffsetEditor : UnityEditor.Editor {
 		SerializedProperty distanceOffsetForRemoteGrab;
 		SerializedProperty maxAngularVelocity;
 		SerializedProperty m_AttachTransform;
@@ -158,6 +158,13 @@ namespace unityutilities {
 				EditorGUILayout.PropertyField(m_OnSelectEnter);
 				EditorGUILayout.PropertyField(m_OnSelectExit);
 				EditorGUILayout.PropertyField(m_OnActivate);
+			}
+
+			if (GUILayout.Button("Add Highlight Component")) {
+				var t = target as GrabInteractableWithPositionOffset;
+				if (!t.GetComponent<HighlightInteractable>()) {
+					t.gameObject.AddComponent<HighlightInteractable>();
+				}
 			}
 
 			serializedObject.ApplyModifiedProperties();

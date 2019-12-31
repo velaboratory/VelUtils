@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace unityutilities {
+namespace unityutilities.Editor {
 
 	public enum AxisType {
 		KeyOrMouseButton = 0,
