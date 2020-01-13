@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.0] - 2020-01-12
+ - Add dynamic adding of objects to fingertips for Quest hand tracking to Samples
+
+## [2.1.4] - 2020-01-11
+ - Added readonly drawer
+
 ## [2.1.3] - 2019-12-31
  - Added documentation
  - Added finger input module as sample
