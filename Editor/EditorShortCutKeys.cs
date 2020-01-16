@@ -27,8 +27,8 @@ namespace unityutilities.Editor {
 		static void OpenMainScene() {
 			lastOpenedScene = SceneManager.GetActiveScene();
 			EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-			if (SceneManager.GetActiveScene().path != "Assets/Scenes/_Loading.unity") {
-				EditorSceneManager.OpenScene("Assets/Scenes/_Loading.unity");
+			if (SceneManager.GetActiveScene().path != SceneManager.GetSceneByBuildIndex(0).path) {
+				EditorSceneManager.OpenScene(SceneManager.GetSceneByBuildIndex(0).path);
 			}
 		}
 

@@ -29,7 +29,8 @@ namespace unityutilities
 		RiftSQuest,
 		Vive,
 		Index,
-		WMR
+		WMR,
+		QuestHands
 	}
 
 	/// <summary>
@@ -177,6 +178,7 @@ namespace unityutilities
 			{
 				headsetSystem = HeadsetSystem.Oculus;
 				controllerStyle = HeadsetControllerStyle.RiftSQuest;
+				// TODO detect if using hands
 			}
 			else if (XRDevice.model.Contains("Oculus Rift"))
 			{
