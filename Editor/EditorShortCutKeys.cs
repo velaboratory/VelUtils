@@ -27,8 +27,8 @@ namespace unityutilities.Editor {
 		static void OpenMainScene() {
 			lastOpenedScene = SceneManager.GetActiveScene();
 			EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-			if (SceneManager.GetActiveScene().path != SceneManager.GetSceneByBuildIndex(0).path) {
-				EditorSceneManager.OpenScene(SceneManager.GetSceneByBuildIndex(0).path);
+			if (SceneManager.GetActiveScene().path != SceneUtility.GetScenePathByBuildIndex(0)) {
+				EditorSceneManager.OpenScene(SceneUtility.GetScenePathByBuildIndex(0));
 			}
 		}
 
