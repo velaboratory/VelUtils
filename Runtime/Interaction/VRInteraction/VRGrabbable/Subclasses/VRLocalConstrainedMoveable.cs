@@ -38,11 +38,11 @@ namespace unityutilities.VRInteraction
 		// Update is called once per frame
 		void FixedUpdate()
 		{
-			if (grabbedBy != null)
+			if (GrabbedBy != null)
 			{
 
-				Vector3 newPos = grabbedBy.position;
-				Quaternion newRot = grabbedBy.rotation;
+				Vector3 newPos = GrabbedBy.position;
+				Quaternion newRot = GrabbedBy.rotation;
 				Vector3 posDiff = (newPos - startPos);
 				posDiff *= multiplier;
 
@@ -76,8 +76,8 @@ namespace unityutilities.VRInteraction
 				else
 				{
 					//just move it
-					this.transform.position = grabbedBy.position;
-					this.transform.rotation = grabbedBy.rotation;
+					this.transform.position = GrabbedBy.position;
+					this.transform.rotation = GrabbedBy.rotation;
 				}
 				moved(newPos, newRot, posDiff, rotDiff);
 
@@ -87,27 +87,21 @@ namespace unityutilities.VRInteraction
 
 		override public void HandleGrab(VRGrabbableHand h)
 		{
-			if (grabbedBy != null)
+			if (GrabbedBy != null)
 			{
 				HandleRelease();
 			}
-			grabbedBy = h.transform;
-			handStartPos = grabbedBy.position;
+			handStartPos = GrabbedBy.position;
 			startPos = transform.TransformPoint(localStartPosition);
-			oldPos = grabbedBy.position;
+			oldPos = GrabbedBy.position;
 		}
 
-		override public int HandleRelease(VRGrabbableHand h = null)
+		override public void HandleRelease(VRGrabbableHand h = null)
 		{
-			//if has inertia, keep turning, otherwise, stop
-			grabbedBy = null;
-
 			// There seems to be a Unity bug that this fixes.
 			// It doesn't do anything otherwise.
 			transform.Translate(0, 1, 0);
 			transform.Translate(0, -1, 0);
-
-			return 0;
 		}
 
 		public override byte[] PackData()

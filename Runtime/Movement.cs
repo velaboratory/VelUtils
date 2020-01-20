@@ -788,7 +788,7 @@ namespace unityutilities {
 				grabPos = new GameObject(side + " Hand Grab Pos");
 				grabPos.transform.position = hand.position;
 				grabPos.transform.SetParent(parent);
-				cpt.target = grabPos.transform;
+				cpt.SetTarget(grabPos.transform, false);
 				cpt.positionOffset = rig.rb.position - hand.position;
 				cpt.snapIfDistanceGreaterThan = 1f;
 				rig.rb.isKinematic = false;
@@ -813,7 +813,7 @@ namespace unityutilities {
 					if (grabPos != null) {
 						OnRelease?.Invoke(grabPos.transform, side);
 						Destroy(grabPos.gameObject);
-						cpt.target = null;
+						cpt.SetTarget(null);
 						//rig.rb.velocity = MedianAvg(lastVels);
 						rig.rb.velocity = -rig.transform.TransformVector(InputMan.ControllerVelocity(side));
 						RoundVelToZero();

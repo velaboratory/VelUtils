@@ -20,7 +20,7 @@ namespace unityutilities.VRInteraction
 		// Update is called once per frame
 		void Update()
 		{
-			if (grabbedBy != null)
+			if (GrabbedBy != null)
 			{
 				for (int i = 0; i < listOfGrabbedByHands.Count; i++)
 				{
@@ -37,11 +37,10 @@ namespace unityutilities.VRInteraction
 			localHandGrabPositions.Add(transform.InverseTransformPoint(h.transform.position));
 		}
 
-		public override int HandleRelease(VRGrabbableHand h = null)
+		public override void HandleRelease(VRGrabbableHand h = null)
 		{
-			int index = base.HandleRelease(h);
-			localHandGrabPositions.RemoveAt(index);
-			return index;
+			base.HandleRelease(h);
+			// TODO localHandGrabPositions.RemoveAt(index);
 		}
 
 		public override byte[] PackData()

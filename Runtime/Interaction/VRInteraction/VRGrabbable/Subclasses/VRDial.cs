@@ -1,16 +1,22 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace unityutilities.VRInteraction
 {
-	[RequireComponent(typeof(Rigidbody))]
+	/// <summary>
+	/// Spins 🔄
+	/// </summary>
 	public class VRDial : VRGrabbable
 	{
 		public Vector3 dialAxis = Vector3.forward;
 		private Rigidbody rb;
-		public Quaternion lastGrabbedRotation;
-		public Vector3 lastGrabbedPosition;
+		private Quaternion lastGrabbedRotation;
+		private Vector3 lastGrabbedPosition;
+		private float lastAngle;
 		public float minAngle = -100;
 		public float maxAngle = 100;
 		public bool useLimits = false;
@@ -37,7 +43,7 @@ namespace unityutilities.VRInteraction
 			Sum
 		}
 
-		//[HideInInspector]
+		[ReadOnly]
 		public float currentAngle;
 		[Tooltip("Set this in inspector to change the starting angle\n" +
 			"The object should still be at 0deg")]
@@ -45,6 +51,10 @@ namespace unityutilities.VRInteraction
 
 		private float vibrationDelta = 10;
 		private float vibrationDeltaSum = 0;
+
+
+		private Queue<float> lastRotationVels = new Queue<float>();
+		private int lastRotationVelsLength = 10;
 
 
 		// Use this for initialization
@@ -67,11 +77,17 @@ namespace unityutilities.VRInteraction
 			}
 
 
-			if (grabbedBy != null)
+			if (GrabbedBy != null)
 			{
 				GrabInput();
+
+				// update the last velocities 
+				lastRotationVels.Enqueue(currentAngle - lastAngle);
+				if (lastRotationVels.Count > lastRotationVelsLength)
+					lastRotationVels.Dequeue();
 			}
 
+			lastAngle = currentAngle;
 		}
 
 		protected void GrabInput()
@@ -80,7 +96,7 @@ namespace unityutilities.VRInteraction
 			#region Position of the hand
 
 			// the direction vectors to the two hand positions
-			Vector3 posDiff = grabbedBy.position - transform.position;
+			Vector3 posDiff = GrabbedBy.position - transform.position;
 			Vector3 lastPosDiff = lastGrabbedPosition - transform.position;
 
 			Vector3 localDialAxis = transform.TransformDirection(dialAxis);
@@ -112,7 +128,7 @@ namespace unityutilities.VRInteraction
 
 			float rotationBasedOnHandPosition = currentAngle + angleDiff;
 
-			lastGrabbedPosition = grabbedBy.position;
+			lastGrabbedPosition = GrabbedBy.position;
 
 			#endregion
 
@@ -120,7 +136,7 @@ namespace unityutilities.VRInteraction
 			#region Rotation of the hand
 
 			// get the rotation of the hand in the last frame
-			Quaternion diff = grabbedBy.rotation * Quaternion.Inverse(lastGrabbedRotation);
+			Quaternion diff = GrabbedBy.rotation * Quaternion.Inverse(lastGrabbedRotation);
 
 			// convert to angle axis
 			diff.ToAngleAxis(out float angle, out Vector3 axis);
@@ -157,18 +173,17 @@ namespace unityutilities.VRInteraction
 					}
 				}
 
-				lastGrabbedRotation = grabbedBy.rotation;
+				lastGrabbedRotation = GrabbedBy.rotation;
 
 				rotationBaseOnHandRotation = currentAngle + newAngle;
 			}
 
 			#endregion
 
-
 			// set mix
 			if (dynamicPositionMix)
 			{
-				positionMix = Mathf.Clamp01(Vector3.Distance(transform.position, grabbedBy.position) * dynamicPositionMixDistanceMultiplier);
+				positionMix = Mathf.Clamp01(Vector3.Distance(transform.position, GrabbedBy.position) * dynamicPositionMixDistanceMultiplier);
 			}
 
 
@@ -236,25 +251,22 @@ namespace unityutilities.VRInteraction
 
 		public override void HandleGrab(VRGrabbableHand h)
 		{
-			if (grabbedBy != null)
-			{
-				HandleRelease();
-			}
 			base.HandleGrab(h);
 
-			locallyOwned = true;
-
-			lastGrabbedRotation = grabbedBy.rotation;
-			lastGrabbedPosition = grabbedBy.position;
+			lastGrabbedRotation = GrabbedBy.rotation;
+			lastGrabbedPosition = GrabbedBy.position;
 		}
 
-		public override int HandleRelease(VRGrabbableHand h = null)
+		public override void HandleRelease(VRGrabbableHand h = null)
 		{
-
-			//if has inertia, keep turning, otherwise, stop
 			base.HandleRelease(h);
-			HandleDeselection();
-			return 0;
+
+			// add velocity
+			if (rb && lastRotationVels.Count > 0)
+			{
+				// y not convert to rad?
+				rb.angularVelocity = dialAxis * lastRotationVels.Average();
+			}
 		}
 
 		public override byte[] PackData()

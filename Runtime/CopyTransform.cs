@@ -14,7 +14,8 @@ namespace unityutilities {
 			Force
 		}
 
-		public Transform target;
+
+		public Transform Target { get; private set; }
 
 		//----------------------//
 		[Header("Position")] public bool followPosition;
@@ -50,10 +51,7 @@ namespace unityutilities {
 
 
 		private void Update() {
-			if (!target) {
-				//Debug.Log("No target set!");
-				return;
-			}
+			if (!Target) return;
 
 			if (followRotation && !useFixedUpdateRot) {
 				UpdateRotation(Time.smoothDeltaTime);
@@ -65,10 +63,7 @@ namespace unityutilities {
 		}
 
 		private void FixedUpdate() {
-			if (!target) {
-				//Debug.Log("No target set!");
-				return;
-			}
+			if (!Target) return;
 
 			if (followPosition && useFixedUpdatePos) {
 				UpdatePosition(Time.fixedDeltaTime);
@@ -82,10 +77,10 @@ namespace unityutilities {
 		private void UpdatePosition(float timeStep) {
 			Vector3 t;
 			if (positionOffsetCoordinateSystem == Space.World) {
-				t = target.position + positionOffset;
+				t = Target.position + positionOffset;
 			}
 			else {
-				t = target.TransformPoint(positionOffset);
+				t = Target.TransformPoint(positionOffset);
 			}
 
 			switch (positionFollowType) {
@@ -124,14 +119,14 @@ namespace unityutilities {
 			Quaternion t;
 			if (rotationOffsetCoordinateSystem == Space.Self) {
 				if (useVector3RotationOffset) {
-					t = target.rotation * Quaternion.Euler(rotationOffsetVector3);
+					t = Target.rotation * Quaternion.Euler(rotationOffsetVector3);
 				}
 				else {
-					t = target.rotation * rotationOffset;
+					t = Target.rotation * rotationOffset;
 				}
 			}
 			else {
-				t = target.rotation;
+				t = Target.rotation;
 			}
 
 			switch (rotationFollowType) {
@@ -172,15 +167,17 @@ namespace unityutilities {
 		/// Also sets the obj to follow pos and rot.
 		/// </summary>
 		/// <param name="newTarget">The target to follow</param>
-		// ReSharper disable once UnusedMember.Global
-		public void SetTarget(Transform newTarget) {
-			target = newTarget;
-			positionOffsetCoordinateSystem = Space.Self;
-			positionOffset = newTarget.InverseTransformPoint(transform.position);
+		public void SetTarget(Transform newTarget, bool generateOffsets = true) {
+			Target = newTarget;
+			if (generateOffsets && newTarget != null)
+			{
+				positionOffsetCoordinateSystem = Space.Self;
+				positionOffset = newTarget.InverseTransformPoint(transform.position);
 
 
-			rotationOffsetCoordinateSystem = Space.Self;
-			rotationOffset = Quaternion.Inverse(newTarget.transform.rotation) * transform.rotation;
+				rotationOffsetCoordinateSystem = Space.Self;
+				rotationOffset = Quaternion.Inverse(newTarget.transform.rotation) * transform.rotation;
+			}
 		}
 	}
 
@@ -198,13 +195,13 @@ namespace unityutilities {
 			
 			if (rbf == null) return;
 
-			if (rbf != null && rbf.target == null) {
+			if (rbf != null && rbf.Target == null) {
 				EditorGUILayout.HelpBox(
 					"No target assigned. Please assign a target to follow.", MessageType.Error);
 			}
 
-			rbf.target = (Transform) EditorGUILayout.ObjectField(
-				"Target", rbf.target, typeof(Transform), true);
+			rbf.SetTarget((Transform) EditorGUILayout.ObjectField(
+				"Target", rbf.Target, typeof(Transform), true), false);
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Position", EditorStyles.boldLabel);

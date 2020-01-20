@@ -36,9 +36,9 @@ namespace unityutilities.VRInteraction
 
 		void grabInput()
 		{
-			if (grabbedBy != null)
+			if (GrabbedBy != null)
 			{
-				Vector3 currentPosition = grabbedBy.position;
+				Vector3 currentPosition = GrabbedBy.position;
 				Vector3 between = currentPosition - lastGrabPosition;
 				Vector3 worldSlideAxis = transform.localToWorldMatrix.MultiplyVector(localSlideAxis);
 				float deltaSlide = Vector3.Dot(between, worldSlideAxis) * slideScale;
@@ -58,7 +58,7 @@ namespace unityutilities.VRInteraction
 				if (deltaSlide != 0)
 				{
 					SetData(nextSlide, true);
-					lastGrabPosition = grabbedBy.position;
+					lastGrabPosition = GrabbedBy.position;
 				}
 
 			}
@@ -76,13 +76,6 @@ namespace unityutilities.VRInteraction
 		{
 			base.HandleGrab(h);
 			lastGrabPosition = h.transform.position;
-		}
-
-		public override int HandleRelease(VRGrabbableHand h = null)
-		{
-			base.HandleRelease(h);
-
-			return 0;
 		}
 
 		public override byte[] PackData()

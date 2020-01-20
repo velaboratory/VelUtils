@@ -43,7 +43,7 @@ namespace unityutilities.VRInteraction
 		private void Update()
 		{
 
-			if (grabbedBy != null)
+			if (GrabbedBy != null)
 			{
 				GrabInput();
 			}
@@ -62,7 +62,7 @@ namespace unityutilities.VRInteraction
 					if (hit.distance < 1f)
 					{
 						stuckInTheGround = true;
-						initialHandToGroundDistance = Vector3.Distance(transform.position, grabbedBy.position);
+						initialHandToGroundDistance = Vector3.Distance(transform.position, GrabbedBy.position);
 						place.Play();
 					}
 				}
@@ -70,7 +70,7 @@ namespace unityutilities.VRInteraction
 			else
 			{
 				// Check if lifted out of the ground
-				if (Vector3.Distance(transform.position, grabbedBy.position) > initialHandToGroundDistance + .1f)
+				if (Vector3.Distance(transform.position, GrabbedBy.position) > initialHandToGroundDistance + .1f)
 				{
 					stuckInTheGround = false;
 					lift.Play();
@@ -82,20 +82,20 @@ namespace unityutilities.VRInteraction
 			if (stuckInTheGround)
 			{
 
-				transform.LookAt(grabbedBy.position, grabbedBy.forward);
+				transform.LookAt(GrabbedBy.position, GrabbedBy.forward);
 				transform.Rotate(90, 0, 0, Space.Self);
 
-				lastGrabbedPosition = grabbedBy.position;
+				lastGrabbedPosition = GrabbedBy.position;
 			}
 
 			else
 			{
 
-				transform.rotation = grabbedBy.rotation * rotationOffset;
-				transform.position = grabbedBy.TransformPoint(posOffset);
+				transform.rotation = GrabbedBy.rotation * rotationOffset;
+				transform.position = GrabbedBy.TransformPoint(posOffset);
 
-				lastGrabbedRotation = grabbedBy.rotation;
-				lastGrabbedPosition = grabbedBy.position;
+				lastGrabbedRotation = GrabbedBy.rotation;
+				lastGrabbedPosition = GrabbedBy.position;
 
 			}
 
@@ -106,31 +106,26 @@ namespace unityutilities.VRInteraction
 
 		public override void HandleGrab(VRGrabbableHand h)
 		{
-			if (grabbedBy != null)
+			if (GrabbedBy != null)
 			{
 				HandleRelease();
 			}
 			base.HandleGrab(h);
 
-			lastGrabbedRotation = grabbedBy.rotation;
-			lastGrabbedPosition = grabbedBy.position;
-			posOffset = grabbedBy.InverseTransformPoint(transform.position);
-			rotationOffset = Quaternion.Inverse(grabbedBy.rotation) * transform.rotation;
+			lastGrabbedRotation = GrabbedBy.rotation;
+			lastGrabbedPosition = GrabbedBy.position;
+			posOffset = GrabbedBy.InverseTransformPoint(transform.position);
+			rotationOffset = Quaternion.Inverse(GrabbedBy.rotation) * transform.rotation;
 
 			if (stuckInTheGround)
 			{
-				initialHandToGroundDistance = Vector3.Distance(transform.position, grabbedBy.position);
+				initialHandToGroundDistance = Vector3.Distance(transform.position, GrabbedBy.position);
 			}
 		}
 
-		public override int HandleRelease(VRGrabbableHand h = null)
+		public override void HandleRelease(VRGrabbableHand h = null)
 		{
-
-			//if has inertia, keep turning, otherwise, stop
 			base.HandleRelease(h);
-			HandleDeselection();
-
-			return 0;
 		}
 
 		public override byte[] PackData()

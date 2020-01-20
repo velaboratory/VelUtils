@@ -1,22 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace unityutilities.VRInteraction
 {
 	public abstract class VRGrabbable : MonoBehaviour, INetworkPack
 	{
-
-		public bool colorChange = true;
-
 		[HideInInspector]
 		public List<VRGrabbableHand> listOfGrabbedByHands = new List<VRGrabbableHand>();
 
 		[HideInInspector]
-		public Transform grabbedBy;
+		// Assumes only one hand can grab this object. Consider using something else.
+		public Transform GrabbedBy {
+			get {
+				if (listOfGrabbedByHands.Count > 0) return listOfGrabbedByHands[0].transform;
+				else return null;
+			}
+		}
+
+		/// <summary>
+		/// Whether multiple hands can grab the same object
+		/// </summary>
+		protected bool canBeGrabbedByMultipleHands;
 
 		[Tooltip("The importance of this object compared to others when grabbing overlapping objects. Higher numbers have higher priority.")]
 		public int priority;
+
+		public bool colorChange = true;
 
 		[Tooltip("The color to tint the meshes assigned below.")]
 		public Color highlightColor = Color.white;
@@ -25,7 +37,8 @@ namespace unityutilities.VRInteraction
 		public Action Released;
 
 		[Tooltip("The meshes will be tinted the highlight color and will be enabled when hovering.")]
-		public Renderer[] meshes = new Renderer[0];
+		[FormerlySerializedAs("meshes")]
+		public Renderer[] highlightMeshes = new Renderer[0];
 
 		[Tooltip("The objects will be enabled or disabled when hovering.")]
 		public Transform[] highlightObjs = new Transform[0];
@@ -33,20 +46,24 @@ namespace unityutilities.VRInteraction
 		private List<Color> origColors = new List<Color>();
 		private List<bool> origVisibility = new List<bool>();
 
+		/// <summary>
+		/// Network feature. Is this object owned by this player?
+		/// </summary>
 		public bool locallyOwned = true;
 
 		private void Awake()
 		{
-			if (meshes.Length == 0 && highlightObjs.Length == 0 && GetComponent<Renderer>())
+			#region Set up highlighting
+			if (highlightMeshes.Length == 0 && highlightObjs.Length == 0 && GetComponent<Renderer>())
 			{
-				meshes = new Renderer[] { GetComponent<Renderer>() };
+				highlightMeshes = new Renderer[] { GetComponent<Renderer>() };
 			}
 
-			if (meshes.Length > 0)
+			if (highlightMeshes.Length > 0)
 			{
-				for (int i = 0; i < meshes.Length; i++)
+				for (int i = 0; i < highlightMeshes.Length; i++)
 				{
-					foreach (Material m in meshes[i].materials)
+					foreach (Material m in highlightMeshes[i].materials)
 					{
 						if (m.HasProperty("_Color"))
 						{
@@ -54,57 +71,64 @@ namespace unityutilities.VRInteraction
 						}
 						else
 						{
-							Debug.LogError("Material doesn't have a color", meshes[i].gameObject);
+							Debug.LogError("Material doesn't have a color", highlightMeshes[i].gameObject);
 						}
 					}
-					origVisibility.Add(meshes[i].enabled);
+					origVisibility.Add(highlightMeshes[i].enabled);
 				}
 			}
-
+			#endregion
 		}
 
 		public virtual void HandleGrab(VRGrabbableHand h)
 		{
-
-			grabbedBy = h.transform;
+			if (!canBeGrabbedByMultipleHands && listOfGrabbedByHands.Count > 0)
+				HandleRelease();
 			listOfGrabbedByHands.Add(h);
 
+			Grabbed?.Invoke();
 		}
 
-		public virtual int HandleRelease(VRGrabbableHand h = null)
+		public virtual void HandleRelease(VRGrabbableHand h = null)
 		{
-
-			grabbedBy = null;
-			int index = 0;
 			if (h != null)
 			{
-				index = listOfGrabbedByHands.IndexOf(h);
 				listOfGrabbedByHands.Remove(h);
-
 			}
 			else
 			{
-				listOfGrabbedByHands.RemoveAt(listOfGrabbedByHands.Count - 1);
-				index = listOfGrabbedByHands.Count - 1;
+				if (listOfGrabbedByHands.Count > 1)
+				{
+					Debug.LogError("Called release without specifying hand, but there are multiple hands grabbing.", this);
+				}
+				else if (listOfGrabbedByHands.Count > 0)
+				{
+					listOfGrabbedByHands.RemoveAt(0);
+				}
+				else
+				{
+					Debug.LogError("Called release but no hands are grabbing", this);
+				}
 			}
-			return index;
+
+			Released?.Invoke();
 		}
 
 		public void HandleSelection()
 		{
 
-			if (meshes.Length > 0)
+			if (highlightMeshes.Length > 0)
 			{
-				for (int i = 0; i < meshes.Length; i++)
+				for (int i = 0; i < highlightMeshes.Length; i++)
 				{
 					if (colorChange)
 					{
-						foreach (Material m in meshes[i].materials)
+						foreach (Material m in highlightMeshes[i].materials)
 						{
 							m.color = highlightColor;
 						}
 					}
-					meshes[i].enabled = true;
+					highlightMeshes[i].enabled = true;
 				}
 			}
 			if (highlightObjs.Length > 0)
@@ -119,19 +143,19 @@ namespace unityutilities.VRInteraction
 		public void HandleDeselection()
 		{
 
-			if (meshes.Length > 0)
+			if (highlightMeshes.Length > 0)
 			{
 				int k = 0;
-				for (int i = 0; i < meshes.Length; i++)
+				for (int i = 0; i < highlightMeshes.Length; i++)
 				{
 					if (colorChange)
 					{
-						foreach (Material m in meshes[i].materials)
+						foreach (Material m in highlightMeshes[i].materials)
 						{
 							m.color = origColors[k++];
 						}
 					}
-					meshes[i].enabled = origVisibility[i];
+					highlightMeshes[i].enabled = origVisibility[i];
 				}
 			}
 			if (highlightObjs.Length > 0)

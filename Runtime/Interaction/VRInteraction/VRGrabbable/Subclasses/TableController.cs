@@ -25,9 +25,9 @@ namespace unityutilities.VRInteraction
 		private void Update()
 		{
 
-			if (grabbedBy != null)
+			if (GrabbedBy != null)
 			{
-				MoveToWithControllerOffset(grabbedBy.transform.position.y);
+				MoveToWithControllerOffset(GrabbedBy.transform.position.y);
 			}
 
 			float increment = .1f;

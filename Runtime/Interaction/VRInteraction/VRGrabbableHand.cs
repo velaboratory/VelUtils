@@ -32,6 +32,8 @@ namespace unityutilities.VRInteraction
 		[ReadOnly]
 		public VRGrabbable grabbedVRGrabbable;
 		[ReadOnly]
+		public VRGrabbable selectedVRGrabbable;
+		[ReadOnly]
 		public List<VRGrabbable> touchedObjs = new List<VRGrabbable>();
 
 		[NonSerialized]
@@ -57,6 +59,27 @@ namespace unityutilities.VRInteraction
 				ReleaseInput();
 			}
 
+			// Highlight 🖊
+			if (grabbedVRGrabbable)
+			{
+				if (selectedVRGrabbable)
+				{
+					selectedVRGrabbable.HandleDeselection();
+					selectedVRGrabbable = null;
+				}
+			}
+			else
+			{
+				var best = GetBestGrabbable();
+				if (selectedVRGrabbable != best)
+				{
+					if (selectedVRGrabbable)
+						selectedVRGrabbable.HandleDeselection();
+					selectedVRGrabbable = best;
+					selectedVRGrabbable.HandleSelection();
+				}
+			}
+
 			// update the last velocities ➡➡
 			lastVels[++lastVelsIndex % lastVels.Length] = rig.transform.TransformVector(InputMan.ControllerVelocity(side));
 		}
@@ -65,12 +88,15 @@ namespace unityutilities.VRInteraction
 		{
 			if (grabbedVRGrabbable)
 			{
-				grabbedVRGrabbable.HandleRelease();
+				grabbedVRGrabbable.HandleRelease(this);
 				if (touchedObjs.Contains(grabbedVRGrabbable))
 				{
-					grabbedVRGrabbable.HandleSelection();
+					selectedVRGrabbable = grabbedVRGrabbable;
+					selectedVRGrabbable.HandleSelection();
 				}
 			}
+
+			grabbedVRGrabbable = null;
 		}
 
 		private void HandleGrabInput()
@@ -107,7 +133,7 @@ namespace unityutilities.VRInteraction
 			touchedObjs.Sort((a, b) =>
 			{
 				if (a.priority != b.priority)
-					return a.priority.CompareTo(b.priority);
+					return b.priority.CompareTo(a.priority);
 				else
 					return Vector3.Distance(a.transform.position, transform.position)
 						.CompareTo(Vector3.Distance(b.transform.position, transform.position));
@@ -131,13 +157,12 @@ namespace unityutilities.VRInteraction
 			{
 				if (touchedObjs.Contains(vrGrabbable))
 				{
-					// this might be fine
+					// this might be fine if obj has multiple colliders
 					Debug.LogError("List already contains that VRGrabbable. Check that you don't have many colliders.", vrGrabbable);
 				}
 				else
 				{
 					touchedObjs.Add(vrGrabbable);
-					vrGrabbable.HandleSelection();
 				}
 			}
 		}
@@ -155,7 +180,11 @@ namespace unityutilities.VRInteraction
 			if (vrGrabbable)
 			{
 				touchedObjs.Remove(vrGrabbable);
-				vrGrabbable.HandleDeselection();
+				if (vrGrabbable == selectedVRGrabbable)
+				{
+					selectedVRGrabbable.HandleDeselection();
+					selectedVRGrabbable = null;
+				}
 			}
 		}
 	}
