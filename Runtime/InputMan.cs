@@ -232,6 +232,47 @@ namespace unityutilities
 
 		#endregion
 
+		#region Generic Input
+		public static bool Get(VRInput input, Side side = Side.Either)
+		{
+			switch (input)
+			{
+				case VRInput.Trigger:
+					return Trigger(side);
+				case VRInput.Grip:
+					return Grip(side);
+				default:
+					return false;
+			}
+		}
+
+		public static bool GetDown(VRInput input, Side side = Side.Either)
+		{
+			switch (input)
+			{
+				case VRInput.Trigger:
+					return TriggerDown(side);
+				case VRInput.Grip:
+					return GripDown(side);
+				default:
+					return false;
+			}
+		}
+
+		public static bool GetUp(VRInput input, Side side = Side.Either)
+		{
+			switch (input)
+			{
+				case VRInput.Trigger:
+					return TriggerUp(side);
+				case VRInput.Grip:
+					return GripUp(side);
+				default:
+					return false;
+			}
+		}
+		#endregion
+
 		#region Trigger
 
 		public static float TriggerValue(Side side = Side.Either)
