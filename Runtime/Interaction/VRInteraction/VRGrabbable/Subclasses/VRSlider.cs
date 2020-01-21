@@ -4,72 +4,132 @@ using UnityEngine;
 
 namespace unityutilities.VRInteraction
 {
-	[RequireComponent(typeof(Rigidbody))]
+	//  ↕ Sliders, like legs of tripod, height-adjustable table, etc.
 	public class VRSlider : VRGrabbable
 	{
-
-		public Rigidbody rb;
+		private Rigidbody rb;
+		[Space]
 		public float slideMax;
 		public float slideMin;
 		public Vector3 localSlideAxis; //localAxis;
-		public Vector3 lastGrabPosition;
-		public float currentSlideAmount = 0;
-		public float slideScale = 1;
+		private Vector3 lastGrabPosition;
+		public float currentSlidePosition = 0;
+		public bool useVelocity;
+		public float movementSpeedMultiplier = 1;
+
+		private float vibrationDelta = .02f;
+		private float vibrationDeltaSum = 0;
 
 		/// <summary>
 		/// float: currentSlideAmount, float: deltaSlide, bool: localInput
 		/// </summary>
 		public Action<float, float, bool> OnSlide;
 
+		private new void Awake()
+		{
+			base.Awake();
+			OnSlide += SlideAction;
+			if (slideMax < slideMin)
+			{
+				Debug.LogError("Slide min greater than slide max. Do something.", this);
+			}
+			if (localSlideAxis == Vector3.zero)
+			{
+				Debug.LogError("Slide axis not set up.", this);
+			}
+		}
+
 
 		// Use this for initialization
 		void Start()
 		{
 			localSlideAxis = localSlideAxis.normalized;
-			rb = this.GetComponent<Rigidbody>();
+			rb = GetComponent<Rigidbody>();
+			if (useVelocity && !rb)
+			{
+				Debug.LogError("Set to use velocity but no rigidbody.", this);
+			}
 		}
 
 		void Update()
 		{
-			grabInput();
-		}
-
-		void grabInput()
-		{
-			if (GrabbedBy != null)
+			if (!useVelocity && GrabbedBy != null)
 			{
-				Vector3 currentPosition = GrabbedBy.position;
-				Vector3 between = currentPosition - lastGrabPosition;
-				Vector3 worldSlideAxis = transform.localToWorldMatrix.MultiplyVector(localSlideAxis);
-				float deltaSlide = Vector3.Dot(between, worldSlideAxis) * slideScale;
-
-				float nextSlide = currentSlideAmount + deltaSlide;
-				if (nextSlide > slideMax)
-				{
-					nextSlide = slideMax;
-					deltaSlide = slideMax - currentSlideAmount;
-				}
-				else if (nextSlide < slideMin)
-				{
-					nextSlide = slideMin;
-					deltaSlide = slideMin - currentSlideAmount;
-				}
-
-				if (deltaSlide != 0)
-				{
-					SetData(nextSlide, true);
-					lastGrabPosition = GrabbedBy.position;
-				}
-
+				GrabInput(Time.deltaTime);
 			}
 		}
 
-		public void SetData(float updatedSlide, bool localInput)
+		private void FixedUpdate()
+		{
+			if (useVelocity && GrabbedBy != null)
+			{
+				GrabInput(Time.fixedDeltaTime);
+			}
+		}
+
+		void GrabInput(float timeDelta)
+		{
+			Vector3 currentPosition = GrabbedBy.position;
+			Vector3 between = currentPosition - lastGrabPosition;
+			Vector3 worldSlideAxis = transform.TransformDirection(localSlideAxis);
+			float deltaSlide = Vector3.Dot(between, worldSlideAxis) * movementSpeedMultiplier;
+
+			float nextSlide = currentSlidePosition + deltaSlide;
+			if (nextSlide > slideMax)
+			{
+				nextSlide = slideMax;
+				deltaSlide = slideMax - currentSlidePosition;
+			}
+			else if (nextSlide < slideMin)
+			{
+				nextSlide = slideMin;
+				deltaSlide = slideMin - currentSlidePosition;
+			}
+
+			if (deltaSlide != 0)
+			{
+				SetData(nextSlide, true);
+				lastGrabPosition = GrabbedBy.position;
+			}
+		}
+
+		public void SetData(float updatedSlide, bool localInput = true)
 		{
 
-			float slideDifference = updatedSlide - currentSlideAmount;
-			currentSlideAmount = updatedSlide;
-			OnSlide(updatedSlide, slideDifference, localInput);
+			float slideDifference = updatedSlide - currentSlidePosition;
+			currentSlidePosition = updatedSlide;
+			transform.Translate(localSlideAxis * slideDifference, Space.Self);
+
+
+			// vibrate
+			// vibrate only when rotated by a certain amount
+			if (vibrationDeltaSum > vibrationDelta)
+			{
+				if (listOfGrabbedByHands[0])
+				{
+					InputMan.Vibrate(listOfGrabbedByHands[0].side, 1f, .2f);
+				}
+				vibrationDeltaSum = 0;
+			}
+
+			vibrationDeltaSum += Mathf.Abs(slideDifference);
+
+
+			OnSlide?.Invoke(updatedSlide, slideDifference, localInput);
+		}
+
+		public void SlideAction(float currentSlideAmount, float deltaLength, bool localInput)
+		{
+		}
+
+		public void Beginning()
+		{
+			SetData(slideMin, true);
+		}
+
+		public void End()
+		{
+			SetData(slideMax, true);
 		}
 
 		public override void HandleGrab(VRGrabbableHand h)
@@ -84,7 +144,7 @@ namespace unityutilities.VRInteraction
 			{
 				BinaryWriter writer = new BinaryWriter(outputStream);
 
-				writer.Write(currentSlideAmount);
+				writer.Write(currentSlidePosition);
 
 				return outputStream.ToArray();
 			}

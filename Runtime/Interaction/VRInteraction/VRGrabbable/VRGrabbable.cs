@@ -51,7 +51,7 @@ namespace unityutilities.VRInteraction
 		/// </summary>
 		public bool locallyOwned = true;
 
-		private void Awake()
+		protected void Awake()
 		{
 			#region Set up highlighting
 			if (highlightMeshes.Length == 0 && highlightObjs.Length == 0 && GetComponent<Renderer>())
@@ -61,9 +61,9 @@ namespace unityutilities.VRInteraction
 
 			if (highlightMeshes.Length > 0)
 			{
-				for (int i = 0; i < highlightMeshes.Length; i++)
+				foreach (var mesh in highlightMeshes)
 				{
-					foreach (Material m in highlightMeshes[i].materials)
+					foreach (Material m in mesh.materials)
 					{
 						if (m.HasProperty("_Color"))
 						{
@@ -71,10 +71,10 @@ namespace unityutilities.VRInteraction
 						}
 						else
 						{
-							Debug.LogError("Material doesn't have a color", highlightMeshes[i].gameObject);
+							Debug.LogError("Material doesn't have a color", mesh.gameObject);
 						}
 					}
-					origVisibility.Add(highlightMeshes[i].enabled);
+					origVisibility.Add(mesh.enabled);
 				}
 			}
 			#endregion

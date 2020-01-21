@@ -231,7 +231,7 @@ namespace unityutilities.VRInteraction
 				{
 					if (listOfGrabbedByHands[0])
 					{
-						//InputMan.Vibrate(listOfGrabbedByHands[0].thisController, 1f, .2f);
+						InputMan.Vibrate(listOfGrabbedByHands[0].side, 1f, .2f);
 					}
 					vibrationDeltaSum = 0;
 				}

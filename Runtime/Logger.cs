@@ -21,6 +21,7 @@ namespace unityutilities {
 		public string webLogURL = "http://";
 		private const string passwordField = "password";
 		public string webLogPassword;
+		public string appName;
 		public static List<string> subFolders = new List<string>();
 
 		/// <summary>
@@ -35,8 +36,9 @@ namespace unityutilities {
 		public static bool enableLoggingLocal = true;
 		public static bool enableLoggingRemote = true;
 		private static string debugLogFileName = "debug_log";
-		// can't change during runtime
-		public static bool enableDebugLogLogging = true;
+
+		[Tooltip("Whether to log debug output to file and web. Can't change during runtime.")]
+		public bool enableDebugLogLogging = true;
 
 		/// <summary>
 		/// Dictionary of filename and list of lines that haven't been logged yet
@@ -144,7 +146,7 @@ namespace unityutilities {
 					dataToLog[fileName].Clear();
 
 					if (enableLoggingRemote) {
-						StartCoroutine(Upload(fileName, allOutputData.ToString()));
+						StartCoroutine(Upload(fileName, allOutputData.ToString(), appName));
 					}
 				}
 				catch (Exception e) {
@@ -155,11 +157,12 @@ namespace unityutilities {
 			numLinesLogged = 0;
 		}
 
-		IEnumerator Upload(string name, string data) {
+		IEnumerator Upload(string name, string data, string appName) {
 			WWWForm form = new WWWForm();
 			form.AddField(passwordField, webLogPassword);
 			form.AddField("file", name);
 			form.AddField("data", data);
+			form.AddField("app", appName);
 			using (UnityWebRequest www = UnityWebRequest.Post(webLogURL, form)) {
 				yield return www.SendWebRequest();
 				if (www.isNetworkError || www.isHttpError) {
@@ -184,9 +187,16 @@ namespace unityutilities {
 			}
 		}
 
-		private void Awake() {
+		private void OnEnable()
+		{
 			if (enableDebugLogLogging)
 				Application.logMessageReceived += LogCallback;
+		}
+
+		private void OnDisable()
+		{
+			if (enableDebugLogLogging)
+				Application.logMessageReceived -= LogCallback;
 		}
 
 		private void LogCallback(string condition, string stackTrace, LogType logType) {
@@ -199,8 +209,6 @@ namespace unityutilities {
 
 		//close writers
 		private void OnApplicationQuit() {
-			if (enableDebugLogLogging)
-				Application.logMessageReceived -= LogCallback;
 
 			ActuallyLog();
 

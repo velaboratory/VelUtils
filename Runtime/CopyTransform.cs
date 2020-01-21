@@ -15,7 +15,7 @@ namespace unityutilities {
 		}
 
 
-		public Transform Target { get; private set; }
+		public Transform target;
 
 		//----------------------//
 		[Header("Position")] public bool followPosition;
@@ -51,7 +51,7 @@ namespace unityutilities {
 
 
 		private void Update() {
-			if (!Target) return;
+			if (!target) return;
 
 			if (followRotation && !useFixedUpdateRot) {
 				UpdateRotation(Time.smoothDeltaTime);
@@ -63,7 +63,7 @@ namespace unityutilities {
 		}
 
 		private void FixedUpdate() {
-			if (!Target) return;
+			if (!target) return;
 
 			if (followPosition && useFixedUpdatePos) {
 				UpdatePosition(Time.fixedDeltaTime);
@@ -77,10 +77,10 @@ namespace unityutilities {
 		private void UpdatePosition(float timeStep) {
 			Vector3 t;
 			if (positionOffsetCoordinateSystem == Space.World) {
-				t = Target.position + positionOffset;
+				t = target.position + positionOffset;
 			}
 			else {
-				t = Target.TransformPoint(positionOffset);
+				t = target.TransformPoint(positionOffset);
 			}
 
 			switch (positionFollowType) {
@@ -119,14 +119,14 @@ namespace unityutilities {
 			Quaternion t;
 			if (rotationOffsetCoordinateSystem == Space.Self) {
 				if (useVector3RotationOffset) {
-					t = Target.rotation * Quaternion.Euler(rotationOffsetVector3);
+					t = target.rotation * Quaternion.Euler(rotationOffsetVector3);
 				}
 				else {
-					t = Target.rotation * rotationOffset;
+					t = target.rotation * rotationOffset;
 				}
 			}
 			else {
-				t = Target.rotation;
+				t = target.rotation;
 			}
 
 			switch (rotationFollowType) {
@@ -168,7 +168,7 @@ namespace unityutilities {
 		/// </summary>
 		/// <param name="newTarget">The target to follow</param>
 		public void SetTarget(Transform newTarget, bool generateOffsets = true) {
-			Target = newTarget;
+			target = newTarget;
 			if (generateOffsets && newTarget != null)
 			{
 				positionOffsetCoordinateSystem = Space.Self;
@@ -195,13 +195,13 @@ namespace unityutilities {
 			
 			if (rbf == null) return;
 
-			if (rbf != null && rbf.Target == null) {
+			if (rbf != null && rbf.target == null) {
 				EditorGUILayout.HelpBox(
 					"No target assigned. Please assign a target to follow.", MessageType.Error);
 			}
 
-			rbf.SetTarget((Transform) EditorGUILayout.ObjectField(
-				"Target", rbf.Target, typeof(Transform), true), false);
+			rbf.target = (Transform) EditorGUILayout.ObjectField(
+				"Target", rbf.target, typeof(Transform), true);
 
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Position", EditorStyles.boldLabel);

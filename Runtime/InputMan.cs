@@ -60,6 +60,7 @@ namespace unityutilities
 	/// <summary>
 	/// Makes input from VR devices accessible from a unified set of methods. Can treat axes as button down.
 	/// </summary>
+	[DefaultExecutionOrder(-100)]
 	[AddComponentMenu("unityutilities/InputMan")]
 	public class InputMan : MonoBehaviour
 	{

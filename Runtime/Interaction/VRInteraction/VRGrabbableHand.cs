@@ -155,12 +155,7 @@ namespace unityutilities.VRInteraction
 			// Select the object
 			if (vrGrabbable)
 			{
-				if (touchedObjs.Contains(vrGrabbable))
-				{
-					// this might be fine if obj has multiple colliders
-					Debug.LogError("List already contains that VRGrabbable. Check that you don't have many colliders.", vrGrabbable);
-				}
-				else
+				if (!touchedObjs.Contains(vrGrabbable))
 				{
 					touchedObjs.Add(vrGrabbable);
 				}

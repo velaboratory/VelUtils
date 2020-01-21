@@ -1,26 +1,32 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEngine;
 
 namespace unityutilities.VRInteraction
 {
+	/// <summary>
+	/// Like the Prism in ENGREDUVR
+	/// </summary>
 	public class VRMoveableButOnceItsStuckInTheGroundItsADial : VRGrabbable
 	{
 		public Vector3 dialAxis = Vector3.forward;
-		private Rigidbody rb;
-		public Quaternion lastGrabbedRotation;
-		public Vector3 lastGrabbedPosition;
 		private Vector3 posOffset;
+
+		/// <summary>
+		/// bool: localInput (was this action cause by grabbing?)
+		/// </summary>
+		public Action<bool> Moved;
+
 		private Quaternion rotationOffset;
-		public delegate void MovedHandler(bool localInput);
-		public delegate void ReleaseHandler();
-		public event MovedHandler Moved = delegate { };
-		public event ReleaseHandler Released = delegate { };
 		public float multiplier = 1;
+
 		[Tooltip("How much to use position of hand rather than rotation")]
 		[Range(0, 1)]
 		public float positionMix = 0;
+
 		[Tooltip("Whether to vary the position mix with distance to the center of the object")]
 		public bool dynamicPositionMix = false;
+
 		public float dynamicPositionMixDistanceMultiplier = 10f;
 
 		private float initialHandToGroundDistance;
@@ -33,12 +39,6 @@ namespace unityutilities.VRInteraction
 		public AudioSource lift;
 		public AudioSource place;
 
-
-		// Use this for initialization
-		private void Start()
-		{
-			rb = GetComponent<Rigidbody>();
-		}
 
 		private void Update()
 		{
@@ -84,8 +84,6 @@ namespace unityutilities.VRInteraction
 
 				transform.LookAt(GrabbedBy.position, GrabbedBy.forward);
 				transform.Rotate(90, 0, 0, Space.Self);
-
-				lastGrabbedPosition = GrabbedBy.position;
 			}
 
 			else
@@ -94,12 +92,9 @@ namespace unityutilities.VRInteraction
 				transform.rotation = GrabbedBy.rotation * rotationOffset;
 				transform.position = GrabbedBy.TransformPoint(posOffset);
 
-				lastGrabbedRotation = GrabbedBy.rotation;
-				lastGrabbedPosition = GrabbedBy.position;
-
 			}
 
-			Moved(true);
+			Moved?.Invoke(true);
 			#endregion
 
 		}
@@ -112,8 +107,6 @@ namespace unityutilities.VRInteraction
 			}
 			base.HandleGrab(h);
 
-			lastGrabbedRotation = GrabbedBy.rotation;
-			lastGrabbedPosition = GrabbedBy.position;
 			posOffset = GrabbedBy.InverseTransformPoint(transform.position);
 			rotationOffset = Quaternion.Inverse(GrabbedBy.rotation) * transform.rotation;
 
