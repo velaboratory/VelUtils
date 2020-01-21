@@ -106,15 +106,25 @@ namespace unityutilities.VRInteraction
 				VRGrabbable best = GetBestGrabbable();
 				if (best != null)
 				{
-					best.HandleDeselection();
-					best.HandleGrab(this);
-					grabbedVRGrabbable = best;
-					if (vibrateOnGrab)
-					{
-						InputMan.Vibrate(side, 1, .5f);
-					}
+					ManualGrab(best);
 				}
 			}
+		}
+
+		public void ManualGrab(VRGrabbable grabbable)
+		{
+			grabbable.HandleDeselection();
+			grabbable.HandleGrab(this);
+			grabbedVRGrabbable = grabbable;
+			if (vibrateOnGrab)
+			{
+				InputMan.Vibrate(side, 1, .5f);
+			}
+		}
+
+		public void ManualRelease(VRGrabbable grabbable)
+		{
+			HandleReleaseInput();
 		}
 
 		/// <summary>
