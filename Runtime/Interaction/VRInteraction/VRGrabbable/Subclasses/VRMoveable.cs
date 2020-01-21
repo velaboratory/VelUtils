@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace unityutilities.VRInteraction
@@ -15,6 +16,7 @@ namespace unityutilities.VRInteraction
 
 		// public Transform centerOfMass;
 
+		[Space]
 		public bool useVelocityFollow = true;
 		private bool wasKinematic;
 		private bool wasUsingGravity;
@@ -103,7 +105,8 @@ namespace unityutilities.VRInteraction
 			{
 				if (h != null)
 				{
-					rb.velocity = AvgOfVector3s(h.lastVels);
+					// get the average
+					rb.velocity = h.lastVels.Aggregate(new Vector3(0, 0, 0), (s, v) => s + v) / (float)h.lastVels.Count;
 				}
 				else
 				{

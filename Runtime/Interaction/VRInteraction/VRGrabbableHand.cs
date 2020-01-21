@@ -17,17 +17,6 @@ namespace unityutilities.VRInteraction
 
 		public bool vibrateOnGrab = true;
 
-		/// <summary>
-		/// Call this from somewhere to try to grab anything that is being hovered.
-		/// Allows for remote sources if input, such as for tracked hands.
-		/// </summary>
-		public Action GrabInput;
-		/// <summary>
-		/// Call this from somewhere to try to release the currently grabbed object.
-		/// Allows for remote sources if input, such as for tracked hands.
-		/// </summary>
-		public Action ReleaseInput;
-
 		[Header("Debug")]
 		[ReadOnly]
 		public VRGrabbable grabbedVRGrabbable;
@@ -36,27 +25,21 @@ namespace unityutilities.VRInteraction
 		[ReadOnly]
 		public List<VRGrabbable> touchedObjs = new List<VRGrabbable>();
 
-		[NonSerialized]
-		public Vector3[] lastVels = new Vector3[5];
-		int lastVelsIndex;
 
-		private void Awake()
-		{
-			GrabInput += HandleGrabInput;
-			ReleaseInput += HandleReleaseInput;
-		}
+		public Queue<Vector3> lastVels = new Queue<Vector3>();
+		private int lastVelsLength = 10;
 
 		private void Update()
 		{
 			// Grab ✊
 			if (InputMan.GetDown(grabInput, side))
 			{
-				GrabInput();
+				Grab();
 			}
 			// Release 🤚
 			else if (InputMan.GetUp(grabInput, side))
 			{
-				ReleaseInput();
+				Release();
 			}
 
 			// Highlight 🖊
@@ -81,10 +64,32 @@ namespace unityutilities.VRInteraction
 			}
 
 			// update the last velocities ➡➡
-			lastVels[++lastVelsIndex % lastVels.Length] = rig.transform.TransformVector(InputMan.ControllerVelocity(side));
+			lastVels.Enqueue(rig.transform.TransformVector(InputMan.ControllerVelocity(side)));
+			if (lastVels.Count > lastVelsLength)
+				lastVels.Dequeue();
 		}
 
-		private void HandleReleaseInput()
+		/// <summary>
+		/// Call this from somewhere to try to grab anything that is being hovered.
+		/// Allows for remote sources if input, such as for tracked hands.
+		/// </summary>
+		public void Grab()
+		{
+			if (!grabbedVRGrabbable)
+			{
+				VRGrabbable best = GetBestGrabbable();
+				if (best != null)
+				{
+					Grab(best);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Call this from somewhere to try to release the currently grabbed object.
+		/// Allows for remote sources if input, such as for tracked hands.
+		/// </summary>
+		public void Release()
 		{
 			if (grabbedVRGrabbable)
 			{
@@ -99,19 +104,13 @@ namespace unityutilities.VRInteraction
 			grabbedVRGrabbable = null;
 		}
 
-		private void HandleGrabInput()
-		{
-			if (!grabbedVRGrabbable)
-			{
-				VRGrabbable best = GetBestGrabbable();
-				if (best != null)
-				{
-					ManualGrab(best);
-				}
-			}
-		}
 
-		public void ManualGrab(VRGrabbable grabbable)
+		/// <summary>
+		/// Call this from somewhere to grab the passed-in object.
+		/// Allows for manually grabbing an object, such as for a spawner.
+		/// </summary>
+		/// <param name="grabbable">The object to be grabbed</param>
+		public void Grab(VRGrabbable grabbable)
 		{
 			grabbable.HandleDeselection();
 			grabbable.HandleGrab(this);
@@ -120,11 +119,6 @@ namespace unityutilities.VRInteraction
 			{
 				InputMan.Vibrate(side, 1, .5f);
 			}
-		}
-
-		public void ManualRelease(VRGrabbable grabbable)
-		{
-			HandleReleaseInput();
 		}
 
 		/// <summary>
