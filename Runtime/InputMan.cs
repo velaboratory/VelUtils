@@ -5,12 +5,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable UnusedMember.Global
-
-#if STEAMVR_AVAILABLE
-using Valve.VR;
-#endif
 
 namespace unityutilities
 {

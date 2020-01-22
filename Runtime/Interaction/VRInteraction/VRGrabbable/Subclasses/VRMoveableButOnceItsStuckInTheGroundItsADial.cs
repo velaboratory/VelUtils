@@ -62,7 +62,7 @@ namespace unityutilities.VRInteraction
 					if (hit.distance < 1f)
 					{
 						stuckInTheGround = true;
-						initialHandToGroundDistance = Vector3.Distance(transform.position, GrabbedBy.position);
+						initialHandToGroundDistance = Vector3.Distance(transform.position, GrabbedBy.transform.position);
 						place.Play();
 					}
 				}
@@ -70,7 +70,7 @@ namespace unityutilities.VRInteraction
 			else
 			{
 				// Check if lifted out of the ground
-				if (Vector3.Distance(transform.position, GrabbedBy.position) > initialHandToGroundDistance + .1f)
+				if (Vector3.Distance(transform.position, GrabbedBy.transform.position) > initialHandToGroundDistance + .1f)
 				{
 					stuckInTheGround = false;
 					lift.Play();
@@ -82,15 +82,15 @@ namespace unityutilities.VRInteraction
 			if (stuckInTheGround)
 			{
 
-				transform.LookAt(GrabbedBy.position, GrabbedBy.forward);
+				transform.LookAt(GrabbedBy.transform.position, GrabbedBy.transform.forward);
 				transform.Rotate(90, 0, 0, Space.Self);
 			}
 
 			else
 			{
 
-				transform.rotation = GrabbedBy.rotation * rotationOffset;
-				transform.position = GrabbedBy.TransformPoint(posOffset);
+				transform.rotation = GrabbedBy.transform.rotation * rotationOffset;
+				transform.position = GrabbedBy.transform.TransformPoint(posOffset);
 
 			}
 
@@ -107,12 +107,12 @@ namespace unityutilities.VRInteraction
 			}
 			base.HandleGrab(h);
 
-			posOffset = GrabbedBy.InverseTransformPoint(transform.position);
-			rotationOffset = Quaternion.Inverse(GrabbedBy.rotation) * transform.rotation;
+			posOffset = GrabbedBy.transform.InverseTransformPoint(transform.position);
+			rotationOffset = Quaternion.Inverse(GrabbedBy.transform.rotation) * transform.rotation;
 
 			if (stuckInTheGround)
 			{
-				initialHandToGroundDistance = Vector3.Distance(transform.position, GrabbedBy.position);
+				initialHandToGroundDistance = Vector3.Distance(transform.position, GrabbedBy.transform.position);
 			}
 		}
 

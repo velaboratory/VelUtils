@@ -69,7 +69,7 @@ namespace unityutilities.VRInteraction
 
 		void GrabInput(float timeDelta)
 		{
-			Vector3 currentPosition = GrabbedBy.position;
+			Vector3 currentPosition = GrabbedBy.transform.position;
 			Vector3 between = currentPosition - lastGrabPosition;
 			Vector3 worldSlideAxis = transform.TransformDirection(localSlideAxis);
 			float deltaSlide = Vector3.Dot(between, worldSlideAxis) * movementSpeedMultiplier;
@@ -89,7 +89,7 @@ namespace unityutilities.VRInteraction
 			if (deltaSlide != 0)
 			{
 				SetData(nextSlide, true);
-				lastGrabPosition = GrabbedBy.position;
+				lastGrabPosition = GrabbedBy.transform.position;
 			}
 		}
 
@@ -105,9 +105,9 @@ namespace unityutilities.VRInteraction
 			// vibrate only when rotated by a certain amount
 			if (vibrationDeltaSum > vibrationDelta)
 			{
-				if (listOfGrabbedByHands[0])
+				if (GrabbedBy)
 				{
-					InputMan.Vibrate(listOfGrabbedByHands[0].side, 1f, .2f);
+					InputMan.Vibrate(GrabbedBy.side, 1f, .2f);
 				}
 				vibrationDeltaSum = 0;
 			}

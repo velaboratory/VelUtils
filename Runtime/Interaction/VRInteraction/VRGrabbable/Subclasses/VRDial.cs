@@ -96,7 +96,7 @@ namespace unityutilities.VRInteraction
 			#region Position of the hand
 
 			// the direction vectors to the two hand positions
-			Vector3 posDiff = GrabbedBy.position - transform.position;
+			Vector3 posDiff = GrabbedBy.transform.position - transform.position;
 			Vector3 lastPosDiff = lastGrabbedPosition - transform.position;
 
 			Vector3 localDialAxis = transform.TransformDirection(dialAxis);
@@ -128,7 +128,7 @@ namespace unityutilities.VRInteraction
 
 			float rotationBasedOnHandPosition = currentAngle + angleDiff;
 
-			lastGrabbedPosition = GrabbedBy.position;
+			lastGrabbedPosition = GrabbedBy.transform.position;
 
 			#endregion
 
@@ -136,7 +136,7 @@ namespace unityutilities.VRInteraction
 			#region Rotation of the hand
 
 			// get the rotation of the hand in the last frame
-			Quaternion diff = GrabbedBy.rotation * Quaternion.Inverse(lastGrabbedRotation);
+			Quaternion diff = GrabbedBy.transform.rotation * Quaternion.Inverse(lastGrabbedRotation);
 
 			// convert to angle axis
 			diff.ToAngleAxis(out float angle, out Vector3 axis);
@@ -173,7 +173,7 @@ namespace unityutilities.VRInteraction
 					}
 				}
 
-				lastGrabbedRotation = GrabbedBy.rotation;
+				lastGrabbedRotation = GrabbedBy.transform.rotation;
 
 				rotationBaseOnHandRotation = currentAngle + newAngle;
 			}
@@ -183,7 +183,7 @@ namespace unityutilities.VRInteraction
 			// set mix
 			if (dynamicPositionMix)
 			{
-				positionMix = Mathf.Clamp01(Vector3.Distance(transform.position, GrabbedBy.position) * dynamicPositionMixDistanceMultiplier);
+				positionMix = Mathf.Clamp01(Vector3.Distance(transform.position, GrabbedBy.transform.position) * dynamicPositionMixDistanceMultiplier);
 			}
 
 
@@ -229,9 +229,9 @@ namespace unityutilities.VRInteraction
 				// vibrate only when rotated by a certain amount
 				if (vibrationDeltaSum > vibrationDelta)
 				{
-					if (listOfGrabbedByHands[0])
+					if (GrabbedBy)
 					{
-						InputMan.Vibrate(listOfGrabbedByHands[0].side, 1f, .2f);
+						InputMan.Vibrate(GrabbedBy.side, 1f, .2f);
 					}
 					vibrationDeltaSum = 0;
 				}
@@ -253,8 +253,8 @@ namespace unityutilities.VRInteraction
 		{
 			base.HandleGrab(h);
 
-			lastGrabbedRotation = GrabbedBy.rotation;
-			lastGrabbedPosition = GrabbedBy.position;
+			lastGrabbedRotation = GrabbedBy.transform.rotation;
+			lastGrabbedPosition = GrabbedBy.transform.position;
 		}
 
 		public override void HandleRelease(VRGrabbableHand h = null)

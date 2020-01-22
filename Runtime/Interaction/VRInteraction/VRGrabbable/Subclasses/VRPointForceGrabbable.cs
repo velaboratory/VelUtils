@@ -9,8 +9,16 @@ namespace unityutilities.VRInteraction
 	{
 
 		Rigidbody rb;
-		public float forceMultiplier = 2000;
-		private List<Vector3> localHandGrabPositions = new List<Vector3>();
+
+		[Space]
+		public float forceMultiplier = 1;
+		private Dictionary<VRGrabbableHand, Vector3> localHandGrabPositions = new Dictionary<VRGrabbableHand, Vector3>();
+
+		private new void Awake()
+		{
+			base.Awake();
+			canBeGrabbedByMultipleHands = true;
+		}
 
 		void Start()
 		{
@@ -22,10 +30,10 @@ namespace unityutilities.VRInteraction
 		{
 			if (GrabbedBy != null)
 			{
-				for (int i = 0; i < listOfGrabbedByHands.Count; i++)
+				foreach (var hand in listOfGrabbedByHands)
 				{
-					Vector3 diff = transform.InverseTransformPoint(listOfGrabbedByHands[i].transform.position) - localHandGrabPositions[i];
-					rb.AddForceAtPosition(forceMultiplier * Time.deltaTime * transform.TransformVector(diff), transform.TransformPoint(localHandGrabPositions[i]));
+					Vector3 diff = transform.InverseTransformPoint(hand.transform.position) - localHandGrabPositions[hand];
+					rb.AddForceAtPosition(forceMultiplier * 10000 * Time.deltaTime * transform.TransformVector(diff), transform.TransformPoint(localHandGrabPositions[hand]));
 
 				}
 			}
@@ -34,13 +42,13 @@ namespace unityutilities.VRInteraction
 		public override void HandleGrab(VRGrabbableHand h)
 		{
 			base.HandleGrab(h);
-			localHandGrabPositions.Add(transform.InverseTransformPoint(h.transform.position));
+			localHandGrabPositions.Add(h, transform.InverseTransformPoint(h.transform.position));
 		}
 
 		public override void HandleRelease(VRGrabbableHand h = null)
 		{
 			base.HandleRelease(h);
-			// TODO localHandGrabPositions.RemoveAt(index);
+			localHandGrabPositions.Remove(h);
 		}
 
 		public override byte[] PackData()

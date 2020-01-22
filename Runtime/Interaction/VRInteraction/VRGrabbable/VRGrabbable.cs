@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -13,9 +12,9 @@ namespace unityutilities.VRInteraction
 
 		[HideInInspector]
 		// Assumes only one hand can grab this object. Consider using something else.
-		public Transform GrabbedBy {
+		public VRGrabbableHand GrabbedBy {
 			get {
-				if (listOfGrabbedByHands.Count > 0) return listOfGrabbedByHands[0].transform;
+				if (listOfGrabbedByHands.Count > 0) return listOfGrabbedByHands[0];
 				else return null;
 			}
 		}
@@ -53,7 +52,7 @@ namespace unityutilities.VRInteraction
 
 		protected void Awake()
 		{
-			#region Set up highlighting
+			#region Set up highlighting 🖊
 			if (highlightMeshes.Length == 0 && highlightObjs.Length == 0 && GetComponent<Renderer>())
 			{
 				highlightMeshes = new Renderer[] { GetComponent<Renderer>() };
@@ -72,6 +71,7 @@ namespace unityutilities.VRInteraction
 						else
 						{
 							Debug.LogError("Material doesn't have a color", mesh.gameObject);
+							colorChange = false;
 						}
 					}
 					origVisibility.Add(mesh.enabled);
@@ -83,7 +83,14 @@ namespace unityutilities.VRInteraction
 		public virtual void HandleGrab(VRGrabbableHand h)
 		{
 			if (!canBeGrabbedByMultipleHands && listOfGrabbedByHands.Count > 0)
-				HandleRelease();
+			{
+				if (listOfGrabbedByHands.Count > 1)
+				{
+					Debug.LogError("wat");
+				}
+				// ask the old hand to release it
+				GrabbedBy.Release();
+			}
 			listOfGrabbedByHands.Add(h);
 
 			Grabbed?.Invoke();

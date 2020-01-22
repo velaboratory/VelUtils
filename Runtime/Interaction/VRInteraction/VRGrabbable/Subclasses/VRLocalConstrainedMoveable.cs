@@ -41,8 +41,8 @@ namespace unityutilities.VRInteraction
 			if (GrabbedBy != null)
 			{
 
-				Vector3 newPos = GrabbedBy.position;
-				Quaternion newRot = GrabbedBy.rotation;
+				Vector3 newPos = GrabbedBy.transform.position;
+				Quaternion newRot = GrabbedBy.transform.rotation;
 				Vector3 posDiff = (newPos - startPos);
 				posDiff *= multiplier;
 
@@ -76,8 +76,8 @@ namespace unityutilities.VRInteraction
 				else
 				{
 					//just move it
-					this.transform.position = GrabbedBy.position;
-					this.transform.rotation = GrabbedBy.rotation;
+					this.transform.position = GrabbedBy.transform.position;
+					this.transform.rotation = GrabbedBy.transform.rotation;
 				}
 				moved(newPos, newRot, posDiff, rotDiff);
 
@@ -91,9 +91,9 @@ namespace unityutilities.VRInteraction
 			{
 				HandleRelease();
 			}
-			handStartPos = GrabbedBy.position;
+			handStartPos = GrabbedBy.transform.position;
 			startPos = transform.TransformPoint(localStartPosition);
-			oldPos = GrabbedBy.position;
+			oldPos = GrabbedBy.transform.position;
 		}
 
 		override public void HandleRelease(VRGrabbableHand h = null)

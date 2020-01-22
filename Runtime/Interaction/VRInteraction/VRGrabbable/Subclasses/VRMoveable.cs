@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace unityutilities.VRInteraction
@@ -23,6 +24,7 @@ namespace unityutilities.VRInteraction
 		private CopyTransform copyTransform;
 
 		public bool releaseVelocitySmoothing = true;
+		public bool allowMultiHandGrabbing = false;
 
 		// Use this for initialization
 		private void Start()
@@ -151,4 +153,29 @@ namespace unityutilities.VRInteraction
 			}
 		}
 	}
+
+#if UNITY_EDITOR
+	/// <summary>
+	/// Sets up the interface for the VRMoveable script.
+	/// </summary>
+	[CustomEditor(typeof(VRMoveable))]
+	public class VRMoveableEditor : Editor
+	{
+		public override void OnInspectorGUI()
+		{
+			DrawDefaultInspector();
+
+			var vrm = target as VRMoveable;
+
+			if (vrm.useVelocityFollow && !vrm.gameObject.GetComponent<Rigidbody>())
+			{
+				EditorGUILayout.HelpBox("Set to follow with velocity, but no rigidbody attached.", MessageType.Error);
+				if (GUILayout.Button("Add Rigidbody"))
+				{
+					vrm.gameObject.AddComponent<Rigidbody>();
+				}
+			}
+		}
+	}
+#endif
 }
