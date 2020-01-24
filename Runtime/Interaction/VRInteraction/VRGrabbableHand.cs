@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace unityutilities.VRInteraction
@@ -27,6 +28,9 @@ namespace unityutilities.VRInteraction
 
 		public Queue<Vector3> lastVels = new Queue<Vector3>();
 		private int lastVelsLength = 10;
+
+		public Action<VRGrabbable> GrabEvent;
+		public Action<VRGrabbable> ReleaseEvent;
 
 		private void Update()
 		{
@@ -100,6 +104,8 @@ namespace unityutilities.VRInteraction
 				}
 			}
 
+			ReleaseEvent?.Invoke(grabbedVRGrabbable);
+
 			grabbedVRGrabbable = null;
 		}
 
@@ -118,6 +124,7 @@ namespace unityutilities.VRInteraction
 			{
 				InputMan.Vibrate(side, 1, .5f);
 			}
+			GrabEvent?.Invoke(grabbable);
 		}
 
 		/// <summary>
