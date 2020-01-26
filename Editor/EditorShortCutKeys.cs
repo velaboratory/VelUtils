@@ -52,4 +52,29 @@ namespace unityutilities.Editor {
 			GUI.enabled = true;
 		}
 	}
+
+	public class ReadOnlyPlayModeAttribute : PropertyAttribute { }
+
+	[CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
+	public class ReadOnlyPlayMode : PropertyDrawer
+	{
+		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+		{
+			return EditorGUI.GetPropertyHeight(property, label, true);
+		}
+
+		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+		{
+			if (Application.isPlaying)
+			{
+				GUI.enabled = false;
+				EditorGUI.PropertyField(position, property, label, true);
+				GUI.enabled = true;
+			} else
+			{
+				base.OnGUI(position, property, label);
+			}
+			
+		}
+	}
 }

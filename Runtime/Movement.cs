@@ -427,12 +427,17 @@ namespace unityutilities {
 					Vector3 xVelocity = Vector3.ProjectOnPlane(lastDir, Vector3.up) * velocity;
 					float yVelocity = Vector3.Dot(lastDir, Vector3.up) * velocity;
 
-					float segmentLength = .25f;
-					const float numSegments = 200f;
+					float segmentLength = velocity;
+					const float maxSegments = 200;
+
+
+					// add the point to the line renderer
+					points.Add(lastPos);
 
 					// the teleport line will stop at a max distance
-					for (int i = 0; i < numSegments; i++) {
+					for (int i = 0; i < maxSegments; i++) {
 						if (Physics.Raycast(lastPos, lastDir, out teleportHit, segmentLength, teleporter.validLayers)) {
+							Debug.DrawLine(lastPos, lastPos + lastDir * segmentLength);
 							points.Add(teleportHit.point);
 
 							// if the hit point is valid
@@ -466,16 +471,23 @@ namespace unityutilities {
 							break;
 						}
 						else {
-							// add the point to the line renderer
-							points.Add(lastPos);
-
 							// calculate the next ray
 							Vector3 newPos = lastPos + xVelocity + Vector3.up * yVelocity;
 							lastDir = newPos - lastPos;
 							segmentLength = (newPos - lastPos).magnitude;
 							lastPos = newPos;
 							yVelocity -= .01f;
+
+							// add the endpoint to the line renderer
+							points.Add(lastPos);
 						}
+
+						// if we reached the end of the arc without hitting something
+						/*	This seems to cause problems
+						if (i + 1 == maxSegments) {;
+							teleporter.Active = false;
+						}
+						*/
 					}
 
 
