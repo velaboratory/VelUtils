@@ -67,9 +67,12 @@ namespace unityutilities.VRInteraction
 			}
 
 			// update the last velocities ➡➡
-			lastVels.Enqueue(rig.transform.TransformVector(InputMan.ControllerVelocity(side)));
-			if (lastVels.Count > lastVelsLength)
-				lastVels.Dequeue();
+			if (rig)
+			{
+				lastVels.Enqueue(rig.transform.TransformVector(InputMan.ControllerVelocity(side)));
+				if (lastVels.Count > lastVelsLength)
+					lastVels.Dequeue();
+			}
 		}
 
 		/// <summary>
@@ -133,11 +136,11 @@ namespace unityutilities.VRInteraction
 		/// <returns>The VRGrabbable</returns>
 		private VRGrabbable GetBestGrabbable()
 		{
-			// Cancel if not touching anything
-			if (touchedObjs.Count <= 0) return null;
-
 			// remove any null objects 😊👌
 			touchedObjs.RemoveAll(item => item == null);
+
+			// Cancel if not touching anything
+			if (touchedObjs.Count <= 0) return null;
 
 			// Sort the list of grabbables by priority, then distance
 			touchedObjs.Sort((a, b) =>

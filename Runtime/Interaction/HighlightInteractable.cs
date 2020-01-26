@@ -1,15 +1,17 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
-namespace unityutilities {
+namespace unityutilities
+{
 	/// <summary>
 	/// Interactable Visual component that tints on hover or selection
 	/// </summary>
 	[AddComponentMenu("unityutilities/Interaction/Interactable Highlight")]
 	[DisallowMultipleComponent]
-	public class HighlightInteractable : MonoBehaviour {
+	public class HighlightInteractable : MonoBehaviour
+	{
 
 		[SerializeField, Tooltip("Tint color for interactable.")]
 		Color m_TintColor = Color.red;
@@ -38,9 +40,11 @@ namespace unityutilities {
 
 		public string propertyName = "_Color";
 
-		void Awake() {
+		void Awake()
+		{
 			m_Interactable = GetComponent<XRBaseInteractable>();
-			if (m_Interactable) {
+			if (m_Interactable)
+			{
 				m_Interactable.onHoverEnter.AddListener(OnFirstHoverEnter);
 				m_Interactable.onLastHoverExit.AddListener(OnLastHoverExit);
 				m_Interactable.onSelectEnter.AddListener(OnSelectEnter);
@@ -49,7 +53,8 @@ namespace unityutilities {
 			else
 				Debug.LogWarning("Could not find interactable for helper.", this);
 
-			if (m_TintRenderers.Count == 0) {
+			if (m_TintRenderers.Count == 0)
+			{
 				m_TintRenderers = new List<Renderer>(GetComponents<Renderer>());
 				if (m_TintRenderers.Count == 0)
 					Debug.LogWarning("Could not find required Renderer component.", this);
@@ -58,8 +63,10 @@ namespace unityutilities {
 			origColor = GetTint();
 		}
 
-		void Destroy() {
-			if (m_Interactable) {
+		void Destroy()
+		{
+			if (m_Interactable)
+			{
 				m_Interactable.onFirstHoverEnter.RemoveListener(OnFirstHoverEnter);
 				m_Interactable.onLastHoverExit.RemoveListener(OnLastHoverExit);
 				m_Interactable.onSelectEnter.RemoveListener(OnSelectEnter);
@@ -67,44 +74,67 @@ namespace unityutilities {
 			}
 		}
 
-		protected virtual void SetTint(bool on) {
+		protected virtual void SetTint(bool on)
+		{
 			tinted = on;
-			foreach (var render in m_TintRenderers) {
-				if (render && render.material) {
-					if (on) {
+			foreach (var render in m_TintRenderers)
+			{
+				if (render && render.material)
+				{
+					if (on)
+					{
 						Color finalColor = m_TintColor * Mathf.LinearToGammaSpace(1.0f);
 						render.material.SetColor(propertyName, finalColor);
-					} else {
+					}
+					else
+					{
 						render.material.SetColor(propertyName, origColor);
 					}
 				}
 			}
 		}
 
-		protected Color GetTint() {
-			foreach (var render in m_TintRenderers) {
-				if (render && render.material) {
-						return render.material.GetColor(propertyName);
+		protected Color GetTint()
+		{
+			foreach (var renderer in m_TintRenderers)
+			{
+				if (renderer && renderer.material)
+				{
+					if (renderer.material.HasProperty(propertyName))
+					{
+						return renderer.material.GetColor(propertyName);
+					}
+					else
+					{
+						Debug.LogError("Can't tint this object.", this);
+						tintOnHover = false;
+						tintOnSelection = false;
+						return Color.white;
+					}
 				}
 			}
 			return Color.white;
 		}
 
-		void OnFirstHoverEnter(XRBaseInteractor interactor) {
+		void OnFirstHoverEnter(XRBaseInteractor interactor)
+		{
 			if (tintOnHover)
 				SetTint(true);
 		}
-		void OnLastHoverExit(XRBaseInteractor interactor) {
+		void OnLastHoverExit(XRBaseInteractor interactor)
+		{
 			if (tintOnHover)
 				SetTint(false);
 		}
-		void OnSelectEnter(XRBaseInteractor interactor) {
+		void OnSelectEnter(XRBaseInteractor interactor)
+		{
 			if (m_TintOnSelection)
 				SetTint(true);
 			else
 				SetTint(false);
 		}
-		void OnSelectExit(XRBaseInteractor interactor) {
+		void OnSelectExit(XRBaseInteractor interactor)
+		{
 			if (m_TintOnSelection)
 				SetTint(false);
 

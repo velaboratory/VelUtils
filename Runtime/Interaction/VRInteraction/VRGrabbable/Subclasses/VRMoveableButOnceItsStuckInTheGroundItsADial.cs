@@ -10,14 +10,15 @@ namespace unityutilities.VRInteraction
 	public class VRMoveableButOnceItsStuckInTheGroundItsADial : VRGrabbable
 	{
 		public Vector3 dialAxis = Vector3.forward;
-		private Vector3 posOffset;
 
 		/// <summary>
 		/// bool: localInput (was this action cause by grabbing?)
 		/// </summary>
 		public Action<bool> Moved;
 
-		private Quaternion rotationOffset;
+		private Vector3 posOffset;
+		private Quaternion rotOffset;
+		private Quaternion rotOffsetForSnapping;
 		public float multiplier = 1;
 
 		[Tooltip("How much to use position of hand rather than rotation")]
@@ -39,6 +40,9 @@ namespace unityutilities.VRInteraction
 		public AudioSource lift;
 		public AudioSource place;
 
+		private const float timeUntilReSnap = .2f;
+		private float timerUntilReSnap = 0;
+
 
 		private void Update()
 		{
@@ -48,12 +52,13 @@ namespace unityutilities.VRInteraction
 				GrabInput();
 			}
 
+			timerUntilReSnap += Time.deltaTime;
 		}
 
 		private void GrabInput()
 		{
 			#region Stick and Unstick into the ground
-			if (!stuckInTheGround)
+			if (!stuckInTheGround && timerUntilReSnap > timeUntilReSnap)
 			{
 				// Check if stuck into the ground
 				if (Physics.Raycast(transform.position + transform.up, -transform.up, out RaycastHit hit))
@@ -64,6 +69,15 @@ namespace unityutilities.VRInteraction
 						stuckInTheGround = true;
 						initialHandToGroundDistance = Vector3.Distance(transform.position, GrabbedBy.transform.position);
 						place.Play();
+
+						// generate correction factor to avoid "jumping"
+						Quaternion rot1 = transform.rotation;
+						transform.LookAt(GrabbedBy.transform.position, GrabbedBy.transform.forward);
+						transform.Rotate(90, 0, 0, Space.Self);
+						Quaternion rot2 = transform.rotation;
+						rotOffsetForSnapping = Quaternion.Inverse(rot2) * rot1;
+						transform.rotation *= rotOffsetForSnapping;
+
 					}
 				}
 			}
@@ -73,6 +87,7 @@ namespace unityutilities.VRInteraction
 				if (Vector3.Distance(transform.position, GrabbedBy.transform.position) > initialHandToGroundDistance + .1f)
 				{
 					stuckInTheGround = false;
+					timerUntilReSnap = 0;
 					lift.Play();
 				}
 			}
@@ -81,15 +96,15 @@ namespace unityutilities.VRInteraction
 			#region Move
 			if (stuckInTheGround)
 			{
-
 				transform.LookAt(GrabbedBy.transform.position, GrabbedBy.transform.forward);
 				transform.Rotate(90, 0, 0, Space.Self);
+				transform.rotation *= rotOffsetForSnapping;
 			}
 
 			else
 			{
 
-				transform.rotation = GrabbedBy.transform.rotation * rotationOffset;
+				transform.rotation = GrabbedBy.transform.rotation * rotOffset;
 				transform.position = GrabbedBy.transform.TransformPoint(posOffset);
 
 			}
@@ -108,7 +123,8 @@ namespace unityutilities.VRInteraction
 			base.HandleGrab(h);
 
 			posOffset = GrabbedBy.transform.InverseTransformPoint(transform.position);
-			rotationOffset = Quaternion.Inverse(GrabbedBy.transform.rotation) * transform.rotation;
+			rotOffset = Quaternion.Inverse(GrabbedBy.transform.rotation) * transform.rotation;
+			rotOffsetForSnapping = Quaternion.FromToRotation(transform.up, GrabbedBy.transform.position - transform.position);
 
 			if (stuckInTheGround)
 			{

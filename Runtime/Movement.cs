@@ -81,6 +81,7 @@ namespace unityutilities {
 		public bool teleportingMovement;
 
 		public Teleporter teleporter = new Teleporter();
+		private const string colorProperty = "_Color";
 
 
 
@@ -290,8 +291,6 @@ namespace unityutilities {
 			teleporter.blinkRenderer.material = teleporter.blinkMaterial;
 
 			SetBlinkOpacity(0);
-
-			SceneManager.activeSceneChanged += SceneChangeEvent;
 		}
 
 		private void Start() {
@@ -496,12 +495,18 @@ namespace unityutilities {
 			}
 		}
 
-		// ReSharper disable once MemberCanBePrivate.Global
 		public void TeleportTo(Vector3 position, Vector3 direction) {
 			TeleportTo(position, Quaternion.LookRotation(direction));
 		}
 
-		public void TeleportTo(Vector3 position, Quaternion rotation) {
+		/// <summary>
+		/// Moves the player object to the requested location.
+		/// Can be used externally to set player position
+		/// </summary>
+		/// <param name="position">Global target position</param>
+		/// <param name="rotation">Global target rotation</param>
+		/// <param name="noBlinkOverride">Set to true to avoid fading to black even if that is set normally</param>
+		public void TeleportTo(Vector3 position, Quaternion rotation, bool noBlinkOverride = false) {
 			float headRotOffset = Vector3.SignedAngle(transform.forward, Vector3.ProjectOnPlane(rig.head.transform.forward, Vector3.up), Vector3.up);
 			rotation = Quaternion.Euler(0, -headRotOffset, 0) * rotation;
 			Quaternion origRot = transform.rotation;
@@ -513,15 +518,15 @@ namespace unityutilities {
 
 			transform.rotation = origRot;
 
-			StartCoroutine(DoSmoothTeleport(position + headPosOffset, rotation, teleporter.smoothTeleportTime));
+			StartCoroutine(DoSmoothTeleport(position + headPosOffset, rotation, teleporter.smoothTeleportTime, noBlinkOverride));
 		}
 
-		private IEnumerator DoSmoothTeleport(Vector3 position, Quaternion rotation, float time) {
+		private IEnumerator DoSmoothTeleport(Vector3 position, Quaternion rotation, float time, bool noBlinkOverride = false) {
 			float distance = Vector3.Distance(transform.position, position);
 
 			transform.rotation = rotation;
 
-			if (teleporter.blink) {
+			if (teleporter.blink && !noBlinkOverride) {
 				FadeOut(teleporter.blinkDuration / 2);
 				yield return new WaitForSeconds(4 * teleporter.blinkDuration / 5);
 			}
@@ -535,7 +540,7 @@ namespace unityutilities {
 			transform.rotation = rotation;
 			transform.position = position;
 
-			if (teleporter.blink) {
+			if (teleporter.blink && !noBlinkOverride) {
 				FadeIn(teleporter.blinkDuration / 2);
 			}
 
@@ -570,15 +575,10 @@ namespace unityutilities {
 		public void SetBlinkOpacity(float value) {
 			Color color = Color.black;
 			color.a = value;
-			teleporter.blinkMaterial.SetColor("_Color", color);
+			teleporter.blinkMaterial.SetColor(colorProperty, color);
 			teleporter.blinkRenderer.material = teleporter.blinkMaterial;
 
 			teleporter.blinkRenderer.enabled = value > 0.001f;
-		}
-
-		private void SceneChangeEvent(Scene oldScene, Scene newScene) {
-			SetBlinkOpacity(0);
-			FadeIn(1);
 		}
 
 		#endregion
