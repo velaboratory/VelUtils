@@ -1,13 +1,15 @@
 ﻿using System;
+using UnityEngine;
 using UnityEngine.Events;
 namespace unityutilities.VRInteraction
-
 {
 	public class VRGrabbableJustSendEvent : VRGrabbable
 	{
 		[Serializable]
 		public class GrabEvent : UnityEvent { }
 
+		[Space]
+		[Tooltip("Optional. Still sends the normal actions")]
 		public GrabEvent grabEvent;
 
 		public override void HandleGrab(VRGrabbableHand h)

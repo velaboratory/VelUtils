@@ -9,95 +9,77 @@ namespace unityutilities.VRInteraction
 	public class VRLocalConstrainedMoveable : VRGrabbable
 	{
 
-		Rigidbody rb;
-		public delegate void MovedHandler(Vector3 currentPosition, Quaternion currentRotation, Vector3 deltaPosition, Quaternion deltaRotation);
+		/// <summary>
+		/// 🏃‍ bool: localInput (was this action cause by grabbing?)
+		/// </summary>
+		public Action<bool> Moved;
+
+		[Header("Local Position Limits (-,+)")]
 		public Vector2 x_range;
 		public Vector2 y_range;
 		public Vector2 z_range;
+		[Space]
 		public float multiplier = 1;
-		public event MovedHandler moved = delegate { };
-		public Transform localStartPos;
+		public Transform localStartTransform;
 		private Vector3 localStartPosition;
-		private Vector3 startPos;
-		private Vector3 handStartPos;
-		private Vector3 oldPos;
+		private Vector3 handOffset;
 
 		void Start()
 		{
-			rb = this.GetComponent<Rigidbody>();
-			if (!localStartPos)
+			if (!localStartTransform)
 			{
 				localStartPosition = transform.localPosition;
 			}
 			else
 			{
-				localStartPosition = transform.InverseTransformPoint(localStartPos.position);
+				localStartPosition = transform.InverseTransformPoint(localStartTransform.position);
 			}
 		}
 
 		// Update is called once per frame
-		void FixedUpdate()
+		void Update()
 		{
 			if (GrabbedBy != null)
 			{
-
-				Vector3 newPos = GrabbedBy.transform.position;
-				Quaternion newRot = GrabbedBy.transform.rotation;
-				Vector3 posDiff = (newPos - startPos);
-				posDiff *= multiplier;
-
-
-				//map the positional movement into the local plane
-				Vector3 localPosOffset = transform.worldToLocalMatrix.MultiplyVector(posDiff);
-				localPosOffset = new Vector3(
-					Mathf.Clamp(localPosOffset.x, x_range.x, x_range.y),
-					Mathf.Clamp(localPosOffset.y, y_range.x, y_range.y),
-					Mathf.Clamp(localPosOffset.z, z_range.x, z_range.y));
-
-
-				Quaternion rotDiff = newRot * Quaternion.Inverse(this.transform.rotation);
-				if (rb != null && !rb.isKinematic)
+				// the local position offset in the space of this object
+				Vector3 newPos;
+				if (transform.parent)
 				{
-					Vector3 vel = posDiff / Time.fixedDeltaTime;
-					rb.velocity = vel;
-
-					float angle; Vector3 axis;
-					rotDiff.ToAngleAxis(out angle, out axis);
-					Vector3 angularVel = axis * angle * Mathf.Deg2Rad / Time.fixedDeltaTime;
-					rb.angularVelocity = angularVel;
-				}
-				else if (rb != null && rb.isKinematic)
-				{
-					rb.position = startPos + transform.localToWorldMatrix.MultiplyVector(localPosOffset);
-					//rb.transform.Translate(localPosOffset);
-					//rb.rotation = grabbedBy.rotation;
-
+					newPos = transform.parent.InverseTransformPoint(GrabbedBy.transform.TransformPoint(handOffset));
 				}
 				else
 				{
-					//just move it
-					this.transform.position = GrabbedBy.transform.position;
-					this.transform.rotation = GrabbedBy.transform.rotation;
+					newPos = GrabbedBy.transform.TransformPoint(handOffset);
 				}
-				moved(newPos, newRot, posDiff, rotDiff);
 
-				oldPos = newPos;
+				Vector3 posDiff = (newPos - localStartPosition);
+				posDiff *= multiplier;
+
+
+				// only clamp distance away from the starting position
+				posDiff = new Vector3(
+					Mathf.Clamp(posDiff.x, x_range.x, x_range.y),
+					Mathf.Clamp(posDiff.y, y_range.x, y_range.y),
+					Mathf.Clamp(posDiff.z, z_range.x, z_range.y));
+
+				//just move it
+				transform.localPosition = localStartPosition + posDiff;
+
+				Moved?.Invoke(true);
 			}
 		}
 
 		override public void HandleGrab(VRGrabbableHand h)
 		{
-			if (GrabbedBy != null)
-			{
-				HandleRelease();
-			}
-			handStartPos = GrabbedBy.transform.position;
-			startPos = transform.TransformPoint(localStartPosition);
-			oldPos = GrabbedBy.transform.position;
+			base.HandleGrab(h);
+
+			handOffset = GrabbedBy.transform.InverseTransformPoint(transform.position);
 		}
 
 		override public void HandleRelease(VRGrabbableHand h = null)
 		{
+			base.HandleRelease(h);
+
 			// There seems to be a Unity bug that this fixes.
 			// It doesn't do anything otherwise.
 			transform.Translate(0, 1, 0);
@@ -119,9 +101,6 @@ namespace unityutilities.VRInteraction
 
 		public override void UnpackData(byte[] data)
 		{
-			var oldPos = transform.position;
-			var oldRot = transform.rotation;
-
 			using (MemoryStream inputStream = new MemoryStream(data))
 			{
 				BinaryReader reader = new BinaryReader(inputStream);
@@ -130,7 +109,7 @@ namespace unityutilities.VRInteraction
 				transform.localRotation = reader.ReadQuaternion();
 
 
-				moved(transform.position, transform.rotation, transform.position - oldPos, transform.rotation * Quaternion.Inverse(oldRot));
+				Moved?.Invoke(false);
 
 			}
 		}

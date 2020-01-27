@@ -11,7 +11,7 @@ namespace unityutilities.VRInteraction
 		private Rigidbody rb;
 
 		/// <summary>
-		/// bool: localInput (was this action cause by grabbing?)
+		/// 🏃‍ bool: localInput (was this action cause by grabbing?)
 		/// </summary>
 		public Action<bool> Moved;
 
