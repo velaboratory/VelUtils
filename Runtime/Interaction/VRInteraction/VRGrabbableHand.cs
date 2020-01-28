@@ -5,12 +5,15 @@ using UnityEngine;
 namespace unityutilities.VRInteraction
 {
 	/// <summary>
-	/// Handles grab and release of VRGrabbable objects. Needs to be able to receive OnTriggerEnter events.
+	/// ✋ Handles grab and release of VRGrabbable objects. Needs to be able to receive OnTriggerEnter events.
 	/// </summary>
 	public class VRGrabbableHand : MonoBehaviour
 	{
 		public Rig rig;
 		public Side side;
+
+		[Tooltip("Turning this to false prevents this hand from grabbing objects itself.")]
+		public bool canGrab = true;
 
 		[Tooltip("Can be set to none to use external input sources by using actions.")]
 		public VRInput grabInput = VRInput.Trigger;
@@ -61,8 +64,12 @@ namespace unityutilities.VRInteraction
 				{
 					if (selectedVRGrabbable)
 						selectedVRGrabbable.HandleDeselection();
-					selectedVRGrabbable = best;
-					selectedVRGrabbable.HandleSelection();
+
+					if (best != null)
+					{
+						selectedVRGrabbable = best;
+						selectedVRGrabbable.HandleSelection();
+					}
 				}
 			}
 
@@ -81,7 +88,7 @@ namespace unityutilities.VRInteraction
 		/// </summary>
 		public void Grab()
 		{
-			if (!grabbedVRGrabbable)
+			if (canGrab && !grabbedVRGrabbable)
 			{
 				VRGrabbable best = GetBestGrabbable();
 				if (best != null)
@@ -139,8 +146,12 @@ namespace unityutilities.VRInteraction
 			// remove any null objects 😊👌
 			touchedObjs.RemoveAll(item => item == null);
 
+			// Cancel if not allowed to grab
+			if (!canGrab) return null;
+
 			// Cancel if not touching anything
 			if (touchedObjs.Count <= 0) return null;
+
 
 			// Sort the list of grabbables by priority, then distance
 			touchedObjs.Sort((a, b) =>
@@ -156,7 +167,7 @@ namespace unityutilities.VRInteraction
 			return touchedObjs[0];
 		}
 
-		private void OnTriggerEnter(Collider other)
+		private void OnTriggerStay(Collider other)
 		{
 			// Find VRGrabbable
 			VRGrabbable vrGrabbable;

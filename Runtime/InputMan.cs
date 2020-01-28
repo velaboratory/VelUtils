@@ -1,4 +1,4 @@
-#undef STEAMVR_AVAILABLE // change to #define or #undef if SteamVR utilites are installed
+﻿#undef STEAMVR_AVAILABLE // change to #define or #undef if SteamVR utilites are installed
 #undef OCULUS_UTILITIES_AVAILABLE
 
 using System.Collections;
