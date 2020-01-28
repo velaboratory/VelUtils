@@ -295,7 +295,7 @@ namespace unityutilities {
 		/// <param name="interactor">Interactor to check for a valid selection with.</param>
 		/// <returns>True if selection is valid this frame, False if not.</returns>
 		public override bool IsSelectableBy(XRBaseInteractor interactor) {
-			return !m_SelectingInteractor || m_SelectingInteractor == interactor || !m_SelectingInteractor.isSelectExclusive;
+			return !m_SelectingInteractor || m_SelectingInteractor == interactor;
 		}
 
 		#region Velocity Smoothing

@@ -39,7 +39,6 @@ namespace unityutilities.Editor {
 
 
 	public class ReadOnlyAttribute : PropertyAttribute { }
-
 	[CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
 	public class ReadOnly : PropertyDrawer {
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
@@ -53,9 +52,9 @@ namespace unityutilities.Editor {
 		}
 	}
 
+	// not yet functional
 	public class ReadOnlyPlayModeAttribute : PropertyAttribute { }
-
-	[CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
+	[CustomPropertyDrawer(typeof(ReadOnlyPlayModeAttribute))]
 	public class ReadOnlyPlayMode : PropertyDrawer
 	{
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
