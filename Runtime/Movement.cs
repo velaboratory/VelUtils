@@ -753,7 +753,17 @@ namespace unityutilities {
 				}
 
 				if (snapTurnDirection != "") {
-					SnapTurn?.Invoke(turnInput, snapTurnDirection);
+					Side whichSideWasUsed;
+					if (turnInputLocal == Side.Either) {
+						if (InputMan.ThumbstickX(Side.Left) > InputMan.ThumbstickX(Side.Right))
+							whichSideWasUsed = Side.Left;
+						else
+							whichSideWasUsed = Side.Right;
+					}
+					else {
+						whichSideWasUsed = turnInputLocal;
+					}
+					SnapTurn?.Invoke(whichSideWasUsed, snapTurnDirection);
 
 					cpt.enabled = false;
 					snapTurnedThisFrame = true;
