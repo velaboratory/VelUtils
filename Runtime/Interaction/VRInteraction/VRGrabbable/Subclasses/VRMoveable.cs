@@ -27,7 +27,7 @@ namespace unityutilities.VRInteraction
 		public bool allowMultiHandGrabbing = false;
 
 		// Use this for initialization
-		private void Start()
+		private void Awake()
 		{
 			rb = GetComponent<Rigidbody>();
 			wasKinematic = rb.isKinematic;
