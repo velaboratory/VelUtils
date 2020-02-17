@@ -109,7 +109,7 @@ namespace unityutilities
 		}
 
 #if !OCULUS_UTILITIES_AVAILABLE
-		private InputDevice[] xRNodes;
+		private List<InputDevice> devices = new List<InputDevice>();
 		private XRNodeState[] xrNodeStates;
 
 		private static InputDevice GetXRNode(Side side)
@@ -166,30 +166,7 @@ namespace unityutilities
 				instance = this;
 				init = true;
 			}
-
-			Debug.Log("InputMan loaded device: " + XRSettings.loadedDeviceName + " (" + XRDevice.model + ")", instance);
-
-			if (XRDevice.model.Contains("Oculus Rift S") || XRDevice.model.Contains("Quest"))
-			{
-				headsetSystem = HeadsetSystem.Oculus;
-				controllerStyle = HeadsetControllerStyle.RiftSQuest;
-				// TODO detect if using hands
-			}
-			else if (XRDevice.model.Contains("Oculus Rift"))
-			{
-				headsetSystem = HeadsetSystem.Oculus;
-				controllerStyle = HeadsetControllerStyle.Rift;
-			}
-			else if (XRDevice.model.Contains("Vive"))
-			{
-				headsetSystem = HeadsetSystem.SteamVR;
-				controllerStyle = HeadsetControllerStyle.Vive;
-			}
-			else if (XRDevice.model.Contains("Mixed") || XRDevice.model.Contains("WMR"))
-			{
-				headsetSystem = HeadsetSystem.SteamVR;
-				controllerStyle = HeadsetControllerStyle.WMR;
-			}
+			UpdateInputDevices();
 
 			firstPressed.Add(InputStrings.VR_Trigger, new bool[2, 3]);
 			firstPressed.Add(InputStrings.VR_Grip, new bool[2, 3]);
@@ -202,6 +179,37 @@ namespace unityutilities
 			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_X_Right, new float[] { 0, 0 });
 			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_Y_Up, new float[] { 0, 0 });
 			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_Y_Down, new float[] { 0, 0 });
+		}
+
+		private void UpdateInputDevices()
+		{
+			InputDevices.GetDevices(devices);
+
+			string deviceName = XRSettings.loadedDeviceName;
+			string modelName = XRDevice.model;
+			Debug.Log("[UU] Loaded device: " + XRSettings.loadedDeviceName + " (" + modelName + ")", instance);
+
+			if (deviceName.Contains("oculus") || modelName.Contains("Oculus Rift S") || modelName.Contains("Quest"))
+			{
+				headsetSystem = HeadsetSystem.Oculus;
+				controllerStyle = HeadsetControllerStyle.RiftSQuest;
+				// TODO detect if using hands
+			}
+			else if (modelName.Contains("Oculus Rift"))
+			{
+				headsetSystem = HeadsetSystem.Oculus;
+				controllerStyle = HeadsetControllerStyle.Rift;
+			}
+			else if (modelName.Contains("Vive"))
+			{
+				headsetSystem = HeadsetSystem.SteamVR;
+				controllerStyle = HeadsetControllerStyle.Vive;
+			}
+			else if (modelName.Contains("Mixed") || modelName.Contains("WMR"))
+			{
+				headsetSystem = HeadsetSystem.SteamVR;
+				controllerStyle = HeadsetControllerStyle.WMR;
+			}
 		}
 
 		#region Navigation Vars
