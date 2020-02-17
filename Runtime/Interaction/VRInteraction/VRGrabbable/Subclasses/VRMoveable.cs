@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace unityutilities.VRInteraction
 {
+	[CanEditMultipleObjects]
 	public class VRMoveable : VRGrabbable
 	{
 		private Rigidbody rb;
@@ -27,8 +28,9 @@ namespace unityutilities.VRInteraction
 		public bool allowMultiHandGrabbing = false;
 
 		// Use this for initialization
-		private void Awake()
+		private new void Awake()
 		{
+			base.Awake();
 			rb = GetComponent<Rigidbody>();
 			wasKinematic = rb.isKinematic;
 			wasUsingGravity = rb.useGravity;
