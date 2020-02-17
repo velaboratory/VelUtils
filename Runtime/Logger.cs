@@ -115,7 +115,7 @@ namespace unityutilities {
 #if UNITY_ANDROID && !UNITY_EDITOR
 					filePath = Path.Combine(Application.persistentDataPath, fileName+fileExtension);
 #else
-					directoryPath = Path.Combine(Application.dataPath, logFolder);
+					directoryPath = Path.Combine(Application.dataPath, Path.Combine(logFolder, Application.version));
 
 					if (!Directory.Exists(directoryPath)) {
 						Directory.CreateDirectory(directoryPath);
@@ -163,6 +163,7 @@ namespace unityutilities {
 			form.AddField("file", name);
 			form.AddField("data", data);
 			form.AddField("app", appName);
+			form.AddField("version", Application.version);
 			using (UnityWebRequest www = UnityWebRequest.Post(webLogURL, form)) {
 				yield return www.SendWebRequest();
 				if (www.isNetworkError || www.isHttpError) {

@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.XR.Interaction.Toolkit;
 
 namespace unityutilities {
 	/// <summary>
@@ -304,17 +302,6 @@ namespace unityutilities {
 			normalDrag = rig.rb.drag;
 
 			wasKinematic = rig.rb.isKinematic;
-
-
-			// Set up listeners for XRInteraction
-			if (rig.leftHand.GetComponent<XRBaseInteractor>()) {
-				rig.leftHand.GetComponent<XRBaseInteractor>().onHoverEnter.AddListener(InteractorHoverEnterLeft);
-				rig.leftHand.GetComponent<XRBaseInteractor>().onHoverExit.AddListener(InteractorHoverExitLeft);
-			}
-			if (rig.rightHand.GetComponent<XRBaseInteractor>()) {
-				rig.rightHand.GetComponent<XRBaseInteractor>().onHoverEnter.AddListener(InteractorHoverEnterRight);
-				rig.rightHand.GetComponent<XRBaseInteractor>().onHoverExit.AddListener(InteractorHoverExitRight);
-			}
 		}
 
 		private void Update() {
@@ -859,28 +846,6 @@ namespace unityutilities {
 				}
 			}
 		}
-
-		/// <summary>
-		/// Sets the grabbed object from an event from an XRInteractor.
-		/// Should use HoverEnter and HoverExit
-		/// </summary>
-		public void InteractorHoverEnterLeft(XRBaseInteractable interactable) {
-			if (interactable is Climbable)
-				leftHandGrabbedObj = interactable.transform;
-		}
-		public void InteractorHoverEnterRight(XRBaseInteractable interactable) {
-			if (interactable is Climbable)
-				rightHandGrabbedObj = interactable.transform;
-		}
-		public void InteractorHoverExitLeft(XRBaseInteractable interactable) {
-			if (interactable is Climbable)
-				leftHandGrabbedObj = null;
-		}
-		public void InteractorHoverExitRight(XRBaseInteractable interactable) {
-			if (interactable is Climbable)
-				rightHandGrabbedObj = null;
-		}
-
 
 		private Vector3 MedianAvg(Vector3[] inputArray) {
 			List<Vector3> list = new List<Vector3>(inputArray);
