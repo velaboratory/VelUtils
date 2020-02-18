@@ -2,45 +2,88 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using unityutilities;
+using static UnityEngine.UI.Button;
 
-public class VRPhysicalButton : Button
+public class VRPhysicalButton : MonoBehaviour
 {
-	public float depth = .05f;
+	[Tooltip("Distance between button activation and bottoming out.")]
+	public float depth = .01f;
+	[ReadOnly]
+	public float normalHeight;
 	public Rigidbody rb;
 	public float forceMultiplier = 1;
 	private bool clicked;
+	private Color normalColor;
+	public Color clickedColor;
+	public Renderer rend;
+	public AudioSource sound;
+	[Space]
+	public ButtonClickedEvent onClick;
 
-	protected override void Start()
+	void Start()
 	{
-		base.Start();
 		rb = GetComponentInChildren<Rigidbody>();
+		rb.constraints = RigidbodyConstraints.FreezeAll ^ RigidbodyConstraints.FreezePositionY;
+		if (!rend)
+		{
+			rend = rb.GetComponentInChildren<MeshRenderer>();
+		}
+		if (rend)
+		{
+			normalColor = rend.sharedMaterial.color;
+		}
+
+		normalHeight = rb.transform.localPosition.y;
+		if (normalHeight < 2 * depth)
+		{
+			Debug.LogError("Button depth more than half the normal height.");
+		}
 	}
 
 	// Update is called once per frame
 	void FixedUpdate()
 	{
-		if (!clicked && rb.transform.localPosition.y < -depth * .9f)
+		float currentPos = rb.transform.localPosition.y;
+		if (!clicked && currentPos < depth)
 		{
 			onClick.Invoke();
+			if (sound)
+			{
+				sound.Play();
+			}
 			clicked = true;
+
+			if (rend)
+			{
+				rend.material.color = clickedColor;
+			}
 		}
-		else if (rb.transform.localPosition.y > -depth * .8f)
+		else if (currentPos > normalHeight - depth)
 		{
 			clicked = false;
+
+			if (rend)
+			{
+				rend.material.color = normalColor;
+			}
 		}
 
 		// limit movement
-		if (rb.transform.localPosition.y < -depth)
-		{
-			rb.transform.localPosition = new Vector3(0, -depth, 0);
-		} else if (rb.transform.localPosition.y > 0)
+		if (currentPos < 0)
 		{
 			rb.transform.localPosition = new Vector3(0, 0, 0);
+			rb.velocity = Vector3.zero;
+		}
+		else if (currentPos > normalHeight)
+		{
+			rb.transform.localPosition = new Vector3(0, normalHeight, 0);
+			rb.velocity = Vector3.zero;
 		}
 
-		if (rb.transform.localPosition.y < 0)
+		if (currentPos < normalHeight - depth)
 		{
-			rb.AddForce(0, 100 * Time.fixedDeltaTime * forceMultiplier, 0);
+			rb.AddForce(0, 500 * Time.fixedDeltaTime * forceMultiplier, 0);
 		}
 	}
 }

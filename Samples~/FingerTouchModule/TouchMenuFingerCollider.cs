@@ -2,9 +2,11 @@
 using UnityEngine.UI;
 using unityutilities;
 
-public class TouchMenuFingerCollider : MonoBehaviour {
+public class TouchMenuFingerCollider : MonoBehaviour
+{
 	public bool isLeft;
 	public AudioSource audioSource;
+	public Transform followCollider;    // TODO These seem to hang around, since they aren't parented anymore
 
 	private Vector3[] lastPos = new Vector3[2];
 	private int lastPosIndex;
@@ -21,52 +23,69 @@ public class TouchMenuFingerCollider : MonoBehaviour {
 
 	private const float maxVel = 1f;
 
-	private void FixedUpdate() {
+	private void Start()
+	{
+		followCollider.SetParent(GetComponentInParent<OvrAvatar>().transform);
+	}
+
+	private void FixedUpdate()
+	{
 		lastPos[lastPosIndex++ % lastPos.Length] = transform.position;
 	}
 
 
-	void Update() {
+	void Update()
+	{
 		lockTimer += Time.deltaTime;
 	}
 
-	private void DisableCollider(Side side) {
-		if (side == Side.Left && isLeft) {
+	private void DisableCollider(Side side)
+	{
+		if (side == Side.Left && isLeft)
+		{
 			fingerEnabled = false;
 		}
-		else if (side == Side.Right && !isLeft) {
+		else if (side == Side.Right && !isLeft)
+		{
 			fingerEnabled = false;
 		}
 		Debug.Log("" + side + " finger disabled");
 	}
 
-	private void EnableCollider(Side side) {
+	private void EnableCollider(Side side)
+	{
 		fingerEnabled = true;
 		Debug.Log("fingers enabled");
 	}
 
-	private void OnTriggerEnter(Collider c) {
+	private void OnTriggerEnter(Collider c)
+	{
 		if (!fingerEnabled)
 			return;
 		Button s = c.GetComponent<Button>();
-		if (s != null) {
+		if (s != null)
+		{
 			SelectableEnter(s, this, (lastPos[lastPosIndex % lastPos.Length] - transform.position) / Time.fixedDeltaTime);
 		}
 	}
 
-	private void OnTriggerExit(Collider c) {
+	private void OnTriggerExit(Collider c)
+	{
 		if (!fingerEnabled) return;
 		Button s = c.GetComponent<Button>();
-		if (s != null) {
+		if (s != null)
+		{
 			SelectableExit(s, this);
 		}
 	}
 
-	void ClickSelectedButton() {
+	void ClickSelectedButton()
+	{
 		selected?.onClick?.Invoke();
 	}
 
-	public void SelectableEnter(Button i, TouchMenuFingerCollider finger, Vector3 velocity) {
+	public void SelectableEnter(Button i, TouchMenuFingerCollider finger, Vector3 velocity)
+	{
 		if (lockTimer < lockTime) return;
 		if (velocity.magnitude > maxVel) return;
 
@@ -81,11 +100,13 @@ public class TouchMenuFingerCollider : MonoBehaviour {
 		InputMan.Vibrate(finger.isLeft ? Side.Left : Side.Right, 1);
 	}
 
-	public void SelectableExit(Button i, TouchMenuFingerCollider finger) {
+	public void SelectableExit(Button i, TouchMenuFingerCollider finger)
+	{
 		Invoke(nameof(SetSelectedToNull), .2f);
 	}
 
-	void SetSelectedToNull() {
+	void SetSelectedToNull()
+	{
 		selected = null;
 	}
 }

@@ -3,12 +3,15 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-namespace unityutilities {
+namespace unityutilities
+{
 
 	[Serializable]
-	public class FingerTool {
+	public class FingerTool
+	{
 
-		public FingerTool() {
+		public FingerTool()
+		{
 			finger = OVRPlugin.HandFinger.Index;
 			leftHand = true;
 			rightHand = true;
@@ -27,72 +30,121 @@ namespace unityutilities {
 		public bool trackedHands;
 	}
 
-	public class AddToolsToFingers : MonoBehaviour {
+	[RequireComponent(typeof(OvrAvatar))]
+	public class AddToolsToFingers : MonoBehaviour
+	{
 
 		public FingerTool[] tools;
 
 
-		private Hand[] foundHands;
+		private OculusSampleFramework.Hand[] foundHands;
+		private OvrAvatar avatar;
 
-		private void Awake() {
-			if (tools != null && tools.Length > 0) {
-				StartCoroutine(AttachToolsToHands(tools));
+		private void Awake()
+		{
+			if (tools != null && tools.Length > 0)
+			{
+				StartCoroutine(AttachToolsToAvatarHands(tools));
+				StartCoroutine(AttachToolsToTrackedHands(tools));
 			}
 		}
 
-
-		private IEnumerator AttachToolsToHands(FingerTool[] toolObjects) {
-			Hands handsObj;
-			while ((handsObj = Hands.Instance) == null || !handsObj.IsInitialized()) {
+		private IEnumerator AttachToolsToAvatarHands(FingerTool[] toolObjects)
+		{
+			avatar = GetComponent<OvrAvatar>();
+			while (avatar.HandLeft == null)
+			{
 				yield return null;
 			}
 
-			foreach (FingerTool tool in toolObjects) {
+
+			foreach (FingerTool tool in toolObjects)
+			{
+				var leftHand = avatar.HandLeft;
+				var rightHand = avatar.HandRight;
+
+				if (tool.leftHand)
+				{
+					TouchMenuFingerCollider leftTool = Instantiate(tool.toolPrefab, leftHand.RenderParts[0].bones[7]).GetComponent<TouchMenuFingerCollider>();
+					leftTool.isLeft = true;
+				}
+				if (tool.rightHand)
+				{
+					TouchMenuFingerCollider rightTool = Instantiate(tool.toolPrefab, rightHand.RenderParts[0].bones[7]).GetComponent<TouchMenuFingerCollider>();
+					rightTool.isLeft = false;
+				}
+			}
+		}
+
+		private IEnumerator AttachToolsToTrackedHands(FingerTool[] toolObjects)
+		{
+
+			Hands handsObj;
+			while ((handsObj = Hands.Instance) == null || !handsObj.IsInitialized())
+			{
+				yield return null;
+			}
+
+			foreach (FingerTool tool in toolObjects)
+			{
 				while ((handsObj.LeftHand.Skeleton == null || handsObj.LeftHand.Skeleton.Bones == null) &&
-					(handsObj.RightHand.Skeleton == null || handsObj.RightHand.Skeleton.Bones == null)) {
+					(handsObj.RightHand.Skeleton == null || handsObj.RightHand.Skeleton.Bones == null))
+				{
 					yield return null;
 				}
 
 				if (tool.toolPrefab == null) continue;
 
 				// twice for left and right hands
-				for (int i = 0; i < 2; i++) {
+				for (int i = 0; i < 2; i++)
+				{
 					bool isRight = (i == 0);
-					if ((isRight && tool.rightHand) || (!isRight && tool.leftHand)) {
+					if ((isRight && tool.rightHand) || (!isRight && tool.leftHand))
+					{
 
-						while (!Hands.Instance.IsInitialized()) {
+						while (!Hands.Instance.IsInitialized())
+						{
 							yield return null;
 						}
 
 						Transform parent = null;
-						Hand h = null;
+						OculusSampleFramework.Hand h = null;
 
-						if (foundHands == null) {
-							foundHands = FindObjectsOfType<Hand>();
+						if (foundHands == null)
+						{
+							foundHands = FindObjectsOfType<OculusSampleFramework.Hand>();
 						}
-						if (!isRight) {
-							foreach (var hand in foundHands) {
-								if (hand.HandType == OVRPlugin.Hand.HandLeft) {
+						if (!isRight)
+						{
+							foreach (OculusSampleFramework.Hand hand in foundHands)
+							{
+								if (hand.HandType == OVRPlugin.Hand.HandLeft)
+								{
 									h = hand;
 									break;
 								}
 							}
 						}
-						else {
-							foreach (var hand in foundHands) {
-								if (hand.HandType == OVRPlugin.Hand.HandRight) {
+						else
+						{
+							foreach (OculusSampleFramework.Hand hand in foundHands)
+							{
+								if (hand.HandType == OVRPlugin.Hand.HandRight)
+								{
 									h = hand;
 									break;
 								}
 							}
 						}
 
-						if (h == null) {
+						if (h == null)
+						{
 							Debug.LogError("Couldn't find hands at all.");
 							continue;
 						}
 
-						switch (tool.finger) {
+						switch (tool.finger)
+						{
 							case OVRPlugin.HandFinger.Thumb:
 								parent = h.Skeleton.Bones[(int)OVRPlugin.BoneId.Hand_ThumbTip];
 								break;
@@ -112,12 +164,15 @@ namespace unityutilities {
 								break;
 						}
 
-						if (parent != null) {
+						if (parent != null)
+						{
 							var newTool = Instantiate(tool.toolPrefab).transform;
 							newTool.SetParent(parent);
 							newTool.localPosition = Vector3.zero;
 							newTool.localRotation = Quaternion.identity;
-						} else {
+						}
+						else
+						{
 							Debug.LogError("Couldn't find hand finger.");
 						}
 					}
