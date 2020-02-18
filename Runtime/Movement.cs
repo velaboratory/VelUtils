@@ -828,6 +828,11 @@ namespace unityutilities {
 			}
 		}
 
+		/// <summary>
+		/// Sets a grabbed object for that side. Set to null for that side on release.
+		/// </summary>
+		/// <param name="obj">The object just grabbed.</param>
+		/// <param name="side">Which side's object to modify.</param>
 		public void SetGrabbedObj(Transform obj, Side side) {
 			if (side == Side.Left) {
 				if (obj == null) {

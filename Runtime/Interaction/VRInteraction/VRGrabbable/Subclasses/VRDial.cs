@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,6 +9,7 @@ namespace unityutilities.VRInteraction
 	/// <summary>
 	/// Spins 🔄
 	/// </summary>
+	[DisallowMultipleComponent]
 	public class VRDial : VRGrabbable
 	{
 		public Vector3 dialAxis = Vector3.forward;

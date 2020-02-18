@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace unityutilities.VRInteraction
 {
-	[CanEditMultipleObjects]
+	[DisallowMultipleComponent]
 	public class VRMoveable : VRGrabbable
 	{
 		private Rigidbody rb;

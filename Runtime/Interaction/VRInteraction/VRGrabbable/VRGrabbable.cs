@@ -6,7 +6,6 @@ using UnityEngine.Serialization;
 
 namespace unityutilities.VRInteraction
 {
-	[CanEditMultipleObjects]
 	public abstract class VRGrabbable : MonoBehaviour, INetworkPack
 	{
 		[HideInInspector]
