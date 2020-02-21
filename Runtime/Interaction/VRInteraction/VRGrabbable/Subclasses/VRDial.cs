@@ -61,6 +61,7 @@ namespace unityutilities.VRInteraction
 		private void Start()
 		{
 			rb = GetComponent<Rigidbody>();
+			SetData(goalAngle, false);
 		}
 
 		private void Update()

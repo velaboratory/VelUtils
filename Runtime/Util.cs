@@ -76,4 +76,17 @@ namespace unityutilities
 		}
 		#endregion
 	}
+
+	public static class Util
+	{
+		public static float map(float input, float in_min, float in_max, float out_min, float out_max)
+		{
+			var output = input;
+			output -= in_min;
+			output /= in_max - in_min;
+			output *= out_max - out_min;
+			output += out_min;
+			return output;
+		}
+	}
 }

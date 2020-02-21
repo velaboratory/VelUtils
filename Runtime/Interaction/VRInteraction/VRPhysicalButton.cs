@@ -1,89 +1,113 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
-using unityutilities;
 using static UnityEngine.UI.Button;
 
-public class VRPhysicalButton : MonoBehaviour
+namespace unityutilities.VRInteraction
 {
-	[Tooltip("Distance between button activation and bottoming out.")]
-	public float depth = .01f;
-	[ReadOnly]
-	public float normalHeight;
-	public Rigidbody rb;
-	public float forceMultiplier = 1;
-	private bool clicked;
-	private Color normalColor;
-	public Color clickedColor;
-	public Renderer rend;
-	public AudioSource sound;
-	[Space]
-	public ButtonClickedEvent onClick;
-
-	void Start()
+	public class VRPhysicalButton : MonoBehaviour
 	{
-		rb = GetComponentInChildren<Rigidbody>();
-		rb.constraints = RigidbodyConstraints.FreezeAll ^ RigidbodyConstraints.FreezePositionY;
-		if (!rend)
+		[Tooltip("Distance between button activation and bottoming out.")]
+		public float depth = .01f;
+		[ReadOnly]
+		public float normalHeight;
+		public Rigidbody rb;
+		public float forceMultiplier = 1;
+		private bool clicked;
+		private Color normalColor;
+		public Color clickedColor;
+		public Renderer rend;
+		public AudioSource sound;
+		[Space]
+		public ButtonClickedEvent onClick;
+
+		void Start()
 		{
-			rend = rb.GetComponentInChildren<MeshRenderer>();
-		}
-		if (rend)
-		{
-			normalColor = rend.sharedMaterial.color;
+			rb = GetComponentInChildren<Rigidbody>();
+			rb.constraints = RigidbodyConstraints.FreezeAll ^ RigidbodyConstraints.FreezePositionY;
+			if (!rend)
+			{
+				rend = rb.GetComponentInChildren<MeshRenderer>();
+			}
+			if (rend)
+			{
+				normalColor = rend.sharedMaterial.color;
+			}
+
+			normalHeight = rb.transform.localPosition.y;
+			if (normalHeight < 2 * depth)
+			{
+				Debug.LogError("Button depth more than half the normal height.");
+			}
 		}
 
-		normalHeight = rb.transform.localPosition.y;
-		if (normalHeight < 2 * depth)
+		// Update is called once per frame
+		void FixedUpdate()
 		{
-			Debug.LogError("Button depth more than half the normal height.");
+			float currentPos = rb.transform.localPosition.y;
+			if (!clicked && currentPos < depth)
+			{
+				onClick.Invoke();
+				if (sound)
+				{
+					sound.Play();
+				}
+				clicked = true;
+
+				if (rend)
+				{
+					rend.material.color = clickedColor;
+				}
+			}
+			else if (currentPos > normalHeight - depth)
+			{
+				clicked = false;
+
+				if (rend)
+				{
+					rend.material.color = normalColor;
+				}
+			}
+
+			// limit movement
+			if (currentPos < 0)
+			{
+				rb.transform.localPosition = new Vector3(0, 0, 0);
+				rb.velocity = Vector3.zero;
+			}
+			else if (currentPos > normalHeight)
+			{
+				rb.transform.localPosition = new Vector3(0, normalHeight, 0);
+				rb.velocity = Vector3.zero;
+			}
+
+			if (currentPos < normalHeight - depth)
+			{
+				rb.AddForce(0, 500 * Time.fixedDeltaTime * forceMultiplier, 0);
+			}
 		}
 	}
 
-	// Update is called once per frame
-	void FixedUpdate()
+
+#if UNITY_EDITOR
+	/// <summary>
+	/// Sets up the interface for the CopyTransform script.
+	/// </summary>
+	[CustomEditor(typeof(VRPhysicalButton))]
+	public class VRPhysicalButtonEditor : Editor
 	{
-		float currentPos = rb.transform.localPosition.y;
-		if (!clicked && currentPos < depth)
+		public override void OnInspectorGUI()
 		{
-			onClick.Invoke();
-			if (sound)
+			var button = target as VRPhysicalButton;
+
+			DrawDefaultInspector();
+
+			if (GUILayout.Button("Click Button"))
 			{
-				sound.Play();
+				button.onClick.Invoke();
 			}
-			clicked = true;
 
-			if (rend)
-			{
-				rend.material.color = clickedColor;
-			}
-		}
-		else if (currentPos > normalHeight - depth)
-		{
-			clicked = false;
-
-			if (rend)
-			{
-				rend.material.color = normalColor;
-			}
-		}
-
-		// limit movement
-		if (currentPos < 0)
-		{
-			rb.transform.localPosition = new Vector3(0, 0, 0);
-			rb.velocity = Vector3.zero;
-		}
-		else if (currentPos > normalHeight)
-		{
-			rb.transform.localPosition = new Vector3(0, normalHeight, 0);
-			rb.velocity = Vector3.zero;
-		}
-
-		if (currentPos < normalHeight - depth)
-		{
-			rb.AddForce(0, 500 * Time.fixedDeltaTime * forceMultiplier, 0);
 		}
 	}
+#endif
+
 }
