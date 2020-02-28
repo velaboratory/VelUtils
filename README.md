@@ -59,3 +59,5 @@ A versatile grab script that can work for positional dials and general physics g
 
 ## TODO
  - Teleport line shader doesn't compile with build by default
+### brook requests
+ - Prefab: Rig->Right Hand and Rig->Left Hand are missing a script
