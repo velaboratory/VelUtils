@@ -1,7 +1,10 @@
 {
   "name": "com.franzco.unityutilities",
   "displayName": "unityutilities",
-  "version": "2.5.2",
+  "dependencies": {
+    "com.unity.xr.oculus.standalone" : "2.38.4"
+  },
+  "version": "2.5.3",
   "unity": "2019.1",
   "description": "A lightweight collection of flexible utilities for VR projects.",
   "keywords": [
@@ -15,6 +18,11 @@
     "url": "https://cobweb.cs.uga.edu/~anton"
   },
   "samples": [
+    {
+      "displayName": "Oculus SDK Support",
+	  "description": "Includes support for Oculus SDK features. Main feature is faster input with OVRInput.",
+	  "path": "Samples~/OculusSDKSupport"
+    },
     {
       "displayName": "Finger Touch Module",
       "description": "Module to use an Oculus Avatar finger or Quest hand tracking finger as a touch input for UI. Requires Oculus Integration.",

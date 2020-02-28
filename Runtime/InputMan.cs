@@ -61,7 +61,7 @@ namespace unityutilities
 		public static HeadsetSystem headsetSystem;
 		public static HeadsetControllerStyle controllerStyle;
 
-		private enum InputStrings
+		protected enum InputStrings
 		{
 			VR_Trigger,
 			VR_Grip,
@@ -140,9 +140,9 @@ namespace unityutilities
 #endif
 
 		private static InputMan instance;
-		private static bool init;
+		protected static bool init;
 
-		private static void Init()
+		protected static void Init()
 		{
 			if (instance != null)
 			{
@@ -221,7 +221,7 @@ namespace unityutilities
 		/// The third remains true when the button is held.
 		/// 	it represents whether the button was already down last frame
 		/// </summary>
-		private static Dictionary<InputStrings, bool[,]> firstPressed = new Dictionary<InputStrings, bool[,]>();
+		protected static Dictionary<InputStrings, bool[,]> firstPressed = new Dictionary<InputStrings, bool[,]>();
 
 		// the distance necessary to count as a "press"
 		public static float triggerThreshold = .5f;
