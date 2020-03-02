@@ -786,9 +786,9 @@ namespace unityutilities
 		/// </summary>
 		/// <param name="side">Which controller to vibrate</param>
 		/// <param name="intensity">Intensity from 0 to 1</param>
-		/// <param name="duration">Duration of the vibration</param>
+		/// <param name="duration">Duration of the vibration (s)</param>
 		/// <param name="delay">Time before the vibration starts</param>
-		public static void Vibrate(Side side, float intensity, float duration = 1, float delay = 0)
+		public static void Vibrate(Side side, float intensity, float duration = .025f, float delay = 0)
 		{
 			if (!init) Init();
 
@@ -829,12 +829,12 @@ namespace unityutilities
 #else
 			if (side == Side.Both)
 			{
-				GetXRNode(Side.Left).SendHapticImpulse(0, intensity, duration / 40f);
-				GetXRNode(Side.Right).SendHapticImpulse(0, intensity, duration / 40f);
+				GetXRNode(Side.Left).SendHapticImpulse(0, intensity, duration);
+				GetXRNode(Side.Right).SendHapticImpulse(0, intensity, duration);
 			}
 			else
 			{
-				GetXRNode(side).SendHapticImpulse(0, intensity, duration / 40f);
+				GetXRNode(side).SendHapticImpulse(0, intensity, duration);
 			}
 #endif
 		}
