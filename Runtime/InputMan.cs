@@ -209,12 +209,12 @@ namespace unityutilities
 
 		public static bool TriggerDown(Side side = Side.Either)
 		{
-			return instance.inputModule.GetRawValueDown(InputStrings.VR_Trigger, side);
+			return instance.inputModule.GetRawDown(InputStrings.VR_Trigger, side);
 		}
 
 		public static bool TriggerUp(Side side = Side.Either)
 		{
-			return instance.inputModule.GetRawValueUp(InputStrings.VR_Trigger, side);
+			return instance.inputModule.GetRawUp(InputStrings.VR_Trigger, side);
 		}
 
 		public static float MainTriggerValue()
@@ -257,24 +257,6 @@ namespace unityutilities
 			return TriggerUp(NonDominantHand);
 		}
 
-#if OCULUS_UTILITIES_AVAILABLE
-	public static float TriggerValue(OVRInput.Controller side) {
-		return TriggerValue(OVRController2Side(side));
-	}
-
-	public static bool Trigger(OVRInput.Controller side) {
-		return Trigger(OVRController2Side(side));
-	}
-	
-	public static bool TriggerDown(OVRInput.Controller side) {
-		return TriggerDown(OVRController2Side(side));
-	}
-
-	public static bool TriggerUp(OVRInput.Controller side) {
-		return TriggerUp(OVRController2Side(side));
-	}
-#endif
-
 		#endregion
 
 		#region Grip
@@ -289,29 +271,13 @@ namespace unityutilities
 		}
 		public static bool GripDown(Side side = Side.Either)
 		{
-			return instance.inputModule.GetRawValueDown(InputStrings.VR_Grip, side);
+			return instance.inputModule.GetRawDown(InputStrings.VR_Grip, side);
 		}
 
 		public static bool GripUp(Side side = Side.Either)
 		{
-			return instance.inputModule.GetRawValueUp(InputStrings.VR_Grip, side);
+			return instance.inputModule.GetRawUp(InputStrings.VR_Grip, side);
 		}
-
-#if OCULUS_UTILITIES_AVAILABLE
-	public static float GripValue(OVRInput.Controller side) {
-		return GripValue(OVRController2Side(side));
-	}
-	public static bool Grip(OVRInput.Controller side) {
-		return Grip(OVRController2Side(side));
-	}
-	public static bool GripDown(OVRInput.Controller side) {
-		return GripDown(OVRController2Side(side));
-	}
-	
-	public static bool GripUp(OVRInput.Controller side) {
-		return GripUp(OVRController2Side(side));
-	}
-#endif
 
 		#endregion
 
@@ -320,17 +286,17 @@ namespace unityutilities
 		// TODO both should be one held down while other is pressed.
 		public static bool ThumbstickPress(Side side = Side.Either)
 		{
-			return instance.inputModule.GetRawButton(InputStrings.VR_Thumbstick_Press, side);
+			return instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Press, side);
 		}
 
 		public static bool ThumbstickPressDown(Side side = Side.Either)
 		{
-			return instance.inputModule.GetRawButtonDown(InputStrings.VR_Thumbstick_Press, side);
+			return instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Press, side);
 		}
 
 		public static bool ThumbstickPressUp(Side side = Side.Either)
 		{
-			return instance.inputModule.GetRawButtonUp(InputStrings.VR_Thumbstick_Press, side);
+			return instance.inputModule.GetRawUp(InputStrings.VR_Thumbstick_Press, side);
 		}
 
 		public static bool MainThumbstickPress()
@@ -479,32 +445,32 @@ namespace unityutilities
 
 		public static bool Button1(Side side = Side.Either)
 		{
-			return instance.inputModule.GetRawButton(InputStrings.VR_Button1, side);
+			return instance.inputModule.GetRaw(InputStrings.VR_Button1, side);
 		}
 
 		public static bool Button1Down(Side side = Side.Either)
 		{
-			return instance.inputModule.GetRawButtonDown(InputStrings.VR_Button1, side);
+			return instance.inputModule.GetRawDown(InputStrings.VR_Button1, side);
 		}
 
 		public static bool Button1Up(Side side = Side.Either)
 		{
-			return instance.inputModule.GetRawButtonUp(InputStrings.VR_Button1, side);
+			return instance.inputModule.GetRawUp(InputStrings.VR_Button1, side);
 		}
 
 		public static bool Button2(Side side = Side.Either)
 		{
-			return instance.inputModule.GetRawButton(InputStrings.VR_Button2, side);
+			return instance.inputModule.GetRaw(InputStrings.VR_Button2, side);
 		}
 
 		public static bool Button2Down(Side side = Side.Either)
 		{
-			return instance.inputModule.GetRawButtonDown(InputStrings.VR_Button2, side);
+			return instance.inputModule.GetRawDown(InputStrings.VR_Button2, side);
 		}
 
 		public static bool Button2Up(Side side = Side.Either)
 		{
-			return instance.inputModule.GetRawButtonUp(InputStrings.VR_Button2, side);
+			return instance.inputModule.GetRawUp(InputStrings.VR_Button2, side);
 		}
 
 		public static bool MainMenuButton()
@@ -586,8 +552,8 @@ namespace unityutilities
 				if (headsetSystem == HeadsetSystem.Oculus)
 				{
 					return (instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Up, Side.Right)
-						&& instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_Y_Up, Side.Left)) ||
-						(instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_Y_Up, Side.Right)
+						&& instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Up, Side.Left)) ||
+						(instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Up, Side.Right)
 						&& instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Up, Side.Left));
 				}
 				else
@@ -600,11 +566,11 @@ namespace unityutilities
 			{
 				if (headsetSystem == HeadsetSystem.Oculus)
 				{
-					return instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_Y_Up, side);
+					return instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Up, side);
 				}
 				else
 				{
-					return instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_Y_Up, side) && ThumbstickPress(side);
+					return instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Up, side) && ThumbstickPress(side);
 				}
 			}
 		}
@@ -618,8 +584,8 @@ namespace unityutilities
 				if (headsetSystem == HeadsetSystem.Oculus)
 				{
 					return (instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Down, Side.Right)
-						&& instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_Y_Down, Side.Left)) ||
-						(instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_Y_Down, Side.Right)
+						&& instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Down, Side.Left)) ||
+						(instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Down, Side.Right)
 						&& instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Down, Side.Left));
 				}
 				else
@@ -632,11 +598,11 @@ namespace unityutilities
 			{
 				if (headsetSystem == HeadsetSystem.Oculus)
 				{
-					return instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_Y_Down, side);
+					return instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Down, side);
 				}
 				else
 				{
-					return instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_Y_Down, side) && ThumbstickPress(side);
+					return instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Down, side) && ThumbstickPress(side);
 				}
 			}
 		}
@@ -650,8 +616,8 @@ namespace unityutilities
 				if (headsetSystem == HeadsetSystem.Oculus)
 				{
 					return (instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Left, Side.Right)
-						&& instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_X_Left, Side.Left)) ||
-						(instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_X_Left, Side.Right)
+						&& instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Left, Side.Left)) ||
+						(instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Left, Side.Right)
 						&& instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Left, Side.Left));
 				}
 				else
@@ -664,11 +630,11 @@ namespace unityutilities
 			{
 				if (headsetSystem == HeadsetSystem.Oculus)
 				{
-					return instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_X_Left, side);
+					return instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Left, side);
 				}
 				else
 				{
-					return instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_X_Left, side) && ThumbstickPress(side);
+					return instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Left, side) && ThumbstickPress(side);
 				}
 			}
 		}
@@ -682,8 +648,8 @@ namespace unityutilities
 				if (headsetSystem == HeadsetSystem.Oculus)
 				{
 					return (instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Right, Side.Right)
-						&& instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_X_Right, Side.Left)) ||
-						(instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_X_Right, Side.Right)
+						&& instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Right, Side.Left)) ||
+						(instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Right, Side.Right)
 						&& instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Right, Side.Left));
 				}
 				else
@@ -696,11 +662,11 @@ namespace unityutilities
 			{
 				if (headsetSystem == HeadsetSystem.Oculus)
 				{
-					return instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_X_Right, side);
+					return instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Right, side);
 				}
 				else
 				{
-					return instance.inputModule.GetRawValueDown(InputStrings.VR_Thumbstick_X_Right, side) && ThumbstickPress(side);
+					return instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Right, side) && ThumbstickPress(side);
 				}
 			}
 		}
@@ -738,14 +704,6 @@ namespace unityutilities
 		#endregion
 
 		#region Vibrations
-
-		/// <summary>
-		/// Whether the left (0) or right (1) controllers are vibrating
-		/// </summary>
-		private static bool[] vibrating;
-#if OCULUS_UTILITIES_AVAILABLE
-	private static OVRHapticsClip[] hapticsClip;
-#endif
 
 		/// <summary>
 		/// Vibrate the controller
@@ -797,19 +755,6 @@ namespace unityutilities
 #endif
 		}
 
-#if OCULUS_UTILITIES_AVAILABLE
-	/// <summary>
-	/// Vibrate the controller
-	/// </summary>
-	/// <param name="side">Which controller to vibrate</param>
-	/// <param name="intensity">Intensity from 0 to 1</param>
-	/// <param name="duration">Duration of the vibration</param>
-	/// <param name="delay">Time before the vibration starts</param>
-	public static void Vibrate(OVRInput.Controller side, float intensity, float duration = 1, float delay = 0) {
-		Vibrate(OVRController2Side(side), intensity, duration, delay);
-	}
-#endif
-
 		private void StartVibrateDelay(Side side, float intensity, float duration, float delay)
 		{
 			StartCoroutine(VibrateDelay(side, intensity, duration, delay));
@@ -833,9 +778,6 @@ namespace unityutilities
 		/// <returns></returns>
 		public static Vector3 ControllerVelocity(Side side, Space space = Space.Self)
 		{
-#if OCULUS_UTILITIES_AVAILABLE
-		Vector3 vel = OVRInput.GetLocalControllerVelocity(Side2OVRController(side));
-#endif
 			return instance.inputModule.ControllerVelocity(side, space);
 		}
 
@@ -876,35 +818,7 @@ namespace unityutilities
 #endif
 
 #if OCULUS_UTILITIES_AVAILABLE
-	private static Side OVRController2Side(OVRInput.Controller controller) {
-		switch (controller) {
-			case OVRInput.Controller.LTouch:
-				return Side.Left;
-			case OVRInput.Controller.RTouch:
-				return Side.Right;
-			case OVRInput.Controller.None:
-				return Side.None;
-			case OVRInput.Controller.All:
-				return Side.Both;
-			default:
-				return Side.None;
-		}
-	}
-
-	private static OVRInput.Controller Side2OVRController(Side side) {
-		switch (side) {
-			case Side.Left:
-				return OVRInput.Controller.LTouch;
-			case Side.Right:
-				return OVRInput.Controller.RTouch;
-			case Side.None:
-				return OVRInput.Controller.None;
-			case Side.Both:
-				return OVRInput.Controller.All;
-			default:
-				return OVRInput.Controller.None;
-		}
-	}
+	
 #endif
 
 

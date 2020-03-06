@@ -85,6 +85,28 @@ namespace unityutilities
 			return nodes[0];
 		}
 
+		private static bool IsAxis(InputStrings key)
+		{
+			switch (key)
+			{
+				case InputStrings.VR_Trigger:
+				case InputStrings.VR_Grip:
+				case InputStrings.VR_Thumbstick_X:
+				case InputStrings.VR_Thumbstick_Y:
+					return true;
+				case InputStrings.VR_Thumbstick_X_Left:
+				case InputStrings.VR_Thumbstick_X_Right:
+				case InputStrings.VR_Thumbstick_Y_Up:
+				case InputStrings.VR_Thumbstick_Y_Down:
+				case InputStrings.VR_Thumbstick_Press:
+				case InputStrings.VR_Button1:
+				case InputStrings.VR_Button2:
+					return false;
+				default:
+					return false;
+			}
+		}
+
 		public override void Vibrate(Side side, float intensity, float duration)
 		{
 			if (side == Side.Both)
@@ -119,40 +141,6 @@ namespace unityutilities
 			}
 		}
 
-		public override bool GetRawValueDown(InputStrings key, Side side)
-		{
-			switch (side)
-			{
-				case Side.Both:
-					return firstPressed[key][0, 0] &&
-						   firstPressed[key][1, 0];
-				case Side.Either:
-					return firstPressed[key][0, 0] ||
-						   firstPressed[key][1, 0];
-				case Side.None:
-					return false;
-				default:
-					return firstPressed[key][(int)side, 0];
-			}
-		}
-
-		public override bool GetRawValueUp(InputStrings key, Side side)
-		{
-			switch (side)
-			{
-				case Side.Both:
-					return firstPressed[key][0, 1] &&
-						   firstPressed[key][1, 1];
-				case Side.Either:
-					return firstPressed[key][0, 1] ||
-						   firstPressed[key][1, 1];
-				case Side.None:
-					return false;
-				default:
-					return firstPressed[key][(int)side, 1];
-			}
-		}
-
 		/// <summary>
 		/// Returns true if the axis is past the threshold
 		/// </summary>
@@ -161,72 +149,112 @@ namespace unityutilities
 		/// <returns></returns>
 		public override bool GetRaw(InputStrings key, Side side)
 		{
-			bool left, right;
-			switch (side)
+			if (IsAxis(key))
 			{
-				case Side.Both:
-					left = Input.GetAxis(inputManagerStrings[key][(int)Side.Left]) > triggerThreshold;
-					right = Input.GetAxis(inputManagerStrings[key][(int)Side.Right]) > triggerThreshold;
-					return left && right;
-				case Side.Either:
-					left = Input.GetAxis(inputManagerStrings[key][(int)Side.Left]) > triggerThreshold;
-					right = Input.GetAxis(inputManagerStrings[key][(int)Side.Right]) > triggerThreshold;
-					return left || right;
-				case Side.None:
-					return false;
-				default:
-					return Input.GetAxis(inputManagerStrings[key][(int)side]) > triggerThreshold;
+				bool left, right;
+				switch (side)
+				{
+					case Side.Both:
+						left = Input.GetAxis(inputManagerStrings[key][(int)Side.Left]) > triggerThreshold;
+						right = Input.GetAxis(inputManagerStrings[key][(int)Side.Right]) > triggerThreshold;
+						return left && right;
+					case Side.Either:
+						left = Input.GetAxis(inputManagerStrings[key][(int)Side.Left]) > triggerThreshold;
+						right = Input.GetAxis(inputManagerStrings[key][(int)Side.Right]) > triggerThreshold;
+						return left || right;
+					case Side.None:
+						return false;
+					default:
+						return Input.GetAxis(inputManagerStrings[key][(int)side]) > triggerThreshold;
+				}
+			}
+			else
+			{
+				switch (side)
+				{
+					case Side.Both:
+						return Input.GetButton(inputManagerStrings[key][(int)Side.Left]) &&
+							   Input.GetButton(inputManagerStrings[key][(int)Side.Right]);
+					case Side.Either:
+						return Input.GetButton(inputManagerStrings[key][(int)Side.Left]) ||
+							   Input.GetButton(inputManagerStrings[key][(int)Side.Right]);
+					case Side.None:
+						return false;
+					default:
+						return Input.GetButton(inputManagerStrings[key][(int)side]);
+				}
 			}
 		}
 
-		public override bool GetRawButton(InputStrings key, Side side)
+		public override bool GetRawDown(InputStrings key, Side side)
 		{
-			switch (side)
+			if (IsAxis(key))
 			{
-				case Side.Both:
-					return Input.GetButton(inputManagerStrings[key][(int)Side.Left]) &&
-						   Input.GetButton(inputManagerStrings[key][(int)Side.Right]);
-				case Side.Either:
-					return Input.GetButton(inputManagerStrings[key][(int)Side.Left]) ||
-						   Input.GetButton(inputManagerStrings[key][(int)Side.Right]);
-				case Side.None:
-					return false;
-				default:
-					return Input.GetButton(inputManagerStrings[key][(int)side]);
+				switch (side)
+				{
+					case Side.Both:
+						return firstPressed[key][0, 0] &&
+							   firstPressed[key][1, 0];
+					case Side.Either:
+						return firstPressed[key][0, 0] ||
+							   firstPressed[key][1, 0];
+					case Side.None:
+						return false;
+					default:
+						return firstPressed[key][(int)side, 0];
+				}
+			}
+			else
+			{
+				switch (side)
+				{
+					case Side.Both:
+						return Input.GetButtonDown(inputManagerStrings[key][(int)Side.Left]) &&
+							   Input.GetButtonDown(inputManagerStrings[key][(int)Side.Right]);
+					case Side.Either:
+						return Input.GetButtonDown(inputManagerStrings[key][(int)Side.Left]) ||
+							   Input.GetButtonDown(inputManagerStrings[key][(int)Side.Right]);
+					case Side.None:
+						return false;
+					default:
+						return Input.GetButtonDown(inputManagerStrings[key][(int)side]);
+				}
 			}
 		}
 
-		public override bool GetRawButtonDown(InputStrings key, Side side)
+		public override bool GetRawUp(InputStrings key, Side side)
 		{
-			switch (side)
+			if (IsAxis(key))
 			{
-				case Side.Both:
-					return Input.GetButtonDown(inputManagerStrings[key][(int)Side.Left]) &&
-						   Input.GetButtonDown(inputManagerStrings[key][(int)Side.Right]);
-				case Side.Either:
-					return Input.GetButtonDown(inputManagerStrings[key][(int)Side.Left]) ||
-						   Input.GetButtonDown(inputManagerStrings[key][(int)Side.Right]);
-				case Side.None:
-					return false;
-				default:
-					return Input.GetButtonDown(inputManagerStrings[key][(int)side]);
+				switch (side)
+				{
+					case Side.Both:
+						return firstPressed[key][0, 1] &&
+							   firstPressed[key][1, 1];
+					case Side.Either:
+						return firstPressed[key][0, 1] ||
+							   firstPressed[key][1, 1];
+					case Side.None:
+						return false;
+					default:
+						return firstPressed[key][(int)side, 1];
+				}
 			}
-		}
-
-		public override bool GetRawButtonUp(InputStrings key, Side side)
-		{
-			switch (side)
+			else
 			{
-				case Side.Both:
-					return Input.GetButtonUp(inputManagerStrings[key][(int)Side.Left]) &&
-						   Input.GetButtonUp(inputManagerStrings[key][(int)Side.Right]);
-				case Side.Either:
-					return Input.GetButtonUp(inputManagerStrings[key][(int)Side.Left]) ||
-						   Input.GetButtonUp(inputManagerStrings[key][(int)Side.Right]);
-				case Side.None:
-					return false;
-				default:
-					return Input.GetButtonUp(inputManagerStrings[key][(int)side]);
+				switch (side)
+				{
+					case Side.Both:
+						return Input.GetButtonUp(inputManagerStrings[key][(int)Side.Left]) &&
+							   Input.GetButtonUp(inputManagerStrings[key][(int)Side.Right]);
+					case Side.Either:
+						return Input.GetButtonUp(inputManagerStrings[key][(int)Side.Left]) ||
+							   Input.GetButtonUp(inputManagerStrings[key][(int)Side.Right]);
+					case Side.None:
+						return false;
+					default:
+						return Input.GetButtonUp(inputManagerStrings[key][(int)side]);
+				}
 			}
 		}
 

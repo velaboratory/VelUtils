@@ -9,10 +9,6 @@ namespace unityutilities
 
 		public abstract float GetRawValue(InputStrings key, Side side);
 
-		public abstract bool GetRawValueDown(InputStrings key, Side side);
-
-		public abstract bool GetRawValueUp(InputStrings key, Side side);
-
 		/// <summary>
 		/// Returns true if the axis is past the threshold
 		/// </summary>
@@ -21,11 +17,9 @@ namespace unityutilities
 		/// <returns></returns>
 		public abstract bool GetRaw(InputStrings key, Side side);
 
-		public abstract bool GetRawButton(InputStrings key, Side side);
+		public abstract bool GetRawDown(InputStrings key, Side side);
 
-		public abstract bool GetRawButtonDown(InputStrings key, Side side);
-
-		public abstract bool GetRawButtonUp(InputStrings key, Side side);
+		public abstract bool GetRawUp(InputStrings key, Side side);
 
 		public abstract Vector3 ControllerVelocity(Side side, Space space);
 
