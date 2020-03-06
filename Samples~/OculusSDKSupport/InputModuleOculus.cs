@@ -74,11 +74,41 @@ namespace unityutilities
 			bool left = false, right = false;
 			if (side != Side.Right)
 			{
-				left = OVRInput.Get(InputStringsToOVRInputButton(key), Side2OVRController(Side.Left));
+				if (key == InputStrings.VR_Thumbstick_X)
+				{
+					left =
+						OVRInput.Get(InputStringsToOVRInputButton(InputStrings.VR_Thumbstick_X_Left), Side2OVRController(Side.Left)) ||
+						OVRInput.Get(InputStringsToOVRInputButton(InputStrings.VR_Thumbstick_X_Right), Side2OVRController(Side.Left));
+				}
+				else if (key == InputStrings.VR_Thumbstick_Y)
+				{
+					left =
+						OVRInput.Get(InputStringsToOVRInputButton(InputStrings.VR_Thumbstick_Y_Up), Side2OVRController(Side.Left)) ||
+						OVRInput.Get(InputStringsToOVRInputButton(InputStrings.VR_Thumbstick_Y_Down), Side2OVRController(Side.Left));
+				}
+				else
+				{
+					left = OVRInput.Get(InputStringsToOVRInputButton(key), Side2OVRController(Side.Left));
+				}
 			}
 			if (side != Side.Left)
 			{
-				right = OVRInput.Get(InputStringsToOVRInputButton(key), Side2OVRController(Side.Right));
+				if (key == InputStrings.VR_Thumbstick_X)
+				{
+					right =
+						OVRInput.Get(InputStringsToOVRInputButton(InputStrings.VR_Thumbstick_X_Left), Side2OVRController(Side.Right)) ||
+						OVRInput.Get(InputStringsToOVRInputButton(InputStrings.VR_Thumbstick_X_Right), Side2OVRController(Side.Right));
+				}
+				else if (key == InputStrings.VR_Thumbstick_Y)
+				{
+					right =
+						OVRInput.Get(InputStringsToOVRInputButton(InputStrings.VR_Thumbstick_Y_Up), Side2OVRController(Side.Right)) ||
+						OVRInput.Get(InputStringsToOVRInputButton(InputStrings.VR_Thumbstick_Y_Down), Side2OVRController(Side.Right));
+				}
+				else
+				{
+					right = OVRInput.Get(InputStringsToOVRInputButton(key), Side2OVRController(Side.Right));
+				}
 			}
 
 			switch (side)
@@ -241,6 +271,16 @@ namespace unityutilities
 					return OVRInput.Button.One;
 				case InputStrings.VR_Button2:
 					return OVRInput.Button.Two;
+				case InputStrings.VR_Thumbstick_X_Left:
+					return OVRInput.Button.PrimaryThumbstickLeft;
+				case InputStrings.VR_Thumbstick_X_Right:
+					return OVRInput.Button.PrimaryThumbstickRight;
+				case InputStrings.VR_Thumbstick_Y_Up:
+					return OVRInput.Button.PrimaryThumbstickUp;
+				case InputStrings.VR_Thumbstick_Y_Down:
+					return OVRInput.Button.PrimaryThumbstickDown;
+				case InputStrings.VR_Thumbstick_Press:
+					return OVRInput.Button.PrimaryThumbstick;
 			}
 
 			return OVRInput.Button.None;

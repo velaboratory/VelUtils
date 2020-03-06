@@ -53,6 +53,68 @@ namespace unityutilities
 		Grip
 	}
 
+	public enum InputStrings
+	{
+		VR_Trigger,
+		VR_Grip,
+		VR_Thumbstick_X,
+		VR_Thumbstick_Y,
+		VR_Thumbstick_X_Left,
+		VR_Thumbstick_X_Right,
+		VR_Thumbstick_Y_Up,
+		VR_Thumbstick_Y_Down,
+		VR_Thumbstick_Press,
+		VR_Button1,
+		VR_Button2
+	}
+
+	public static class InputStringsMethods
+	{
+		public static bool IsAxis(this InputStrings key)
+		{
+			switch (key)
+			{
+				case InputStrings.VR_Trigger:
+				case InputStrings.VR_Grip:
+				case InputStrings.VR_Thumbstick_X:
+				case InputStrings.VR_Thumbstick_Y:
+					return true;
+				case InputStrings.VR_Thumbstick_X_Left:
+				case InputStrings.VR_Thumbstick_X_Right:
+				case InputStrings.VR_Thumbstick_Y_Up:
+				case InputStrings.VR_Thumbstick_Y_Down:
+				case InputStrings.VR_Thumbstick_Press:
+				case InputStrings.VR_Button1:
+				case InputStrings.VR_Button2:
+					return false;
+				default:
+					return false;
+			}
+		}
+
+		public static bool IsThumbstickAxis(this InputStrings key)
+		{
+			switch (key)
+			{
+				case InputStrings.VR_Thumbstick_X:
+				case InputStrings.VR_Thumbstick_Y:
+				case InputStrings.VR_Thumbstick_X_Left:
+				case InputStrings.VR_Thumbstick_X_Right:
+				case InputStrings.VR_Thumbstick_Y_Up:
+				case InputStrings.VR_Thumbstick_Y_Down:
+					return true;
+				case InputStrings.VR_Trigger:
+				case InputStrings.VR_Grip:
+				case InputStrings.VR_Thumbstick_Press:
+				case InputStrings.VR_Button1:
+				case InputStrings.VR_Button2:
+					return false;
+				default:
+					return false;
+			}
+		}
+	}
+
 	/// <summary>
 	/// Makes input from VR devices accessible from a unified set of methods. Can treat axes as button down.
 	/// </summary>
@@ -65,20 +127,7 @@ namespace unityutilities
 		public static HeadsetSystem headsetSystem;
 		public static HeadsetControllerStyle controllerStyle;
 
-		public enum InputStrings
-		{
-			VR_Trigger,
-			VR_Grip,
-			VR_Thumbstick_X,
-			VR_Thumbstick_Y,
-			VR_Thumbstick_X_Left,
-			VR_Thumbstick_X_Right,
-			VR_Thumbstick_Y_Up,
-			VR_Thumbstick_Y_Down,
-			VR_Thumbstick_Press,
-			VR_Button1,
-			VR_Button2
-		}
+		
 
 		public static Side DominantHand { get; set; }
 
@@ -820,6 +869,8 @@ namespace unityutilities
 #if OCULUS_UTILITIES_AVAILABLE
 	
 #endif
+
+		
 
 
 	}

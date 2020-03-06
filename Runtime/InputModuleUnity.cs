@@ -85,28 +85,6 @@ namespace unityutilities
 			return nodes[0];
 		}
 
-		private static bool IsAxis(InputStrings key)
-		{
-			switch (key)
-			{
-				case InputStrings.VR_Trigger:
-				case InputStrings.VR_Grip:
-				case InputStrings.VR_Thumbstick_X:
-				case InputStrings.VR_Thumbstick_Y:
-					return true;
-				case InputStrings.VR_Thumbstick_X_Left:
-				case InputStrings.VR_Thumbstick_X_Right:
-				case InputStrings.VR_Thumbstick_Y_Up:
-				case InputStrings.VR_Thumbstick_Y_Down:
-				case InputStrings.VR_Thumbstick_Press:
-				case InputStrings.VR_Button1:
-				case InputStrings.VR_Button2:
-					return false;
-				default:
-					return false;
-			}
-		}
-
 		public override void Vibrate(Side side, float intensity, float duration)
 		{
 			if (side == Side.Both)
@@ -149,7 +127,7 @@ namespace unityutilities
 		/// <returns></returns>
 		public override bool GetRaw(InputStrings key, Side side)
 		{
-			if (IsAxis(key))
+			if (key.IsAxis())
 			{
 				bool left, right;
 				switch (side)
@@ -188,7 +166,7 @@ namespace unityutilities
 
 		public override bool GetRawDown(InputStrings key, Side side)
 		{
-			if (IsAxis(key))
+			if (key.IsAxis())
 			{
 				switch (side)
 				{
@@ -224,7 +202,7 @@ namespace unityutilities
 
 		public override bool GetRawUp(InputStrings key, Side side)
 		{
-			if (IsAxis(key))
+			if (key.IsAxis())
 			{
 				switch (side)
 				{
