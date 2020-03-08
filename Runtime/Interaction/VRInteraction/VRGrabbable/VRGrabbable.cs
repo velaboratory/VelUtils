@@ -63,16 +63,23 @@ namespace unityutilities.VRInteraction
 			{
 				foreach (var mesh in highlightMeshes)
 				{
-					foreach (Material m in mesh.materials)
+					if (colorChange)
 					{
-						if (m.HasProperty("_Color"))
+						foreach (Material m in mesh.materials)
 						{
-							origColors.Add(m.color);
-						}
-						else
-						{
-							Debug.LogError("Material doesn't have a color", mesh.gameObject);
-							colorChange = false;
+							if (m.HasProperty("_Color"))
+							{
+								origColors.Add(m.color);
+							}
+							else if (m.HasProperty("_MainColor"))
+							{
+								origColors.Add(m.color);
+							}
+							else
+							{
+								Debug.LogError("Material doesn't have a color", mesh.gameObject);
+								colorChange = false;
+							}
 						}
 					}
 					origVisibility.Add(mesh.enabled);

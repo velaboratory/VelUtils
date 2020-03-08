@@ -245,7 +245,7 @@ namespace unityutilities {
 
 
 		private void Awake() {
-			if (!teleportingMovement || !teleporter.blink || teleporter.blinkShader == null) return;
+			if (teleporter.blinkShader == null) return;
 			teleporter.blinkMaterial = new Material(teleporter.blinkShader);
 			teleporter.blinkMesh = rig.head.gameObject.AddComponent<MeshFilter>();
 			teleporter.blinkRenderer = rig.head.gameObject.AddComponent<MeshRenderer>();

@@ -259,6 +259,8 @@ namespace unityutilities {
 		}
 
 		public static void HideAllHints(Side side = Side.Both) {
+			if (!instance) return;
+
 			List<ControllerLabel> deletedLabels = new List<ControllerLabel>();
 			foreach (ControllerLabel label in instance.instantiatedLabels) {
 				if (label.side == side || side == Side.Both) {
