@@ -78,11 +78,11 @@ namespace unityutilities
 				case InputStrings.VR_Grip:
 				case InputStrings.VR_Thumbstick_X:
 				case InputStrings.VR_Thumbstick_Y:
-					return true;
 				case InputStrings.VR_Thumbstick_X_Left:
 				case InputStrings.VR_Thumbstick_X_Right:
 				case InputStrings.VR_Thumbstick_Y_Up:
 				case InputStrings.VR_Thumbstick_Y_Down:
+					return true;
 				case InputStrings.VR_Thumbstick_Press:
 				case InputStrings.VR_Button1:
 				case InputStrings.VR_Button2:
@@ -157,6 +157,7 @@ namespace unityutilities
 			if (!init)
 			{
 				instance = new GameObject("InputMan").AddComponent<InputMan>();
+				instance.inputModule = instance.gameObject.AddComponent<InputModuleUnity>();
 				DontDestroyOnLoad(instance.gameObject);
 				init = true;
 			}

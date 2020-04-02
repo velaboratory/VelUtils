@@ -132,7 +132,7 @@ namespace unityutilities.VRInteraction
 			grabbedVRGrabbable = grabbable;
 			if (vibrateOnGrab)
 			{
-				InputMan.Vibrate(side, 1, .5f);
+				InputMan.Vibrate(side, .5f, .1f);
 			}
 			GrabEvent?.Invoke(grabbable);
 		}

@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 901437073905630873}
   - component: {fileID: 1502173887709379465}
   - component: {fileID: 4554089416191960763}
-  - component: {fileID: 6174193360679176617}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -80,19 +79,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!135 &6174193360679176617
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2653226594590429602}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5908626815760217705
 GameObject:
   m_ObjectHideFlags: 0
@@ -105,6 +91,7 @@ GameObject:
   - component: {fileID: 7885398608887938299}
   - component: {fileID: 6665459077498201296}
   - component: {fileID: 6510965278985117688}
+  - component: {fileID: 2056707406}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -190,6 +177,24 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2056707406
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5908626815760217705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a2a9c34df4095f47b9ca8f975175f5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Device: 0
+  m_PoseSource: 2
+  m_PoseProviderComponent: {fileID: 0}
+  m_TrackingType: 0
+  m_UpdateType: 0
+  m_UseRelativeTransform: 0
 --- !u!1 &6394127856725986483
 GameObject:
   m_ObjectHideFlags: 0
@@ -199,6 +204,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 252749959343987061}
+  - component: {fileID: 2116397810}
   m_Layer: 0
   m_Name: Floor
   m_TagString: Untagged
@@ -220,6 +226,18 @@ Transform:
   m_Father: {fileID: 6777277523045891329}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2116397810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6394127856725986483}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e420e808658801049855d92432fc2a13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7313773171011755184
 GameObject:
   m_ObjectHideFlags: 0
@@ -229,7 +247,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6777277523045891329}
-  - component: {fileID: 4758450881171785327}
   - component: {fileID: 8208687673189042915}
   - component: {fileID: 3746459757574168967}
   - component: {fileID: 7938913794003630012}
@@ -258,23 +275,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4758450881171785327
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7313773171011755184}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7448815bd5148434682b3d931066cd10, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_RigBaseGameObject: {fileID: 7313773171011755184}
-  m_CameraFloorOffsetObject: {fileID: 6394127856725986483}
-  m_CameraGameObject: {fileID: 5908626815760217705}
-  m_TrackingSpace: 1
-  m_CameraYOffset: 1.36144
 --- !u!114 &8208687673189042915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -378,7 +378,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9110631598171955284}
-  - component: {fileID: 3241572651837993988}
+  - component: {fileID: 1131421555}
+  - component: {fileID: 1131421556}
+  - component: {fileID: 1131421561}
   m_Layer: 0
   m_Name: Right Hand
   m_TagString: Untagged
@@ -401,7 +403,20 @@ Transform:
   m_Father: {fileID: 6777277523045891329}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3241572651837993988
+--- !u!135 &1131421555
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7400124074617274568}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.05
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1131421556
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -410,21 +425,35 @@ MonoBehaviour:
   m_GameObject: {fileID: 7400124074617274568}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ae26e19cd956134bbdf3c6f65bf393a, type: 3}
+  m_Script: {fileID: 11500000, guid: dee9a4b7f66582a428455cac0a8e299e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UpdateTrackingType: 0
-  m_EnableInputActions: 1
-  m_ControllerNode: 5
-  m_SelectUsage: 2
-  m_ActivateUsage: 2
-  m_UIPressUsage: 2
-  m_AxisToPressThreshold: 0.1
-  m_ModelPrefab: {fileID: 0}
-  m_ModelTransform: {fileID: 901437073905630873}
-  m_AnimateModel: 0
-  m_ModelSelectTransition: 
-  m_ModelDeSelectTransition: 
+  rig: {fileID: 8208687673189042915}
+  side: 1
+  canGrab: 1
+  grabInput: 1
+  vibrateOnGrab: 1
+  grabbedVRGrabbable: {fileID: 0}
+  selectedVRGrabbable: {fileID: 0}
+  touchedObjs: []
+--- !u!114 &1131421561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7400124074617274568}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a2a9c34df4095f47b9ca8f975175f5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Device: 1
+  m_PoseSource: 5
+  m_PoseProviderComponent: {fileID: 0}
+  m_TrackingType: 0
+  m_UpdateType: 0
+  m_UseRelativeTransform: 0
 --- !u!1 &7578919740422347464
 GameObject:
   m_ObjectHideFlags: 0
@@ -434,7 +463,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6597687686141777384}
-  - component: {fileID: 7543198396774257619}
+  - component: {fileID: 1131421557}
+  - component: {fileID: 1131421558}
+  - component: {fileID: 1131421562}
   m_Layer: 0
   m_Name: Left Hand
   m_TagString: Untagged
@@ -457,7 +488,20 @@ Transform:
   m_Father: {fileID: 6777277523045891329}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7543198396774257619
+--- !u!135 &1131421557
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7578919740422347464}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.05
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1131421558
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -466,21 +510,35 @@ MonoBehaviour:
   m_GameObject: {fileID: 7578919740422347464}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ae26e19cd956134bbdf3c6f65bf393a, type: 3}
+  m_Script: {fileID: 11500000, guid: dee9a4b7f66582a428455cac0a8e299e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UpdateTrackingType: 0
-  m_EnableInputActions: 1
-  m_ControllerNode: 4
-  m_SelectUsage: 2
-  m_ActivateUsage: 2
-  m_UIPressUsage: 2
-  m_AxisToPressThreshold: 0.1
-  m_ModelPrefab: {fileID: 0}
-  m_ModelTransform: {fileID: 4612239017284378356}
-  m_AnimateModel: 0
-  m_ModelSelectTransition: 
-  m_ModelDeSelectTransition: 
+  rig: {fileID: 8208687673189042915}
+  side: 0
+  canGrab: 1
+  grabInput: 1
+  vibrateOnGrab: 1
+  grabbedVRGrabbable: {fileID: 0}
+  selectedVRGrabbable: {fileID: 0}
+  touchedObjs: []
+--- !u!114 &1131421562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7578919740422347464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a2a9c34df4095f47b9ca8f975175f5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Device: 1
+  m_PoseSource: 4
+  m_PoseProviderComponent: {fileID: 0}
+  m_TrackingType: 0
+  m_UpdateType: 0
+  m_UseRelativeTransform: 0
 --- !u!1 &8836457007788785801
 GameObject:
   m_ObjectHideFlags: 0
@@ -492,7 +550,6 @@ GameObject:
   - component: {fileID: 4612239017284378356}
   - component: {fileID: 7280294658229001739}
   - component: {fileID: 905239931547924659}
-  - component: {fileID: 5740211285278967224}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -561,16 +618,3 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!135 &5740211285278967224
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8836457007788785801}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
