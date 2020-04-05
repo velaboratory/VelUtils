@@ -30,7 +30,7 @@ namespace unityutilities.VRInteraction
 
 
 		public Queue<Vector3> lastVels = new Queue<Vector3>();
-		private int lastVelsLength = 10;
+		private int lastVelsLength = 5;
 
 		public Action<VRGrabbable> GrabEvent;
 		public Action<VRGrabbable> ReleaseEvent;

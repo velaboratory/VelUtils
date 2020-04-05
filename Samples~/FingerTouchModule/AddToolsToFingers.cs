@@ -151,10 +151,18 @@ namespace unityutilities
 						{
 							if (isRight)
 							{
-								Instantiate(tool.toolPrefab, avatar.HandRight.RenderParts[0].bones[7]);
+								var obj = Instantiate(tool.toolPrefab, avatar.HandRight.RenderParts[0].bones[7]);
+								if (obj.GetComponent<TouchMenuFingerCollider>())
+								{
+									obj.GetComponent<TouchMenuFingerCollider>().isLeft = !isRight;
+								}
 							} else
 							{
-								Instantiate(tool.toolPrefab, avatar.HandLeft.RenderParts[0].bones[7]);
+								var obj = Instantiate(tool.toolPrefab, avatar.HandLeft.RenderParts[0].bones[7]);
+								if (obj.GetComponent<TouchMenuFingerCollider>())
+								{
+									obj.GetComponent<TouchMenuFingerCollider>().isLeft = !isRight;
+								}
 							}
 						}
 					}
