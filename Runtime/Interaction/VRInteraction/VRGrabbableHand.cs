@@ -28,6 +28,8 @@ namespace unityutilities.VRInteraction
 		[ReadOnly]
 		public List<VRGrabbable> touchedObjs = new List<VRGrabbable>();
 
+		private VRGrabbable raycastedObj;
+
 
 		public Queue<Vector3> lastVels = new Queue<Vector3>();
 		private int lastVelsLength = 5;
@@ -69,6 +71,41 @@ namespace unityutilities.VRInteraction
 					{
 						selectedVRGrabbable = best;
 						selectedVRGrabbable.HandleSelection();
+					}
+				}
+			}
+
+
+			// Add remote objects to the touched list
+			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit))
+			{
+				Collider other = hit.collider;
+
+				// Find VRGrabbable
+				VRGrabbable vrGrabbable;
+				if (other.attachedRigidbody)
+					vrGrabbable = other.attachedRigidbody.GetComponent<VRGrabbable>();
+				else
+					vrGrabbable = other.GetComponent<VRGrabbable>();
+
+				// stop selecting the previous obj
+				if (raycastedObj != null && raycastedObj != vrGrabbable)
+				{
+					touchedObjs.Remove(raycastedObj);
+					if (raycastedObj == selectedVRGrabbable)
+					{
+						selectedVRGrabbable.HandleDeselection();
+						selectedVRGrabbable = null;
+					}
+				}
+				raycastedObj = vrGrabbable;
+
+				// Select the object
+				if (vrGrabbable)
+				{
+					if (!touchedObjs.Contains(vrGrabbable))
+					{
+						touchedObjs.Add(vrGrabbable);
 					}
 				}
 			}

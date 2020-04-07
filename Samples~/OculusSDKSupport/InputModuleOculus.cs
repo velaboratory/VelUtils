@@ -5,29 +5,41 @@ namespace unityutilities
 {
 	public class InputModuleOculus : InputModule
 	{
+		float[] vibrationTimeLeft = { -2, -2 };
 
 		public override void Vibrate(Side side, float intensity, float duration)
 		{
-			int durationMult = 10;
-			OVRHapticsClip clip = new OVRHapticsClip((int)duration * durationMult);
-			for (int i = 0; i < (int)duration * durationMult; i++)
-			{
-				clip.Samples[i] = (byte)(intensity * 255);
-			}
-
 			if (side == Side.Both)
 			{
-				OVRHaptics.LeftChannel.Preempt(clip);
-				OVRHaptics.RightChannel.Preempt(clip);
+				OVRInput.SetControllerVibration(1, intensity, OVRInput.Controller.LTouch);
+				vibrationTimeLeft[0] = duration;
+				OVRInput.SetControllerVibration(1, intensity, OVRInput.Controller.RTouch);
+				vibrationTimeLeft[1] = duration;
 			}
-			else if (side == Side.Left)
+			else if (side == Side.Left || side == Side.Right)
 			{
-				OVRHaptics.LeftChannel.Preempt(clip);
+				OVRInput.SetControllerVibration(1, intensity, Side2OVRController(side));
+				vibrationTimeLeft[side == Side.Left ? 0 : 1] = duration;
+			}
+			else
+			{
+				Debug.LogError("Can't vibrate on that side", this);
+			}
+		}
 
-			}
-			else if (side == Side.Right)
+		private void FixedUpdate()
+		{
+			for (int i = 0; i < 2; i++)
 			{
-				OVRHaptics.RightChannel.Preempt(clip);
+				if (vibrationTimeLeft[i] > 0)
+				{
+					vibrationTimeLeft[i] -= Time.fixedDeltaTime;
+				}
+				else if (vibrationTimeLeft[i] > -2f)
+				{
+					OVRInput.SetControllerVibration(0, 0, i == 0 ? OVRInput.Controller.LTouch : OVRInput.Controller.RTouch);
+					vibrationTimeLeft[i] = -2;
+				}
 			}
 		}
 

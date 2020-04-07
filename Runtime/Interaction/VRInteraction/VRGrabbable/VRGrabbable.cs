@@ -20,6 +20,9 @@ namespace unityutilities.VRInteraction
 			}
 		}
 
+		[NonSerialized]
+		public bool includeInSave = true;
+
 		/// <summary>
 		/// Whether multiple hands can grab the same object
 		/// </summary>
@@ -27,6 +30,9 @@ namespace unityutilities.VRInteraction
 
 		[Tooltip("The importance of this object compared to others when grabbing overlapping objects. Higher numbers have higher priority.")]
 		public int priority;
+
+		[Tooltip("Whether this object can be grabbed from far away.")]
+		public bool remoteGrabbable = false;
 
 		public bool colorChange = true;
 

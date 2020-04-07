@@ -2,7 +2,6 @@
 {
 	public interface INetworkPack
 	{
-
 		/// <summary>
 		/// Packs the data describing the object into a byte array.
 		/// </summary>
