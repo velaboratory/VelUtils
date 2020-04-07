@@ -31,9 +31,7 @@ namespace unityutilities
 
 	public class AddToolsToFingers : MonoBehaviour
 	{
-
-		[SerializeField]
-		private Rig rig;
+		public Rig rig;
 
 		[ReadOnly, SerializeField]
 		private OVRSkeleton leftHandSkele;
