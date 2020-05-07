@@ -88,6 +88,12 @@ namespace unityutilities.VRInteraction
 			}
 
 			copyTransform.SetTarget(h.transform);
+
+			// this obj has been grabbed by raycast, snap
+			if (h.raycastedObjs.Contains(this))
+			{
+				copyTransform.positionOffset = Vector3.zero;
+			}
 		}
 
 		public override void HandleRelease(VRGrabbableHand h = null)

@@ -20,6 +20,8 @@ namespace unityutilities.VRInteraction
 
 		public bool vibrateOnGrab = true;
 
+		public float remoteGrabbingDistance = 5f;
+
 		[Header("Debug")]
 		[ReadOnly]
 		public VRGrabbable grabbedVRGrabbable;
@@ -28,7 +30,8 @@ namespace unityutilities.VRInteraction
 		[ReadOnly]
 		public List<VRGrabbable> touchedObjs = new List<VRGrabbable>();
 
-		private VRGrabbable raycastedObj;
+		[ReadOnly]
+		public List<VRGrabbable> raycastedObjs = new List<VRGrabbable>();
 
 
 		public Queue<Vector3> lastVels = new Queue<Vector3>();
@@ -77,7 +80,29 @@ namespace unityutilities.VRInteraction
 
 
 			// Add remote objects to the touched list
-			if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit))
+			RaycastHit[] hitList = null;
+			if (false && Physics.Raycast(transform.position, transform.forward, out RaycastHit directHit, remoteGrabbingDistance)) {
+				// Find VRGrabbable
+				VRGrabbable vrGrabbable;
+				if (directHit.collider.attachedRigidbody)
+					vrGrabbable = directHit.collider.attachedRigidbody.GetComponent<VRGrabbable>();
+				else
+					vrGrabbable = directHit.collider.GetComponent<VRGrabbable>();
+
+				if (vrGrabbable && vrGrabbable.remoteGrabbable)
+				{
+					hitList = new RaycastHit[] { directHit };
+				}
+			}
+			
+			// if there still isn't anything in the hitlist (no direct hits)
+			if (hitList == null)
+			{
+				hitList = Util.ConeCastAll(transform.position, transform.forward, 1.5f, remoteGrabbingDistance);
+			}
+
+			var newRaycastedObjs = new List<VRGrabbable>();
+			foreach (var hit in hitList)
 			{
 				Collider other = hit.collider;
 
@@ -88,27 +113,34 @@ namespace unityutilities.VRInteraction
 				else
 					vrGrabbable = other.GetComponent<VRGrabbable>();
 
-				// stop selecting the previous obj
-				if (raycastedObj != null && raycastedObj != vrGrabbable)
-				{
-					touchedObjs.Remove(raycastedObj);
-					if (raycastedObj == selectedVRGrabbable)
-					{
-						selectedVRGrabbable.HandleDeselection();
-						selectedVRGrabbable = null;
-					}
-				}
-				raycastedObj = vrGrabbable;
 
 				// Select the object
-				if (vrGrabbable)
+				if (vrGrabbable && vrGrabbable.remoteGrabbable)
 				{
+					newRaycastedObjs.Add(vrGrabbable);
+
 					if (!touchedObjs.Contains(vrGrabbable))
 					{
 						touchedObjs.Add(vrGrabbable);
 					}
 				}
 			}
+
+			// stop selecting the previous objs that aren't currently raycasted at
+			foreach (var obj in raycastedObjs)
+			{
+				if (!newRaycastedObjs.Contains(obj))
+				{
+					touchedObjs.Remove(obj);
+					if (obj == selectedVRGrabbable)
+					{
+						selectedVRGrabbable.HandleDeselection();
+						selectedVRGrabbable = null;
+					}
+				}
+			}
+
+			raycastedObjs = newRaycastedObjs;
 
 			// update the last velocities ➡➡
 			if (rig)
@@ -196,8 +228,15 @@ namespace unityutilities.VRInteraction
 				if (a.priority != b.priority)
 					return b.priority.CompareTo(a.priority);
 				else
-					return Vector3.Distance(a.transform.position, transform.position)
+				{
+					// combine both distance and angular distance from the center for remote grabbing
+					float dist = Vector3.Distance(a.transform.position, transform.position)
 						.CompareTo(Vector3.Distance(b.transform.position, transform.position));
+					float angle = Vector3.Angle(transform.forward, a.transform.position - transform.position)
+						.CompareTo(Vector3.Angle(transform.forward, b.transform.position - transform.position));
+					return (int)(0*dist + angle);
+				}
+
 			});
 
 			// return the first element on the list
