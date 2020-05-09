@@ -1,7 +1,4 @@
-﻿#undef STEAMVR_AVAILABLE // change to #define or #undef if SteamVR utilites are installed
-#undef OCULUS_UTILITIES_AVAILABLE
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -379,20 +376,6 @@ namespace unityutilities
 			return ThumbstickPressUp(NonDominantHand);
 		}
 
-#if OCULUS_UTILITIES_AVAILABLE
-	public static bool ThumbstickPress(OVRInput.Controller side) {
-		return ThumbstickPress(OVRController2Side(side));
-	}
-
-	public static bool ThumbstickPressDown(OVRInput.Controller side) {
-		return ThumbstickPressDown(OVRController2Side(side));
-	}
-	
-	public static bool ThumbstickPressUp(OVRInput.Controller side) {
-		return ThumbstickPressUp(OVRController2Side(side));
-	}
-#endif
-
 		public static bool ThumbstickIdle(Side side, Axis axis)
 		{
 			if (axis == Axis.X)
@@ -552,32 +535,6 @@ namespace unityutilities
 		{
 			return Button1Up(NonDominantHand);
 		}
-
-#if OCULUS_UTILITIES_AVAILABLE
-	public static bool Button1(OVRInput.Controller side) {
-		return Button1(OVRController2Side(side));
-	}
-
-	public static bool Button1Down(OVRInput.Controller side) {
-		return Button1Down(OVRController2Side(side));
-	}
-	
-	public static bool Button1Up(OVRInput.Controller side) {
-		return Button1Up(OVRController2Side(side));
-	}
-	
-	public static bool Button2(OVRInput.Controller side) {
-		return Button2(OVRController2Side(side));
-	}
-
-	public static bool Button2Down(OVRInput.Controller side) {
-		return Button2Down(OVRController2Side(side));
-	}
-	
-	public static bool Button2Up(OVRInput.Controller side) {
-		return Button2Up(OVRController2Side(side));
-	}
-#endif
 
 		public static bool MenuButton(Side side = Side.Either)
 		{
@@ -775,34 +732,7 @@ namespace unityutilities
 
 			intensity = Mathf.Clamp01(intensity);
 
-#if OCULUS_UTILITIES_AVAILABLE
-		OVRHaptics.OVRHapticsChannel channel;
-		switch (side) {
-			case Side.Left:
-				channel = OVRHaptics.LeftChannel;
-				break;
-			case Side.Right:
-				channel = OVRHaptics.RightChannel;
-				break;
-			default:
-				Debug.LogError("Cannot vibrate on " + side);
-				return;
-		}
-
-		int length = (int)(duration * 10);
-		byte[] bytes = new byte[length];
-		for (int i = 0; i < length; i++) {
-			bytes[i] = (byte)(intensity * 255);
-		}
-
-		OVRHapticsClip clip = new OVRHapticsClip(bytes, length);
-		channel.Preempt(clip);
-#elif STEAMVR_AVAILABLE
-			//SteamVR_Controller.Input(side == Side.Left ? 0 : 1).TriggerHapticPulse(500);
-			//SteamVR_Input._default.outActions.Haptic
-#else
 			instance.inputModule.Vibrate(side, intensity, duration);
-#endif
 		}
 
 		private void StartVibrateDelay(Side side, float intensity, float duration, float delay)
@@ -843,37 +773,7 @@ namespace unityutilities
 		}
 
 		#endregion
-
-
-#if STEAMVR_AVAILABLE
-	SteamVR_Input_Sources SideToInputSources(Side side)
-	{
-		if (side == Side.Left)
-		{
-			return SteamVR_Input_Sources.LeftHand;
-		} else if (side == Side.Right)
-		{
-			return SteamVR_Input_Sources.RightHand;
-		} else if (side == Side.Both)
-		{
-			return SteamVR_Input_Sources.Any;
-		}
-		else
-		{
-			Debug.LogError("Cannot convert that side to an input source.");
-		}
-
-		return SteamVR_Input_Sources.Any;
-	}
-#endif
-
-#if OCULUS_UTILITIES_AVAILABLE
 	
-#endif
-
-		
-
-
 	}
 
 #if UNITY_EDITOR

@@ -1,6 +1,4 @@
-﻿#define OCULUS_UTILITIES_AVAILABLE
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;

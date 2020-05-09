@@ -1,5 +1,4 @@
 using UnityEngine;
-using static unityutilities.InputMan;
 
 namespace unityutilities
 {
@@ -51,11 +50,25 @@ namespace unityutilities
 			float left = 0, right = 0;
 			if (side != Side.Right)
 			{
-				left = OVRInput.Get(InputStringsToOVRInputAxis1D(key), Side2OVRController(Side.Left));
+				if (Is3DAxis(key))
+				{
+					left = OVRInput.Get(InputStringsToOVRInputAxis2D(key, out int index), Side2OVRController(Side.Left))[index];
+				}
+				else
+				{
+					left = OVRInput.Get(InputStringsToOVRInputAxis1D(key), Side2OVRController(Side.Left));
+				}
 			}
 			if (side != Side.Left)
 			{
-				right = OVRInput.Get(InputStringsToOVRInputAxis1D(key), Side2OVRController(Side.Right));
+				if (Is3DAxis(key))
+				{
+					right = OVRInput.Get(InputStringsToOVRInputAxis2D(key, out int index), Side2OVRController(Side.Right))[index];
+				}
+				else
+				{
+					right = OVRInput.Get(InputStringsToOVRInputAxis1D(key), Side2OVRController(Side.Right));
+				}
 			}
 
 			switch (side)
@@ -298,6 +311,25 @@ namespace unityutilities
 			return OVRInput.Button.None;
 		}
 
+		/// <summary>
+		/// Is this axis 2d or 3d?
+		/// </summary>
+		/// <param name="key"></param>
+		/// <returns></returns>
+		private bool Is3DAxis(InputStrings key)
+		{
+			switch (key)
+			{
+				case InputStrings.VR_Thumbstick_X:
+				case InputStrings.VR_Thumbstick_Y:
+					return true;
+				case InputStrings.VR_Trigger:
+				case InputStrings.VR_Grip:
+				default:
+					return false;
+			}
+		}
+
 		private static OVRInput.Axis1D InputStringsToOVRInputAxis1D(InputStrings key)
 		{
 			switch (key)
@@ -308,6 +340,28 @@ namespace unityutilities
 					return OVRInput.Axis1D.PrimaryHandTrigger;
 				default:
 					return OVRInput.Axis1D.None;
+			}
+		}
+
+		/// <summary>
+		/// Generates an Oculus Axis2D from an input string.
+		/// </summary>
+		/// <param name="key">Which input desired</param>
+		/// <param name="index">Which index of the vector2 is relevant. This can immediately be used to filter the output</param>
+		/// <returns></returns>
+		private static OVRInput.Axis2D InputStringsToOVRInputAxis2D(InputStrings key, out int index)
+		{
+			switch (key)
+			{
+				case InputStrings.VR_Thumbstick_X:
+					index = 0;
+					return OVRInput.Axis2D.PrimaryThumbstick;
+				case InputStrings.VR_Thumbstick_Y:
+					index = 1;
+					return OVRInput.Axis2D.PrimaryThumbstick;
+				default:
+					index = -1;
+					return OVRInput.Axis2D.None;
 			}
 		}
 
