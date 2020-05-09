@@ -25,7 +25,8 @@ namespace unityutilities.VRInteraction
 		private CopyTransform copyTransform;
 
 		public bool releaseVelocitySmoothing = true;
-		public bool allowMultiHandGrabbing = false;
+		
+		//public bool allowMultiHandGrabbing = false;	// TODO
 
 		// Use this for initialization
 		private new void Awake()

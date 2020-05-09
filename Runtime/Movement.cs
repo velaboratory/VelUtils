@@ -148,6 +148,7 @@ namespace unityutilities {
 		[Serializable]
 		public class Teleporter {
 			// inspector values
+			public Side inputSide = Side.Either;
 			public bool rotateOnTeleport;
 			public float maxTeleportableSlope = 45f;
 			public float lineRendererWidth = .01f;
@@ -351,14 +352,14 @@ namespace unityutilities {
 
 		private void Teleporting() {
 			// check for start of teleports
-			if (InputMan.Up(Side.Left)) {
+			if (InputMan.Up(Side.Left) && teleporter.inputSide.Contains(Side.Left)) {
 				if (currentTeleportingSide == Side.None) {
 					TeleportStart?.Invoke(Side.Left);
 				}
 				currentTeleportingSide = Side.Left;
 			}
 
-			if (InputMan.Up(Side.Right)) {
+			if (InputMan.Up(Side.Right) && teleporter.inputSide.Contains(Side.Right)) {
 				if (currentTeleportingSide == Side.None) {
 					TeleportStart?.Invoke(Side.Right);
 				}

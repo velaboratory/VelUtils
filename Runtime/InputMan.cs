@@ -37,6 +37,45 @@ namespace unityutilities
 		None
 	}
 
+	static class SideMethods
+	{
+
+		public static bool Contains(this Side s, Side other)
+		{
+			switch (s)
+			{
+				case Side.Left:
+					return other == Side.Left;
+				case Side.Right:
+					return other == Side.Right;
+				case Side.Both:
+					return other == Side.Both;
+				case Side.Either:
+					return other == Side.Left || other == Side.Right || other == Side.Both;
+				case Side.None:
+					return false;
+				default:
+					return false;
+			}
+		}
+
+		public static Side OtherSide(this Side side)
+		{
+			if (side == Side.Left)
+			{
+				return Side.Right;
+			}
+			else if (side == Side.Right)
+			{
+				return Side.Left;
+			}
+			else
+			{
+				return Side.None;
+			}
+		}
+	}
+
 	public enum Axis
 	{
 		X,
