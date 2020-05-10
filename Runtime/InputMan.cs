@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -37,7 +38,7 @@ namespace unityutilities
 		None
 	}
 
-	static class SideMethods
+	public static class SideMethods
 	{
 
 		public static bool Contains(this Side s, Side other)
@@ -59,6 +60,10 @@ namespace unityutilities
 			}
 		}
 
+		/// <summary>
+		/// Gets the "other" side from the current value
+		/// Only works for Left and Right
+		/// </summary>
 		public static Side OtherSide(this Side side)
 		{
 			if (side == Side.Left)
@@ -72,6 +77,67 @@ namespace unityutilities
 			else
 			{
 				return Side.None;
+			}
+		}
+
+		public static Side AddOption(this Side side, Side other)
+		{
+			// this wouldn't make sense
+			if (other == Side.Both)
+			{
+				throw new Exception();
+			}
+			// if we are actually adding an option to the left side
+			else if (side == Side.Left &&
+				(other == Side.Right || other == Side.Either))
+			{
+				return Side.Either;
+			}
+			// if we are actually adding an option to the right side
+			else if (side == Side.Right &&
+				(other == Side.Left || other == Side.Either))
+			{
+				return Side.Either;
+			}
+			// just use the new value
+			else if (side == Side.None)
+			{
+				return other;
+			}
+			// nothing has changed
+			else
+			{
+				return side;
+			}
+		}
+
+		public static Side SubtractOption(this Side side, Side other)
+		{
+			// this wouldn't make sense
+			if (other == Side.Both)
+			{
+				throw new Exception();
+			}
+			// if we are actually subtracting the left side
+			else if (side == Side.Either && other == Side.Left)
+			{
+				return Side.Right;
+			}
+			// if we are actually subtracting the right side
+			else if (side == Side.Either && other == Side.Right)
+			{
+				return Side.Left;
+			}
+			else if (
+				(side == Side.Left && other == Side.Left) ||
+				(side == Side.Right && other == Side.Right))
+			{
+				return Side.None;
+			}
+			// nothing has changed
+			else
+			{
+				return side;
 			}
 		}
 	}
@@ -163,7 +229,7 @@ namespace unityutilities
 		public static HeadsetSystem headsetSystem;
 		public static HeadsetControllerStyle controllerStyle;
 
-		
+
 
 		public static Side DominantHand { get; set; }
 
@@ -812,7 +878,7 @@ namespace unityutilities
 		}
 
 		#endregion
-	
+
 	}
 
 #if UNITY_EDITOR
