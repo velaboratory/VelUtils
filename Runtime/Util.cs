@@ -196,7 +196,7 @@ namespace unityutilities
 
 			foreach (var hit in hits)
 			{
-				float angleToHit = Vector3.Angle(direction, hit.point - origin);
+				float angleToHit = Vector3.Angle(direction, hit.collider.transform.position - origin);
 
 				if (angleToHit < angle)
 				{
