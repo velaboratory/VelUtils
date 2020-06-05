@@ -215,6 +215,28 @@ namespace unityutilities
 					return false;
 			}
 		}
+
+		public static bool IsDoubleSidedAxis(this InputStrings key)
+		{
+			switch (key)
+			{
+				case InputStrings.VR_Thumbstick_X:
+				case InputStrings.VR_Thumbstick_Y:
+					return true;
+				case InputStrings.VR_Thumbstick_X_Left:
+				case InputStrings.VR_Thumbstick_X_Right:
+				case InputStrings.VR_Thumbstick_Y_Up:
+				case InputStrings.VR_Thumbstick_Y_Down:
+				case InputStrings.VR_Trigger:
+				case InputStrings.VR_Grip:
+				case InputStrings.VR_Thumbstick_Press:
+				case InputStrings.VR_Button1:
+				case InputStrings.VR_Button2:
+					return false;
+				default:
+					return false;
+			}
+		}
 	}
 
 	/// <summary>

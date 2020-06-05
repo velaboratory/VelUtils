@@ -129,21 +129,49 @@ namespace unityutilities
 		{
 			if (key.IsAxis())
 			{
+				var threshold = key.IsThumbstickAxis() ? thumbstickThreshold : triggerThreshold;
+				var doubleSided = key.IsDoubleSidedAxis();
 				bool left, right;
+
+				var leftValue = Input.GetAxis(inputManagerStrings[key][(int)Side.Left]);
+				var rightValue = Input.GetAxis(inputManagerStrings[key][(int)Side.Right]);
 				switch (side)
 				{
 					case Side.Both:
-						left = Input.GetAxis(inputManagerStrings[key][(int)Side.Left]) > triggerThreshold;
-						right = Input.GetAxis(inputManagerStrings[key][(int)Side.Right]) > triggerThreshold;
+						if (doubleSided)
+						{
+							left = Mathf.Abs(leftValue) > threshold;
+							right = Mathf.Abs(rightValue) > threshold;
+						}
+						else
+						{
+							left = leftValue > threshold;
+							right = rightValue > threshold;
+						}
 						return left && right;
 					case Side.Either:
-						left = Input.GetAxis(inputManagerStrings[key][(int)Side.Left]) > triggerThreshold;
-						right = Input.GetAxis(inputManagerStrings[key][(int)Side.Right]) > triggerThreshold;
+						if (doubleSided)
+						{
+							left = Mathf.Abs(leftValue) > threshold;
+							right = Mathf.Abs(rightValue) > threshold;
+						}
+						else
+						{
+							left = leftValue > threshold;
+							right = rightValue > threshold;
+						}
 						return left || right;
 					case Side.None:
 						return false;
 					default:
-						return Input.GetAxis(inputManagerStrings[key][(int)side]) > triggerThreshold;
+						if (doubleSided)
+						{
+							return Mathf.Abs(Input.GetAxis(inputManagerStrings[key][(int)side])) > threshold;
+						}
+						else
+						{
+							return Input.GetAxis(inputManagerStrings[key][(int)side]) > threshold;
+						}
 				}
 			}
 			else

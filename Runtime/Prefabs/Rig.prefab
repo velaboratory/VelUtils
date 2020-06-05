@@ -250,6 +250,8 @@ GameObject:
   - component: {fileID: 8208687673189042915}
   - component: {fileID: 3746459757574168967}
   - component: {fileID: 7938913794003630012}
+  - component: {fileID: 4147512725684626013}
+  - component: {fileID: 2820108711404196259}
   m_Layer: 0
   m_Name: Rig
   m_TagString: Untagged
@@ -329,6 +331,7 @@ MonoBehaviour:
   slidingSpeed: 3
   teleportingMovement: 1
   teleporter:
+    inputSide: 3
     rotateOnTeleport: 0
     maxTeleportableSlope: 20
     lineRendererWidth: 0.01
@@ -369,6 +372,31 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &4147512725684626013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7313773171011755184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6de12accbaaa0714b91e39ba0989451f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2820108711404196259
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7313773171011755184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 481c6a1ffd5195d409ba39dbbb617100, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputModule: {fileID: 4147512725684626013}
 --- !u!1 &7400124074617274568
 GameObject:
   m_ObjectHideFlags: 0
@@ -433,9 +461,11 @@ MonoBehaviour:
   canGrab: 1
   grabInput: 1
   vibrateOnGrab: 1
+  remoteGrabbingDistance: 5
   grabbedVRGrabbable: {fileID: 0}
   selectedVRGrabbable: {fileID: 0}
   touchedObjs: []
+  raycastedObjs: []
 --- !u!114 &1131421561
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -518,9 +548,11 @@ MonoBehaviour:
   canGrab: 1
   grabInput: 1
   vibrateOnGrab: 1
+  remoteGrabbingDistance: 5
   grabbedVRGrabbable: {fileID: 0}
   selectedVRGrabbable: {fileID: 0}
   touchedObjs: []
+  raycastedObjs: []
 --- !u!114 &1131421562
 MonoBehaviour:
   m_ObjectHideFlags: 0
