@@ -1,7 +1,7 @@
 {
   "name": "com.franzco.unityutilities",
   "displayName": "unityutilities",
-  "version": "2.7.8",
+  "version": "2.8.0",
   "unity": "2019.1",
   "description": "A lightweight collection of flexible utilities for VR projects.",
   "keywords": [
@@ -26,9 +26,15 @@
       "path": "Samples~/FingerTouchModule"
     },
     {
-    	"displayName": "XR Interaction",
-	"description": "Includes XR Interaction compatible scripts. Requires the XR Interaction Toolkit package",
-	"path": "Samples~/XRInteractionModule"
+      "displayName": "XR Interaction",
+	  "description": "Includes XR Interaction compatible scripts. Requires the XR Interaction Toolkit package",
+	  "path": "Samples~/XRInteractionModule"
+    },
+    {
+      "displayName": "Pico Neo 2 Support",
+	  "description": "Includes an input module for the Pico Neo 2 controllers",
+	  "path": "Samples~/Pico Neo 2 Support"
     }
+	
   ]
 }
