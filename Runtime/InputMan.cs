@@ -326,7 +326,10 @@ namespace unityutilities
 			}
 		}
 
-
+		public static bool UserPresent()
+		{
+			return XRDevice.userPresence == UserPresenceState.Present;
+		}
 
 		#region Generic Input
 		public static bool Get(VRInput input, Side side = Side.Either)
