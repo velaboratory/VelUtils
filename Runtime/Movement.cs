@@ -312,6 +312,8 @@ namespace unityutilities {
 		}
 
 		private void Update() {
+			Debug.Log(InputMan.Left(Side.Left));
+
 			// turn
 			Turn();
 
@@ -726,6 +728,8 @@ namespace unityutilities {
 					turnInputLocal = Side.Right;
 				}
 				if (yaw && Mathf.Abs(InputMan.ThumbstickX(turnInputLocal)) > turnNullZone) {
+
+					Debug.Log("LLEFT spin");
 					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up,
 						InputMan.ThumbstickX(turnInputLocal) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
@@ -746,6 +750,7 @@ namespace unityutilities {
 					turnInputLocal = Side.Right;
 				}
 				if (yaw && InputMan.Left(turnInputLocal)) {
+					Debug.Log("LLEFT");
 					snapTurnDirection = "left";
 					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up, -snapRotationAmount);
 				}

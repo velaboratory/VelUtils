@@ -12,7 +12,15 @@ namespace unityutilities
 	{
 		None,
 		Oculus,
-		SteamVR
+		SteamVR,
+		Pico
+	}
+
+	public enum HeadsetControllerLayout	// TODO not used or set yet
+	{
+		None,
+		Thumbstick,
+		Touchpad
 	}
 
 	public enum HeadsetControllerStyle
@@ -249,6 +257,7 @@ namespace unityutilities
 		public InputModule inputModule;
 
 		public static HeadsetSystem headsetSystem;
+		public static HeadsetControllerLayout controllerLayout;
 		public static HeadsetControllerStyle controllerStyle;
 
 
@@ -302,6 +311,8 @@ namespace unityutilities
 			string deviceName = XRSettings.loadedDeviceName;
 			string modelName = XRDevice.model;
 			Debug.Log("[UU] Loaded device: " + XRSettings.loadedDeviceName + " (" + modelName + ")", instance);
+
+			controllerLayout = HeadsetControllerLayout.Thumbstick; // TODO correctly assign this
 
 			if (deviceName.Contains("oculus") || modelName.Contains("Oculus Rift S") || modelName.Contains("Quest"))
 			{
@@ -686,7 +697,7 @@ namespace unityutilities
 
 			if (side == Side.Both)
 			{
-				if (headsetSystem == HeadsetSystem.Oculus)
+				if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 				{
 					return (instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Up, Side.Right)
 						&& instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Up, Side.Left)) ||
@@ -701,7 +712,7 @@ namespace unityutilities
 			}
 			else
 			{
-				if (headsetSystem == HeadsetSystem.Oculus)
+				if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 				{
 					return instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Up, side);
 				}
@@ -718,7 +729,7 @@ namespace unityutilities
 
 			if (side == Side.Both)
 			{
-				if (headsetSystem == HeadsetSystem.Oculus)
+				if (controllerLayout == HeadsetControllerLayout.Thumbstick)	
 				{
 					return (instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Down, Side.Right)
 						&& instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Down, Side.Left)) ||
@@ -733,7 +744,7 @@ namespace unityutilities
 			}
 			else
 			{
-				if (headsetSystem == HeadsetSystem.Oculus)
+				if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 				{
 					return instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Down, side);
 				}
@@ -750,7 +761,7 @@ namespace unityutilities
 
 			if (side == Side.Both)
 			{
-				if (headsetSystem == HeadsetSystem.Oculus)
+				if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 				{
 					return (instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Left, Side.Right)
 						&& instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Left, Side.Left)) ||
@@ -765,7 +776,7 @@ namespace unityutilities
 			}
 			else
 			{
-				if (headsetSystem == HeadsetSystem.Oculus)
+				if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 				{
 					return instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Left, side);
 				}
@@ -782,7 +793,7 @@ namespace unityutilities
 
 			if (side == Side.Both)
 			{
-				if (headsetSystem == HeadsetSystem.Oculus)
+				if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 				{
 					return (instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Right, Side.Right)
 						&& instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Right, Side.Left)) ||
@@ -797,7 +808,7 @@ namespace unityutilities
 			}
 			else
 			{
-				if (headsetSystem == HeadsetSystem.Oculus)
+				if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 				{
 					return instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Right, side);
 				}
@@ -810,7 +821,7 @@ namespace unityutilities
 
 		public static float Vertical(Side side = Side.Either)
 		{
-			if (headsetSystem == HeadsetSystem.Oculus)
+			if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 			{
 				return ThumbstickY(side);
 			}
@@ -825,7 +836,7 @@ namespace unityutilities
 
 		public static float Horizontal(Side side = Side.Either)
 		{
-			if (headsetSystem == HeadsetSystem.Oculus)
+			if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 			{
 				return ThumbstickX(side);
 			}
