@@ -27,14 +27,13 @@
     },
     {
       "displayName": "XR Interaction",
-	  "description": "Includes XR Interaction compatible scripts. Requires the XR Interaction Toolkit package",
-	  "path": "Samples~/XRInteractionModule"
+      "description": "Includes XR Interaction compatible scripts. Requires the XR Interaction Toolkit package",
+      "path": "Samples~/XRInteractionModule"
     },
     {
       "displayName": "Pico Neo 2 Support",
-	  "description": "Includes an input module for the Pico Neo 2 controllers",
-	  "path": "Samples~/Pico Neo 2 Support"
+      "description": "Includes an input module for the Pico Neo 2 controllers",
+      "path": "Samples~/Pico Neo 2 Support"
     }
-	
   ]
 }

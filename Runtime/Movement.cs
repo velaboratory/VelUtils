@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace unityutilities {
 	/// <summary>
@@ -69,6 +70,11 @@ namespace unityutilities {
 		public float slidingSpeed = 3f;
 
 
+		[Header("Keyboard FPS Movement")]
+		public bool keyboardMovement = false;
+		public bool keyboardMovementOnlyWhenNoHeadset = true;
+		public bool keyboardEnableJump = true;
+		public float jumpForce = 1000;
 
 
 
@@ -327,9 +333,9 @@ namespace unityutilities {
 
 			Boosters();
 
-			if (slidingMovement) {
-				SlidingMovement();
-			}
+			
+			SlidingMovement();
+
 
 			// update lastVels
 			lastVels[lastVelsIndex] = rig.rb.velocity;
@@ -352,6 +358,7 @@ namespace unityutilities {
 		#region Teleporting
 
 		private void Teleporting() {
+
 			// check for start of teleports
 			if (InputMan.Up(Side.Left) && teleporter.inputSide.Contains(Side.Left)) {
 				if (currentTeleportingSide == Side.None) {
@@ -598,6 +605,29 @@ namespace unityutilities {
 		}
 
 		private void SlidingMovement() {
+			if (!slidingMovement && !keyboardMovement) return;
+
+			float stickX = 0, stickY = 0;
+			float keyX = 0, keyY = 0;
+			float horizontal = 0, vertical = 0;
+
+			if (!keyboardMovement)
+			{
+				horizontal = InputMan.ThumbstickX(Side.Left);
+				vertical = InputMan.ThumbstickY(Side.Left);
+			}
+			else if (keyboardMovement && (!keyboardMovementOnlyWhenNoHeadset || !InputMan.UserPresent()))
+			{
+				horizontal = Input.GetAxis("Horizontal");
+				vertical = -Input.GetAxis("Vertical");
+
+				// JUMP 🦘
+				if (Input.GetKeyDown(KeyCode.Space))
+				{
+					rig.rb.AddForce(Vector3.up * jumpForce);
+				}
+			}
+
 			bool useForce = false;
 			Vector3 forward = -rig.head.forward;
 			forward.y = 0;
@@ -607,20 +637,20 @@ namespace unityutilities {
 
 
 			if (useForce) {
-				Vector3 forwardForce = Time.deltaTime * InputMan.ThumbstickY(Side.Left) * forward * 1000f;
+				Vector3 forwardForce = Time.deltaTime * vertical * forward * 1000f;
 				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.forward)) < slidingSpeed) {
 					rig.rb.AddForce(forwardForce);
 				}
 
-				Vector3 rightForce = Time.deltaTime * InputMan.ThumbstickX(Side.Left) * right * 1000f;
+				Vector3 rightForce = Time.deltaTime * horizontal * right * 1000f;
 				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.right)) < slidingSpeed) {
 					rig.rb.AddForce(rightForce);
 				}
 			}
 			else {
 				Vector3 currentSpeed = rig.rb.velocity;
-				Vector3 forwardSpeed = InputMan.ThumbstickY(Side.Left) * forward;
-				Vector3 rightSpeed = InputMan.ThumbstickX(Side.Left) * right;
+				Vector3 forwardSpeed = vertical * forward;
+				Vector3 rightSpeed = horizontal * right;
 				Vector3 speed = forwardSpeed + rightSpeed;
 				rig.rb.velocity = slidingSpeed * speed + (currentSpeed.y * rig.rb.transform.up);
 			}
