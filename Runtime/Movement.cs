@@ -306,7 +306,6 @@ namespace unityutilities {
 		}
 
 		private void Update() {
-			Debug.Log(InputMan.Left(Side.Left));
 
 			// turn
 			Turn();
@@ -679,6 +678,7 @@ namespace unityutilities {
 		}
 
 		private void Turn() {
+
 			// don't turn if currently teleporting
 			if (currentTeleportingSide != Side.None) {
 				return;
@@ -720,7 +720,6 @@ namespace unityutilities {
 					turnInputLocal = Side.Right;
 				}
 				if (yaw && InputMan.Left(turnInputLocal)) {
-					Debug.Log("LLEFT");
 					snapTurnDirection = "left";
 					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up, -snapRotationAmount);
 				}

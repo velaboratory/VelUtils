@@ -194,11 +194,11 @@ namespace unityutilities
 			}
 			else if (side == Side.Both)
 			{
-				return GetRaw(key, Side.Left) && GetRaw(key, Side.Right);
+				return (GetRaw(key, Side.Left) && GetRawDown(key, Side.Right)) || (GetRawDown(key, Side.Left) && GetRaw(key, Side.Right));
 			}
 			else if (side == Side.Either)
 			{
-				return GetRaw(key, Side.Left) || GetRaw(key, Side.Right);
+				return GetRawDown(key, Side.Left) || GetRawDown(key, Side.Right);
 			}
 			else
 			{
@@ -367,8 +367,8 @@ namespace unityutilities
 			{
 				UpdateDictionaryDirection(ThumbstickX((Side)i) < -thumbstickThreshold, i, InputStrings.VR_Thumbstick_X_Left);
 				UpdateDictionaryDirection(ThumbstickX((Side)i) > thumbstickThreshold, i, InputStrings.VR_Thumbstick_X_Right);
-				UpdateDictionaryDirection(ThumbstickY((Side)i) < -thumbstickThreshold, i, InputStrings.VR_Thumbstick_Y_Up);
-				UpdateDictionaryDirection(ThumbstickY((Side)i) > thumbstickThreshold, i, InputStrings.VR_Thumbstick_Y_Down);
+				UpdateDictionaryDirection(ThumbstickY((Side)i) > thumbstickThreshold, i, InputStrings.VR_Thumbstick_Y_Up);
+				UpdateDictionaryDirection(ThumbstickY((Side)i) < -thumbstickThreshold, i, InputStrings.VR_Thumbstick_Y_Down);
 			}
 		}
 
