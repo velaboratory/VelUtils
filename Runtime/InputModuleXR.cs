@@ -11,6 +11,7 @@ namespace unityutilities
 
 		private void Awake()
 		{
+			firstPressed = new Dictionary<InputStrings, bool[,]>();
 			firstPressed.Add(InputStrings.VR_Trigger, new bool[2, 3]);
 			firstPressed.Add(InputStrings.VR_Grip, new bool[2, 3]);
 
@@ -24,6 +25,7 @@ namespace unityutilities
 			firstPressed.Add(InputStrings.VR_Thumbstick_Y_Up, new bool[2, 3]);
 			firstPressed.Add(InputStrings.VR_Thumbstick_Y_Down, new bool[2, 3]);
 
+			firstPressed = new Dictionary<InputStrings, bool[,]>();
 			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_X_Left, new float[] { 0, 0 });
 			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_X_Right, new float[] { 0, 0 });
 			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_Y_Up, new float[] { 0, 0 });

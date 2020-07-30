@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.XR;
 using static unityutilities.InputMan;
@@ -24,6 +25,7 @@ namespace unityutilities
 
 		private void Awake()
 		{
+			firstPressed = new Dictionary<InputStrings, bool[,]>();
 			firstPressed.Add(InputStrings.VR_Trigger, new bool[2, 3]);
 			firstPressed.Add(InputStrings.VR_Grip, new bool[2, 3]);
 			firstPressed.Add(InputStrings.VR_Thumbstick_X_Left, new bool[2, 3]);
@@ -31,6 +33,7 @@ namespace unityutilities
 			firstPressed.Add(InputStrings.VR_Thumbstick_Y_Up, new bool[2, 3]);
 			firstPressed.Add(InputStrings.VR_Thumbstick_Y_Down, new bool[2, 3]);
 
+			directionalTimeoutValue = new Dictionary<InputStrings, float[]>();
 			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_X_Left, new float[] { 0, 0 });
 			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_X_Right, new float[] { 0, 0 });
 			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_Y_Up, new float[] { 0, 0 });
@@ -82,7 +85,14 @@ namespace unityutilities
 					return ns;
 				}
 			}
-			return nodes[0];
+			if (nodes != null && nodes.Count > 0)
+			{
+				return nodes[0];
+			}
+			else
+			{
+				return new XRNodeState();
+			}
 		}
 
 		public override void Vibrate(Side side, float intensity, float duration)

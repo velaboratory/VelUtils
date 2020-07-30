@@ -728,8 +728,6 @@ namespace unityutilities {
 					turnInputLocal = Side.Right;
 				}
 				if (yaw && Mathf.Abs(InputMan.ThumbstickX(turnInputLocal)) > turnNullZone) {
-
-					Debug.Log("LLEFT spin");
 					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up,
 						InputMan.ThumbstickX(turnInputLocal) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
