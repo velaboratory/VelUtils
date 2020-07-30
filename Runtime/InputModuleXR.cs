@@ -1,5 +1,4 @@
-﻿using Boo.Lang.Runtime;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
@@ -66,7 +65,7 @@ namespace unityutilities
 			}
 			else
 			{
-				throw new AssertionFailedException("Must be right or left hand");
+				throw new Exception("Must be right or left hand");
 			}
 		}
 

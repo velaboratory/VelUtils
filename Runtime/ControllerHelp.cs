@@ -3,9 +3,11 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace unityutilities {
+namespace unityutilities
+{
 	[AddComponentMenu("unityutilities/Controller Help")]
-	public class ControllerHelp : MonoBehaviour {
+	public class ControllerHelp : MonoBehaviour
+	{
 		public Rig rig;
 		public GameObject labelPrefab;
 		private List<ControllerLabel> instantiatedLabels = new List<ControllerLabel>();
@@ -54,7 +56,8 @@ namespace unityutilities {
 
 		private static Dictionary<ButtonHintType, Vector3[]> offsets;
 
-		public class ControllerLabel {
+		public class ControllerLabel
+		{
 			public readonly Side side;
 			public readonly ButtonHintType type;
 			private readonly GameObject labelObj;
@@ -86,7 +89,8 @@ namespace unityutilities {
 			/// <param name="side">Which controller</param>
 			/// <param name="type">Type of input</param>
 			/// <param name="offset">Position and direction of label offset</param>
-			public ControllerLabel(Side side, ButtonHintType type, Transform parent, Transform controller, GameObject labelPrefab, Vector3[] offset, Mesh mesh = null, Material meshMaterial = null) {
+			public ControllerLabel(Side side, ButtonHintType type, Transform parent, Transform controller, GameObject labelPrefab, Vector3[] offset, Mesh mesh = null, Material meshMaterial = null)
+			{
 				labelObj = Instantiate(labelPrefab, parent);
 				canvasObj = labelObj.GetComponentInChildren<Canvas>().GetComponent<RectTransform>();
 				text = labelObj.GetComponentInChildren<Text>();
@@ -110,17 +114,20 @@ namespace unityutilities {
 				meshHighlight.AddComponent<MeshRenderer>().material = meshMaterial;
 			}
 
-			public void Remove() {
+			public void Remove()
+			{
 				Destroy(labelObj);
 				Destroy(meshHighlight);
 			}
 
-			public void UpdatePos() {
+			public void UpdatePos()
+			{
 				Vector3 pos = controller.TransformPoint(offset[0] * scale);
 				Vector3 dir = controller.TransformPoint(offset[1] * scale);
 				labelObj.transform.position = dir;
 				canvasObj.pivot = new Vector2(0, .5f);
-				if (offset[1].x <= 0) {
+				if (offset[1].x <= 0)
+				{
 					canvasObj.pivot = new Vector2(1, .5f);
 				}
 				canvasObj.anchoredPosition = Vector2.zero;
@@ -129,17 +136,20 @@ namespace unityutilities {
 				RotateToFaceCamera();
 			}
 
-			private void RotateToFaceCamera() {
+			private void RotateToFaceCamera()
+			{
 				labelObj.transform.LookAt(cam.transform);
 				labelObj.transform.Rotate(0, 180, 0, Space.Self);
 			}
 
-			public void SetText(string labelText) {
+			public void SetText(string labelText)
+			{
 				text.text = labelText;
 			}
 		}
 
-		public enum ButtonHintType {
+		public enum ButtonHintType
+		{
 			Trigger,
 			Grip,
 			Thumbstick,
@@ -151,21 +161,27 @@ namespace unityutilities {
 			OtherObject
 		}
 
-		private void Awake() {
+		private void Awake()
+		{
 			instance = this;
 		}
 
-		private void Start() {
-			if (!initialized) {
+		private void Start()
+		{
+			if (!initialized)
+			{
 				//FindControllerParts();
 
-				if (InputMan.controllerStyle == HeadsetControllerStyle.Rift) {
+				if (InputMan.controllerStyle == HeadsetControllerStyle.Rift)
+				{
 					offsets = riftOffsets;
 				}
-				else if (InputMan.controllerStyle == HeadsetControllerStyle.RiftSQuest) {
+				else if (InputMan.controllerStyle == HeadsetControllerStyle.RiftSQuest)
+				{
 					offsets = riftSQuestOffsets;
 				}
-				else {
+				else
+				{
 					offsets = riftOffsets;
 				}
 
@@ -190,8 +206,10 @@ namespace unityutilities {
 			initialized = true;
 		}
 
-		private void LateUpdate() {
-			foreach (ControllerLabel controllerLabel in instantiatedLabels) {
+		private void LateUpdate()
+		{
+			foreach (ControllerLabel controllerLabel in instantiatedLabels)
+			{
 				controllerLabel.UpdatePos();
 			}
 		}
@@ -202,8 +220,10 @@ namespace unityutilities {
 		/// <param name="side">Which controller</param>
 		/// <param name="hintType">The type of input to show the hint for</param>
 		/// <param name="text">The text to show on the hint</param>
-		public static ControllerLabel[] ShowHint(Side side, ButtonHintType hintType, string text) {
-			if (!instance.initialized) {
+		public static ControllerLabel[] ShowHint(Side side, ButtonHintType hintType, string text)
+		{
+			if (!instance.initialized)
+			{
 				instance.Start();
 			}
 			// these two could be combined if destroy method also deleted gameobject
@@ -214,27 +234,33 @@ namespace unityutilities {
 
 			InputMan.Vibrate(side, 1);
 
-			if (side == Side.Left || side == Side.Both) {
+			if (side == Side.Left || side == Side.Both)
+			{
 				ControllerLabel label;
-				if (buttonMeshesDict[Side.Left].ContainsKey(hintType)) {
+				if (buttonMeshesDict[Side.Left].ContainsKey(hintType))
+				{
 					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.leftHand, instance.labelPrefab, offsets[hintType], buttonMeshesDict[Side.Left][hintType], instance.highlightMaterial);
 				}
-				else {
+				else
+				{
 					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.leftHand, instance.labelPrefab, offsets[hintType]);
 				}
 				label.SetText(text);
 				instance.instantiatedLabels.Add(label);
 				labels.Add(label);
 			}
-			if (side == Side.Right || side == Side.Both) {
+			if (side == Side.Right || side == Side.Both)
+			{
 				Vector3[] flippedOffsets = new Vector3[] { offsets[hintType][0], offsets[hintType][1] };
 				flippedOffsets[0].x *= -1;
 				flippedOffsets[1].x *= -1;
 				ControllerLabel label;
-				if (buttonMeshesDict[Side.Right].ContainsKey(hintType)) {
+				if (buttonMeshesDict[Side.Right].ContainsKey(hintType))
+				{
 					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.rightHand, instance.labelPrefab, flippedOffsets, buttonMeshesDict[Side.Right][hintType], instance.highlightMaterial);
 				}
-				else {
+				else
+				{
 					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.rightHand, instance.labelPrefab, flippedOffsets);
 				}
 				label.SetText(text);
@@ -250,18 +276,22 @@ namespace unityutilities {
 		/// </summary>
 		/// <param name="side">Which controller</param>
 		/// <param name="hintType">The type of hint to hide</param>
-		public static void HideHint(Side side, ButtonHintType hintType) {
+		public static void HideHint(Side side, ButtonHintType hintType)
+		{
 			// these two could be combined if destroy method also deleted gameobject
 			instance.instantiatedLabels.FindAll(e => (e.type == hintType && e.side == side)).ForEach(e => e.Remove());
 			instance.instantiatedLabels.RemoveAll(e => (e.type == hintType && e.side == side));
 		}
 
-		public static void HideAllHints(Side side = Side.Both) {
+		public static void HideAllHints(Side side = Side.Both)
+		{
 			if (!instance) return;
 
 			List<ControllerLabel> deletedLabels = new List<ControllerLabel>();
-			foreach (ControllerLabel label in instance.instantiatedLabels) {
-				if (label.side == side || side == Side.Both) {
+			foreach (ControllerLabel label in instance.instantiatedLabels)
+			{
+				if (label.side == side || side == Side.Both)
+				{
 					label.Remove();
 					deletedLabels.Add(label);
 				}

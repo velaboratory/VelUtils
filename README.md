@@ -11,10 +11,10 @@ Clone and use the package manager to add `package.json`, or add the git url to `
 ## Scripts included
 
 ### `AdjustPos.cs`
-Nudges an object with assignable keyboard shortcuts.
+Nudges an object with assignable keyboard shortcuts. Add this script to the object, then customize the inputs in the editor.
 
 ### `InputMan.cs`
-Makes input from VR devices accessible from a unified set of methods. Can treat axes as button down.
+Makes input from VR devices accessible from a unified set of methods. Can treat axes as button down. Needs an InputModule to work, so either add the default one with the button in the editor, or add a platform-specific one.
 
 ### `Logger.cs`
 Logs any data to a file.
@@ -39,7 +39,7 @@ Adds a dropdown menu option for automatically populating the Input system for us
 Adds `F5` shortcut to enter play mode.
 
 ### `ControllerHelp.cs` and `ControllerHelpTester.cs`
-Adds functionality to highlight controller buttons and show hints.
+Adds functionality to highlight controller buttons and show hints. To use, add the `ControllerHelp` prefab found in the `Prefabs` folder to the scene anywhere. Highlighting inputs can be done by calling the static method `ControllerHelp.ShowHint()` and passing in a message.
 
 ### `DontDestroyOnLoad.cs`
 That's it

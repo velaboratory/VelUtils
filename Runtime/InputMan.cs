@@ -16,7 +16,7 @@ namespace unityutilities
 		Pico
 	}
 
-	public enum HeadsetControllerLayout	// TODO not used or set yet
+	public enum HeadsetControllerLayout // TODO not used or set yet
 	{
 		None,
 		Thumbstick,
@@ -729,7 +729,7 @@ namespace unityutilities
 
 			if (side == Side.Both)
 			{
-				if (controllerLayout == HeadsetControllerLayout.Thumbstick)	
+				if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 				{
 					return (instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Down, Side.Right)
 						&& instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Down, Side.Left)) ||
@@ -931,6 +931,9 @@ namespace unityutilities
 
 		public override void OnInspectorGUI()
 		{
+			EditorGUILayout.LabelField("Use this script to get input from VR Controllers.");
+			EditorGUILayout.Space();
+
 			base.OnInspectorGUI();
 
 			if (inputMan.inputModule == null)
