@@ -25,7 +25,7 @@ namespace unityutilities
 			firstPressed.Add(InputStrings.VR_Thumbstick_Y_Up, new bool[2, 3]);
 			firstPressed.Add(InputStrings.VR_Thumbstick_Y_Down, new bool[2, 3]);
 
-			firstPressed = new Dictionary<InputStrings, bool[,]>();
+			directionalTimeoutValue = new Dictionary<InputStrings, float[]>();
 			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_X_Left, new float[] { 0, 0 });
 			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_X_Right, new float[] { 0, 0 });
 			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_Y_Up, new float[] { 0, 0 });
@@ -88,7 +88,14 @@ namespace unityutilities
 					return ns;
 				}
 			}
-			return nodes[0];
+			if (nodes == null || nodes.Count == 0)
+			{
+				return new XRNodeState();
+			}
+			else
+			{
+				return nodes[0];
+			}
 		}
 
 		public override void Vibrate(Side side, float intensity, float duration)
@@ -171,12 +178,12 @@ namespace unityutilities
 						case InputStrings.VR_Thumbstick_X_Right:
 							return value.x > thumbstickThreshold ? 1 : 0;
 						case InputStrings.VR_Thumbstick_Y_Up:
-							return value.y < -thumbstickThreshold ? 1 : 0;
-						case InputStrings.VR_Thumbstick_Y_Down:
 							return value.y > thumbstickThreshold ? 1 : 0;
+						case InputStrings.VR_Thumbstick_Y_Down:
+							return value.y < -thumbstickThreshold ? 1 : 0;
+						default:
+							return 0;
 					}
-
-					return 0;
 				}
 				else return 0;
 			}
@@ -406,8 +413,8 @@ namespace unityutilities
 
 				UpdateDictionaryDirection(ThumbstickX((Side)i) < -thumbstickThreshold, i, InputStrings.VR_Thumbstick_X_Left);
 				UpdateDictionaryDirection(ThumbstickX((Side)i) > thumbstickThreshold, i, InputStrings.VR_Thumbstick_X_Right);
-				UpdateDictionaryDirection(ThumbstickY((Side)i) < -thumbstickThreshold, i, InputStrings.VR_Thumbstick_Y_Up);
-				UpdateDictionaryDirection(ThumbstickY((Side)i) > thumbstickThreshold, i, InputStrings.VR_Thumbstick_Y_Down);
+				UpdateDictionaryDirection(ThumbstickY((Side)i) > thumbstickThreshold, i, InputStrings.VR_Thumbstick_Y_Up);
+				UpdateDictionaryDirection(ThumbstickY((Side)i) < -thumbstickThreshold, i, InputStrings.VR_Thumbstick_Y_Down);
 			}
 		}
 	}
