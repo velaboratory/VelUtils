@@ -23,9 +23,10 @@ namespace unityutilities.VRInteraction
 		private bool wasKinematic;
 		private bool wasUsingGravity;
 		private CopyTransform copyTransform;
+		public bool setKinematic = true;
 
 		public bool releaseVelocitySmoothing = true;
-		
+
 		//public bool allowMultiHandGrabbing = false;	// TODO
 
 		// Use this for initialization
@@ -48,13 +49,16 @@ namespace unityutilities.VRInteraction
 
 
 			// TODO work out better system
-			if (!locallyOwned)
+			if (setKinematic)
 			{
-				rb.isKinematic = true;
-			}
-			else
-			{
-				rb.isKinematic = wasKinematic;
+				if (!locallyOwned)
+				{
+					rb.isKinematic = true;
+				}
+				else
+				{
+					rb.isKinematic = wasKinematic;
+				}
 			}
 		}
 

@@ -142,11 +142,15 @@ namespace unityutilities
 		{
 			if (side == Side.Either)
 			{
-				return Mathf.Max(GetRawValue(key, Side.Left), GetRawValue(key, Side.Right));    // TODO doesn't work with negatives
+				float left = GetRawValue(key, Side.Left);
+				float right = GetRawValue(key, Side.Right);
+				return Mathf.Abs(left) > Mathf.Abs(right) ? left : right;
 			}
 			else if (side == Side.Both)
 			{
-				return Mathf.Min(GetRawValue(key, Side.Left), GetRawValue(key, Side.Right));    // TODO doesn't work with negatives
+				float left = GetRawValue(key, Side.Left);
+				float right = GetRawValue(key, Side.Right);
+				return Mathf.Abs(left) < Mathf.Abs(right) ? left : right;
 			}
 			else if (side == Side.None)
 			{
