@@ -140,6 +140,7 @@ namespace unityutilities
 
 		public override float GetRawValue(InputStrings key, Side side)
 		{
+#if !UNITY_WEBGL
 			if (side == Side.Either)
 			{
 				float left = GetRawValue(key, Side.Left);
@@ -201,6 +202,9 @@ namespace unityutilities
 			}
 
 			else return 0;
+#else
+			return 0;
+#endif
 		}
 
 		/// <summary>

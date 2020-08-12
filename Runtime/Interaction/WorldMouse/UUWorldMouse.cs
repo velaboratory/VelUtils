@@ -29,6 +29,7 @@ namespace unityutilities
 	public class UUWorldMouse : WorldMouse
 	{
 		public VRInput input = VRInput.Trigger;
+		public Side side;
 
 		[Space]
 
@@ -72,12 +73,12 @@ namespace unityutilities
 
 		public override bool PressDown()
 		{
-			return InputMan.GetDown(input);
+			return InputMan.GetDown(input, side);
 		}
 
 		public override bool PressUp()
 		{
-			return InputMan.GetUp(input);
+			return InputMan.GetUp(input, side);
 		}
 
 		public void ShowLaser(bool show)

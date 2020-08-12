@@ -9,19 +9,25 @@ namespace unityutilities.VRInteraction
 		public VRDial parentDial;
 		public float factor = .1f;
 
+		public void Start()
+		{
+			ResetToParent();
+		}
+
 		public override void SetData(float updatedAngle, bool localInput)
 		{
-
 			base.SetData(updatedAngle, localInput);
 			parentDial.SetData(updatedAngle * factor, localInput);
 		}
 
+		public void ResetToParent()
+		{
+			currentAngle = parentDial.currentAngle / factor;
+		}
+
 		public override void HandleGrab(VRGrabbableHand h)
 		{
-			if (parentDial.currentAngle != currentAngle)
-			{
-				currentAngle = parentDial.currentAngle / factor;
-			}
+			ResetToParent();
 
 			base.HandleGrab(h);
 

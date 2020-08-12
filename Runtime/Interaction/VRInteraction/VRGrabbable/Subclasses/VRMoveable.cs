@@ -127,7 +127,13 @@ namespace unityutilities.VRInteraction
 					//rb.velocity = h.lastVels.OrderBy(e => e.sqrMagnitude).ToList()[h.lastVels.Count / 2];
 
 					// get the last vel
-					rb.velocity = h.lastVels.Last();
+					if (h.lastVels.Count > 0)
+					{
+						rb.velocity = h.lastVels.Last();
+					} else
+					{
+						Debug.LogError("No velocities. Can't throw!");
+					}
 				}
 				else
 				{
