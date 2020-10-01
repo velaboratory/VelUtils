@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace unityutilities.VRInteraction
 {
+	[AddComponentMenu("unityutilities/Interaction/VRMoveable")]
 	[DisallowMultipleComponent]
 	public class VRMoveable : VRGrabbable
 	{
@@ -130,7 +131,8 @@ namespace unityutilities.VRInteraction
 					if (h.lastVels.Count > 0)
 					{
 						rb.velocity = h.lastVels.Last();
-					} else
+					}
+					else
 					{
 						Debug.LogError("No velocities. Can't throw!");
 					}

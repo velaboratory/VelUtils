@@ -22,6 +22,9 @@ namespace unityutilities.VRInteraction
 
 		public float remoteGrabbingDistance = 5f;
 
+		[Tooltip("Which layers to interact with")]
+		public LayerMask layerMask = ~0;
+
 		[Header("Debug")]
 		[ReadOnly]
 		public VRGrabbable grabbedVRGrabbable;
@@ -81,7 +84,8 @@ namespace unityutilities.VRInteraction
 
 			// Add remote objects to the touched list
 			RaycastHit[] hitList = null;
-			if (false && Physics.Raycast(transform.position, transform.forward, out RaycastHit directHit, remoteGrabbingDistance)) {
+			if (false && Physics.Raycast(transform.position, transform.forward, out RaycastHit directHit, remoteGrabbingDistance, layerMask))
+			{
 				// Find VRGrabbable
 				VRGrabbable vrGrabbable;
 				if (directHit.collider.attachedRigidbody)
@@ -94,11 +98,11 @@ namespace unityutilities.VRInteraction
 					hitList = new RaycastHit[] { directHit };
 				}
 			}
-			
+
 			// if there still isn't anything in the hitlist (no direct hits)
 			if (hitList == null)
 			{
-				hitList = Util.ConeCastAll(transform.position, transform.forward, 1.5f, remoteGrabbingDistance);
+				hitList = Util.ConeCastAll(transform.position, transform.forward, 1.5f, remoteGrabbingDistance, layerMask);
 			}
 
 			var newRaycastedObjs = new List<VRGrabbable>();
@@ -234,7 +238,7 @@ namespace unityutilities.VRInteraction
 						.CompareTo(Vector3.Distance(b.transform.position, transform.position));
 					float angle = Vector3.Angle(transform.forward, a.transform.position - transform.position)
 						.CompareTo(Vector3.Angle(transform.forward, b.transform.position - transform.position));
-					return (int)(0*dist + angle);
+					return (int)(0 * dist + angle);
 				}
 
 			});
@@ -245,6 +249,9 @@ namespace unityutilities.VRInteraction
 
 		private void OnTriggerStay(Collider other)
 		{
+			// ignore if not included in the layermask
+			if (layerMask != (layerMask | 1 << other.gameObject.layer)) return;
+
 			// Find VRGrabbable
 			VRGrabbable vrGrabbable;
 			if (other.attachedRigidbody)
@@ -264,6 +271,9 @@ namespace unityutilities.VRInteraction
 
 		private void OnTriggerExit(Collider other)
 		{
+			// ignore if not included in the layermask
+			if (layerMask != (layerMask | 1 << other.gameObject.layer)) return;
+
 			// Find VRGrabbable
 			VRGrabbable vrGrabbable;
 			if (other.attachedRigidbody)

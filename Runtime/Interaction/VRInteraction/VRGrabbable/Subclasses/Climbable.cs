@@ -2,6 +2,7 @@
 
 namespace unityutilities.VRInteraction
 {
+	[AddComponentMenu("unityutilities/Interaction/Climbable")]
 	[DisallowMultipleComponent]
 	public class Climbable : VRGrabbable
 	{

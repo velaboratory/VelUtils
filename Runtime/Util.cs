@@ -205,10 +205,10 @@ namespace unityutilities
 		/// <param name="maxRadius"></param>
 		/// <param name="maxDistance"></param>
 		/// <returns>Hit or no?</returns>
-		public static RaycastHit[] ConeCastAll(Vector3 origin, Vector3 direction, float maxRadius, float maxDistance)
+		public static RaycastHit[] ConeCastAll(Vector3 origin, Vector3 direction, float maxRadius, float maxDistance, int layerMask=~0)
 		{
 			// get hits
-			RaycastHit[] hits = Physics.SphereCastAll(origin - direction * maxRadius, maxRadius, direction, maxDistance);
+			RaycastHit[] hits = Physics.SphereCastAll(origin - direction * maxRadius, maxRadius, direction, maxDistance, layerMask);
 			List<RaycastHit> coneCastHitList = new List<RaycastHit>();
 
 			float angle = Mathf.Atan(maxRadius / maxDistance) * Mathf.Rad2Deg;

@@ -46,8 +46,10 @@ namespace unityutilities
 
 		private bool showThisFrame = false;
 
-		void Start()
+		protected override void Start()
 		{
+			base.Start();
+
 			lineRend = new GameObject("UI Interaction").AddComponent<LineRenderer>();
 			lineRend.transform.SetParent(transform);
 			lineRend.transform.localPosition = Vector3.zero;
@@ -60,7 +62,7 @@ namespace unityutilities
 			};
 		}
 
-		private void Update()
+		protected override void Update()
 		{
 			base.Update();
 			if (rayDistance < Mathf.Infinity)

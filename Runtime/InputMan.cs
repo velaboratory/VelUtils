@@ -309,7 +309,11 @@ namespace unityutilities
 			InputDevices.GetDevices(devices);
 
 			string deviceName = XRSettings.loadedDeviceName;
+#if UNITY_2019
 			string modelName = XRDevice.model;
+#else
+			string modelName = "";
+#endif
 			Debug.Log("[UU] Loaded device: " + XRSettings.loadedDeviceName + " (" + modelName + ")", instance);
 
 			controllerLayout = HeadsetControllerLayout.Thumbstick; // TODO correctly assign this
@@ -339,7 +343,11 @@ namespace unityutilities
 
 		public static bool UserPresent()
 		{
+#if UNITY_2019
 			return XRDevice.userPresence == UserPresenceState.Present;
+#else
+			return true;
+#endif
 		}
 
 		#region Generic Input
@@ -381,9 +389,9 @@ namespace unityutilities
 					return false;
 			}
 		}
-		#endregion
+#endregion
 
-		#region Trigger
+#region Trigger
 
 		public static float TriggerValue(Side side = Side.Either)
 		{
@@ -445,9 +453,9 @@ namespace unityutilities
 			return TriggerUp(NonDominantHand);
 		}
 
-		#endregion
+#endregion
 
-		#region Grip
+#region Grip
 
 		public static float GripValue(Side side = Side.Either)
 		{
@@ -467,9 +475,9 @@ namespace unityutilities
 			return instance.inputModule.GetRawUp(InputStrings.VR_Grip, side);
 		}
 
-		#endregion
+#endregion
 
-		#region Thumbstick/Touchpad
+#region Thumbstick/Touchpad
 
 		// TODO both should be one held down while other is pressed.
 		public static bool ThumbstickPress(Side side = Side.Either)
@@ -613,9 +621,9 @@ namespace unityutilities
 			return ThumbstickY(side);
 		}
 
-		#endregion
+#endregion
 
-		#region Menu buttons
+#region Menu buttons
 
 		public static bool Button1(Side side = Side.Either)
 		{
@@ -687,9 +695,9 @@ namespace unityutilities
 			return Button1Down(side);
 		}
 
-		#endregion
+#endregion
 
-		#region Directions
+#region Directions
 
 		public static bool Up(Side side = Side.Either)
 		{
@@ -849,9 +857,9 @@ namespace unityutilities
 			return 0;
 		}
 
-		#endregion
+#endregion
 
-		#region Vibrations
+#region Vibrations
 
 		/// <summary>
 		/// Vibrate the controller
@@ -887,9 +895,9 @@ namespace unityutilities
 			Vibrate(side, intensity, duration);
 		}
 
-		#endregion
+#endregion
 
-		#region Controller Velocity
+#region Controller Velocity
 
 		/// <summary>
 		/// Gets the controller velocity. Only works for global space for now.
@@ -913,7 +921,7 @@ namespace unityutilities
 			return instance.inputModule.ControllerAngularVelocity(side, space);
 		}
 
-		#endregion
+#endregion
 
 	}
 

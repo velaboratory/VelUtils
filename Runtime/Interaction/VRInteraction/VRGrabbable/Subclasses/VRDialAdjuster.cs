@@ -2,6 +2,7 @@
 
 namespace unityutilities.VRInteraction
 {
+	[AddComponentMenu("unityutilities/Interaction/VRDialAdjuster")]
 	[RequireComponent(typeof(Rigidbody))]
 	public class VRDialAdjuster : VRDial
 	{

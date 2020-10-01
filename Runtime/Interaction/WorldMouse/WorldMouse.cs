@@ -24,12 +24,17 @@ namespace unityutilities
 		public GameObject hitGameObject { get; private set; }
 		public Collider hitCollider { get; private set; }
 
+		protected virtual void Start()
+		{
+			WorldMouseInputModule.Instance.AddWorldMouse(this);
+		}
+
 		protected virtual void Update()
 		{
 			worldRayDistance = Mathf.Infinity;
-			RaycastHit hit;
-			if (Physics.Raycast(new Ray(transform.position, transform.forward), out hit))
+			if (Physics.Raycast(new Ray(transform.position, transform.forward), out RaycastHit hit))
 			{
+				Debug.DrawRay(transform.position, transform.forward);
 				worldRayDistance = hit.distance;
 				lastHit = hit;
 				worldHitPoint = hit.point;

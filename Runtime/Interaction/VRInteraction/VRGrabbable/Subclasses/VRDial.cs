@@ -9,6 +9,7 @@ namespace unityutilities.VRInteraction
 	/// <summary>
 	/// Spins 🔄
 	/// </summary>
+	[AddComponentMenu("unityutilities/Interaction/VRDial")]
 	[DisallowMultipleComponent]
 	public class VRDial : VRGrabbable
 	{

@@ -4,7 +4,10 @@ using UnityEngine;
 
 namespace unityutilities.VRInteraction
 {
-	//  ↕ Sliders, like legs of tripod, height-adjustable table, etc.
+	/// <summary>
+	/// ↕ Sliders, like legs of tripod, height-adjustable table, etc.
+	/// </summary>
+	[AddComponentMenu("unityutilities/Interaction/VRSlider")]
 	public class VRSlider : VRGrabbable
 	{
 		private Rigidbody rb;

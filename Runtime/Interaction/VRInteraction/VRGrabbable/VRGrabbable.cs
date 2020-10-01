@@ -28,7 +28,7 @@ namespace unityutilities.VRInteraction
 		/// </summary>
 		protected bool canBeGrabbedByMultipleHands;
 
-		[Tooltip("The importance of this object compared to others when grabbing overlapping objects. Higher numbers have higher priority.")]
+		[Tooltip("The importance of this object compared to others when grabbing overlapping objects.\n\nHigher numbers have higher priority.")]
 		public int priority;
 
 		[Tooltip("Whether this object can be grabbed from far away.")]

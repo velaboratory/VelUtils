@@ -225,8 +225,10 @@ namespace unityutilities
 				switch (side)
 				{
 					case Side.Both:
-						return Input.GetButtonDown(inputManagerStrings[key][(int)Side.Left]) &&
-							   Input.GetButtonDown(inputManagerStrings[key][(int)Side.Right]);
+						string left = inputManagerStrings[key][(int)Side.Left];
+						string right = inputManagerStrings[key][(int)Side.Right];
+						return (Input.GetButtonDown(left) && Input.GetButton(right)) ||
+							(Input.GetButton(left) && Input.GetButtonDown(right));
 					case Side.Either:
 						return Input.GetButtonDown(inputManagerStrings[key][(int)Side.Left]) ||
 							   Input.GetButtonDown(inputManagerStrings[key][(int)Side.Right]);
