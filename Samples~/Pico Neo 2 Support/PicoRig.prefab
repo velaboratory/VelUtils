@@ -309,7 +309,7 @@ GameObject:
   - component: {fileID: 5879382370625783707}
   - component: {fileID: 5879382370625783706}
   m_Layer: 0
-  m_Name: Rig
+  m_Name: PicoRig
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -323,7 +323,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5879382370625783705}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -91.6, y: 1, z: -98.1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 3992876823717954140}
@@ -383,6 +383,10 @@ MonoBehaviour:
   slidingMovement: 0
   slidingAccel: 1
   slidingSpeed: 3
+  keyboardMovement: 0
+  keyboardMovementOnlyWhenNoHeadset: 1
+  keyboardEnableJump: 1
+  jumpForce: 1000
   teleportingMovement: 1
   teleporter:
     inputSide: 3
@@ -448,7 +452,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5879382370625783705}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89a2b9a1f7e15de4199b34a2ad80d171, type: 3}
+  m_Script: {fileID: 11500000, guid: 1a5c3510caa722843b9fc79a401daff7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &7806145010209724314
@@ -555,6 +559,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 11442420, guid: f4d2c95a82cadba4fb259ca17b5a8404, type: 3}
       propertyPath: showFPS
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11446018, guid: f4d2c95a82cadba4fb259ca17b5a8404, type: 3}
+      propertyPath: FoveatedRendering
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11446018, guid: f4d2c95a82cadba4fb259ca17b5a8404, type: 3}
+      propertyPath: foveationLevel
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11446018, guid: f4d2c95a82cadba4fb259ca17b5a8404, type: 3}
+      propertyPath: EyeTracking
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []

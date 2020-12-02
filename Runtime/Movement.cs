@@ -579,10 +579,12 @@ namespace unityutilities {
 		public void SetBlinkOpacity(float value) {
 			Color color = Color.black;
 			color.a = value;
-			teleporter.blinkMaterial.SetColor(colorProperty, color);
-			teleporter.blinkRenderer.material = teleporter.blinkMaterial;
-
-			teleporter.blinkRenderer.enabled = value > 0.001f;
+			if (teleporter.blinkMaterial != null)
+			{
+				teleporter.blinkMaterial.SetColor(colorProperty, color);
+				teleporter.blinkRenderer.material = teleporter.blinkMaterial;
+				teleporter.blinkRenderer.enabled = value > 0.001f;
+			}
 		}
 
 		#endregion
