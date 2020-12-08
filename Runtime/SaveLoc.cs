@@ -6,7 +6,7 @@ namespace unityutilities
 {
 
 	/// <summary>
-	/// Saves the location and rotation of an object to playerprefs. Local or global coordinates. Requires a unique object name.
+	/// Saves the location and rotation of an object to PlayerPrefsJson. Local or global coordinates. Requires a unique object name.
 	/// </summary>
 	[AddComponentMenu("unityutilities/SaveLoc")]
 	public class SaveLoc : MonoBehaviour
@@ -48,36 +48,19 @@ namespace unityutilities
 			}
 			else
 			{
+				Transform t = transform;
 				switch (coordinateSystem)
 				{
 					case Space.Self:
-						var localPosition = transform.localPosition;
-						localPosition = new Vector3(
-							PlayerPrefs.GetFloat(name + "_xLPos", localPosition.x),
-							PlayerPrefs.GetFloat(name + "_yLPos", localPosition.y),
-							PlayerPrefs.GetFloat(name + "_zLPos", localPosition.z));
-						transform.localPosition = localPosition;
-						var localEulerAngles = transform.localEulerAngles;
-						localEulerAngles = new Vector3(
-							PlayerPrefs.GetFloat(name + "_xLRot", localEulerAngles.x),
-							PlayerPrefs.GetFloat(name + "_yLRot", localEulerAngles.y),
-							PlayerPrefs.GetFloat(name + "_zLRot", localEulerAngles.z));
-						transform.localEulerAngles = localEulerAngles;
+						t.localPosition = PlayerPrefsJson.GetVector3(name + "_LocalPos", t.localPosition);
+						t.localEulerAngles = PlayerPrefsJson.GetVector3(name + "_LocalRot", t.localEulerAngles);
 						break;
 					case Space.World:
-						var position = transform.position;
-						position = new Vector3(
-							PlayerPrefs.GetFloat(name + "_xPos", position.x),
-							PlayerPrefs.GetFloat(name + "_yPos", position.y),
-							PlayerPrefs.GetFloat(name + "_zPos", position.z));
-						transform.position = position;
-						var eulerAngles = transform.eulerAngles;
-						eulerAngles = new Vector3(
-							PlayerPrefs.GetFloat(name + "_xRot", eulerAngles.x),
-							PlayerPrefs.GetFloat(name + "_yRot", eulerAngles.y),
-							PlayerPrefs.GetFloat(name + "_zRot", eulerAngles.z));
-						transform.eulerAngles = eulerAngles;
+						t.position = PlayerPrefsJson.GetVector3(name + "_Pos", t.position);
+						t.eulerAngles = PlayerPrefsJson.GetVector3(name + "_Rot", t.eulerAngles);
 						break;
+					default:
+						throw new ArgumentOutOfRangeException("Needs to be either Space.Self or Space.World");
 				}
 			}
 		}
@@ -94,25 +77,15 @@ namespace unityutilities
 				switch (coordinateSystem)
 				{
 					case Space.Self:
-						var localPosition = transform.localPosition;
-						PlayerPrefs.SetFloat(name + "_xLPos", localPosition.x);
-						PlayerPrefs.SetFloat(name + "_yLPos", localPosition.y);
-						PlayerPrefs.SetFloat(name + "_zLPos", localPosition.z);
-						var localEulerAngles = transform.localEulerAngles;
-						PlayerPrefs.SetFloat(name + "_xLRot", localEulerAngles.x);
-						PlayerPrefs.SetFloat(name + "_yLRot", localEulerAngles.y);
-						PlayerPrefs.SetFloat(name + "_zLRot", localEulerAngles.z);
+						PlayerPrefsJson.SetVector3(name+"_LocalPos", transform.localPosition);
+						PlayerPrefsJson.SetVector3(name+"_LocalRot", transform.localEulerAngles);
 						break;
 					case Space.World:
-						var position = transform.position;
-						PlayerPrefs.SetFloat(name + "_xPos", position.x);
-						PlayerPrefs.SetFloat(name + "_yPos", position.y);
-						PlayerPrefs.SetFloat(name + "_zPos", position.z);
-						var eulerAngles = transform.eulerAngles;
-						PlayerPrefs.SetFloat(name + "_xRot", eulerAngles.x);
-						PlayerPrefs.SetFloat(name + "_yRot", eulerAngles.y);
-						PlayerPrefs.SetFloat(name + "_zRot", eulerAngles.z);
+						PlayerPrefsJson.SetVector3(name+"_Pos", transform.position);
+						PlayerPrefsJson.SetVector3(name+"_Rot", transform.eulerAngles);
 						break;
+					default:
+						throw new ArgumentOutOfRangeException("Needs to be either Space.Self or Space.World");
 				}
 			}
 		}

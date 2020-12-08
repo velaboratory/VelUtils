@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace unityutilities
@@ -15,20 +15,24 @@ namespace unityutilities
 		private string filename;
 
 		private static bool init;
+
 		private static void Init()
 		{
 			init = true;
-			if (instance == null)
-			{
-				instance = new GameObject("PlayerPrefsJson").AddComponent<PlayerPrefsJson>();
-			}
+			if (instance == null) instance = new GameObject("PlayerPrefsJson").AddComponent<PlayerPrefsJson>();
 			instance.filename = Path.Combine(Application.persistentDataPath, "PlayerPrefsJson.json");
 			instance.Load();
 		}
 
-		private void Awake()
+
+		private static void InitIfNot()
 		{
 			if (!init) Init();
+		}
+
+		private void Awake()
+		{
+			InitIfNot();
 		}
 
 		private void Update()
@@ -45,88 +49,123 @@ namespace unityutilities
 		}
 
 		#region Set Data
+
 		public static void SetFloat(string id, float value)
 		{
-			if (!init) Init();
+			InitIfNot();
 			instance.data[id] = value;
 			instance.dirty = true;
 		}
 
 		public static void SetInt(string id, int value)
 		{
-			if (!init) Init();
+			InitIfNot();
 			instance.data[id] = value;
 			instance.dirty = true;
 		}
 
 		public static void SetVector3(string id, Vector3 value)
 		{
-			if (!init) Init();
-			instance.data[id] = JToken.FromObject(value);
+			InitIfNot();
+			instance.data[id] = new JObject
+			{
+				{"x", value.x},
+				{"y", value.y},
+				{"z", value.z},
+			};
 			instance.dirty = true;
 		}
 
 		public static void SetQuaternion(string id, Quaternion value)
 		{
-			if (!init) Init();
-			instance.data[id] = JToken.FromObject(value);
+			InitIfNot();
+			instance.data[id] = new JObject
+			{
+				{"x", value.x},
+				{"y", value.y},
+				{"z", value.z},
+				{"w", value.w},
+			};
 			instance.dirty = true;
 		}
+
+		public static void SetString(string id, string value)
+		{
+			InitIfNot();
+			instance.data[id] = value;
+			instance.dirty = true;
+		}
+
+		public static void SetBool(string id, bool value)
+		{
+			InitIfNot();
+			instance.data[id] = value;
+			instance.dirty = true;
+		}
+
+		public static void SetDictionary(string id, Dictionary<string,string> value)
+		{
+			InitIfNot();
+			instance.data[id] = JObject.FromObject(value);
+			instance.dirty = true;
+		}
+
 		#endregion
 
 
 		#region Get Data
+
 		public static float GetFloat(string id, float defaultValue = 0)
 		{
-			if (!init) Init();
-			if (instance.data.ContainsKey(id))
-			{
-				return (float)instance.data[id];
-			}
-			else
-			{
-				return defaultValue;
-			}
+			InitIfNot();
+			return HasKey(id) ? (float) instance.data[id] : defaultValue;
 		}
 
 		public static int GetInt(string id, int defaultValue = 0)
 		{
-			if (!init) Init();
-			if (instance.data.ContainsKey(id))
-			{
-				return (int)instance.data[id];
-			}
-			else
-			{
-				return defaultValue;
-			}
+			InitIfNot();
+			return HasKey(id) ? (int) instance.data[id] : defaultValue;
 		}
 
 		public static Vector3 GetVector3(string id, Vector3 defaultValue = new Vector3())
 		{
-			if (!init) Init();
-			if (instance.data.ContainsKey(id))
-			{
-				return instance.data[id].ToObject<Vector3>();
-			}
-			else
-			{
-				return defaultValue;
-			}
+			InitIfNot();
+			return HasKey(id) ? instance.data[id].ToObject<Vector3>() : defaultValue;
 		}
 
 		public static Quaternion GetQuaternion(string id, Quaternion defaultValue = new Quaternion())
 		{
-			if (!init) Init();
-			if (instance.data.ContainsKey(id))
-			{
-				return instance.data[id].ToObject<Quaternion>();
-			}
-			else
-			{
-				return defaultValue;
-			}
+			InitIfNot();
+			return HasKey(id) ? instance.data[id].ToObject<Quaternion>() : defaultValue;
 		}
+
+		public static string GetString(string id, string defaultValue = "")
+		{
+			InitIfNot();
+			return HasKey(id) ? (string) instance.data[id] : defaultValue;
+		}
+
+		public static bool GetBool(string id, bool defaultValue = false)
+		{
+			InitIfNot();
+			return HasKey(id) ? (bool) instance.data[id] : defaultValue;
+		}
+		public static Dictionary<string,string> GetDictionary(string id, Dictionary<string,string> defaultValue = null)
+		{
+			InitIfNot();
+			return HasKey(id) ? instance.data[id]?.ToObject<Dictionary<string,string>>() : defaultValue;
+		}
+
+		#endregion
+
+		#region Check Data
+
+		public static bool HasKey(string id)
+		{
+			InitIfNot();
+			return instance.data.ContainsKey(id);
+		}
+
 		#endregion
 
 		private void Load()
@@ -137,11 +176,60 @@ namespace unityutilities
 			}
 		}
 
-		private void Save()
+		public void Save()
 		{
-			File.WriteAllText(filename, JsonConvert.SerializeObject(data));
+			File.WriteAllText(filename, JsonConvert.SerializeObject(data, Formatting.Indented));
 
 			dirty = false;
 		}
 	}
+
+
+	internal static class TupleToVectorExtensions
+	{
+		public static Vector3 ToVector3(this (float x, float y, float z) val)
+		{
+			(float x, float y, float z) = val;
+			return new Vector3(x, y, z);
+		}
+
+		public static Quaternion ToQuaternion(this (float x, float y, float z, float w) val)
+		{
+			(float x, float y, float z, float w) = val;
+			return new Quaternion(x, y, z, w);
+		}
+
+		public static (float x, float y, float z) ToTuple(this Vector3 val)
+		{
+			return (val.x, val.y, val.z);
+		}
+
+		public static (float x, float y, float z, float w) ToTuple(this Quaternion val)
+		{
+			return (val.x, val.y, val.z, val.w);
+		}
+	}
+
+#if UNITY_EDITOR
+	/// <summary>
+	/// Allows for loading from playerprefsjson in the Editor.
+	/// </summary>
+	[CustomEditor(typeof(PlayerPrefsJson))]
+	public class PlayerPrefsJsonEditor : Editor
+	{
+		public override void OnInspectorGUI()
+		{
+			DrawDefaultInspector();
+			PlayerPrefsJson t = target as PlayerPrefsJson;
+
+			EditorGUILayout.Space();
+			EditorGUILayout.Space();
+
+			if (GUILayout.Button("Show PlayerPrefsJson.json in Explorer"))
+			{
+				EditorUtility.RevealInFinder(Path.Combine(Application.persistentDataPath, "PlayerPrefsJson.json"));
+			}
+		}
+	}
+#endif
 }

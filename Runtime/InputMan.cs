@@ -625,6 +625,11 @@ namespace unityutilities
 
 #region Menu buttons
 
+		/// <summary>
+		/// A or X on Oculus controllers.
+		/// True when the button is held down
+		/// </summary>
+		/// <param name="side">Which controller</param>
 		public static bool Button1(Side side = Side.Either)
 		{
 			return instance.inputModule.GetRaw(InputStrings.VR_Button1, side);
@@ -640,6 +645,11 @@ namespace unityutilities
 			return instance.inputModule.GetRawUp(InputStrings.VR_Button1, side);
 		}
 
+		/// <summary>
+		/// B or Y on Oculus controllers.
+		/// True when the button is held down
+		/// </summary>
+		/// <param name="side">Which controller</param>
 		public static bool Button2(Side side = Side.Either)
 		{
 			return instance.inputModule.GetRaw(InputStrings.VR_Button2, side);
