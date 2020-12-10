@@ -10,12 +10,12 @@ namespace unityutilities
         /// Packs the data describing the object into a dictionary.
         /// </summary>
         /// <returns>The dictionary with all the data.</returns>
-        Dictionary<string,string> PackData();
+        Dictionary<string,object> PackData();
 
         /// <summary>
         /// Receives the dictioary of data about the object.
         /// </summary>
         /// <param name="data">The dictionary with all the data.</param>
-        void UnpackData(Dictionary<string,string> data);
+        void UnpackData(Dictionary<string,object> data);
     }
 }

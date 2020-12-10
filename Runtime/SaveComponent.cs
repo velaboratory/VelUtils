@@ -17,7 +17,7 @@ namespace unityutilities
 		public bool load = true;
 		[Space] public Space coordinateSystem = Space.Self;
 
-		private void Start()
+		private void Awake()
 		{
 			if (load)
 			{
@@ -41,7 +41,7 @@ namespace unityutilities
 			switch (target)
 			{
 				case IDictionaryPackable dictObj:
-					Dictionary<string, string> dict = PlayerPrefsJson.GetDictionary(name + "_dict");
+					Dictionary<string, object> dict = PlayerPrefsJson.GetDictionary(name + "_dict");
 					if (dict != null) dictObj.UnpackData(dict);
 
 					break;
@@ -89,7 +89,7 @@ namespace unityutilities
 			switch (target)
 			{
 				case IDictionaryPackable dictObj:
-					Dictionary<string, string> data = dictObj.PackData();
+					Dictionary<string, object> data = dictObj.PackData();
 					if (data != null) PlayerPrefsJson.SetDictionary(name + "_dict", data);
 					break;
 				case INetworkPack netpack:

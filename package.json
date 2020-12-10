@@ -1,7 +1,7 @@
 {
   "name": "com.franzco.unityutilities",
   "displayName": "unityutilities",
-  "version": "2.9.8",
+  "version": "2.10.2",
   "unity": "2019.1",
   "description": "A lightweight collection of flexible utilities for VR projects.",
   "keywords": [
@@ -17,8 +17,8 @@
   "samples": [
     {
       "displayName": "Oculus SDK Support",
-	  "description": "Includes support for Oculus SDK features. Main feature is faster input with OVRInput.",
-	  "path": "Samples~/OculusSDKSupport"
+      "description": "Includes support for Oculus SDK features. Main feature is faster input with OVRInput.",
+      "path": "Samples~/OculusSDKSupport"
     },
     {
       "displayName": "Finger Touch Module",
@@ -35,5 +35,8 @@
       "description": "Includes an input module for the Pico Neo 2 controllers",
       "path": "Samples~/Pico Neo 2 Support"
     }
-  ]
+  ],
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "2.0.0-preview"
+  }
 }
