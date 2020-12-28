@@ -70,15 +70,6 @@ namespace unityutilities {
 		public float slidingSpeed = 3f;
 
 
-		[Header("Keyboard FPS Movement")]
-		public bool keyboardMovement = false;
-		public bool keyboardMovementOnlyWhenNoHeadset = true;
-		public bool keyboardEnableJump = true;
-		public float jumpForce = 1000;
-
-
-
-
 		[Header("Teleporting")]
 
 		[Tooltip("Enable thumbstick teleporting.")]
@@ -607,28 +598,10 @@ namespace unityutilities {
 		}
 
 		private void SlidingMovement() {
-			if (!slidingMovement && !keyboardMovement) return;
+			if (!slidingMovement) return;
 
-			float stickX = 0, stickY = 0;
-			float keyX = 0, keyY = 0;
-			float horizontal = 0, vertical = 0;
-
-			if (!keyboardMovement)
-			{
-				horizontal = InputMan.ThumbstickX(Side.Left);
-				vertical = InputMan.ThumbstickY(Side.Left);
-			}
-			else if (keyboardMovement && (!keyboardMovementOnlyWhenNoHeadset || !InputMan.UserPresent()))
-			{
-				horizontal = Input.GetAxis("Horizontal");
-				vertical = -Input.GetAxis("Vertical");
-
-				// JUMP 🦘
-				if (Input.GetKeyDown(KeyCode.Space))
-				{
-					rig.rb.AddForce(Vector3.up * jumpForce);
-				}
-			}
+			float horizontal = InputMan.ThumbstickX(Side.Left);
+			float vertical = InputMan.ThumbstickY(Side.Left);
 
 			bool useForce = false;
 			Vector3 forward = -rig.head.forward;

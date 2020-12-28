@@ -20,6 +20,7 @@ namespace unityutilities.VRInteraction
 
 		public bool vibrateOnGrab = true;
 
+		public bool enableRemoteGrabbing = true;
 		public float remoteGrabbingDistance = 5f;
 
 		[Tooltip("Which layers to interact with")]
@@ -28,6 +29,9 @@ namespace unityutilities.VRInteraction
 		[Header("Debug")]
 		[ReadOnly]
 		public VRGrabbable grabbedVRGrabbable;
+		/// <summary>
+		/// The current best grabbable object. The one that's highlighted.
+		/// </summary>
 		[ReadOnly]
 		public VRGrabbable selectedVRGrabbable;
 		[ReadOnly]
@@ -67,7 +71,7 @@ namespace unityutilities.VRInteraction
 			}
 			else
 			{
-				var best = GetBestGrabbable();
+				VRGrabbable best = GetBestGrabbable();
 				if (selectedVRGrabbable != best)
 				{
 					if (selectedVRGrabbable)
@@ -84,7 +88,7 @@ namespace unityutilities.VRInteraction
 
 			// Add remote objects to the touched list
 			RaycastHit[] hitList = null;
-			if (false && Physics.Raycast(transform.position, transform.forward, out RaycastHit directHit, remoteGrabbingDistance, layerMask))
+			if (false && enableRemoteGrabbing && Physics.Raycast(transform.position, transform.forward, out RaycastHit directHit, remoteGrabbingDistance, layerMask))
 			{
 				// Find VRGrabbable
 				VRGrabbable vrGrabbable;
@@ -102,11 +106,18 @@ namespace unityutilities.VRInteraction
 			// if there still isn't anything in the hitlist (no direct hits)
 			if (hitList == null)
 			{
-				hitList = Util.ConeCastAll(transform.position, transform.forward, 1.5f, remoteGrabbingDistance, layerMask);
+				if (enableRemoteGrabbing)
+				{
+					hitList = Util.ConeCastAll(transform.position, transform.forward, 1.5f, remoteGrabbingDistance, layerMask);	
+				}
+				else
+				{
+					hitList = new RaycastHit[0];
+				}
 			}
 
-			var newRaycastedObjs = new List<VRGrabbable>();
-			foreach (var hit in hitList)
+			List<VRGrabbable> newRaycastedObjs = new List<VRGrabbable>();
+			foreach (RaycastHit hit in hitList)
 			{
 				Collider other = hit.collider;
 
@@ -131,7 +142,7 @@ namespace unityutilities.VRInteraction
 			}
 
 			// stop selecting the previous objs that aren't currently raycasted at
-			foreach (var obj in raycastedObjs)
+			foreach (VRGrabbable obj in raycastedObjs)
 			{
 				if (!newRaycastedObjs.Contains(obj))
 				{

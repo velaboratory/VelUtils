@@ -360,6 +360,14 @@ namespace unityutilities
 					throw new Exception("Can't convert to Vector3");
 			}
 		}
+		
+		/// <summary>
+		/// Drops the z value
+		/// </summary>
+		public static Vector2 ToVector2(this Vector3 val)
+		{
+			return new Vector2(val.x, val.y);
+		}
 
 		public static Quaternion ToQuaternion(this object val)
 		{
