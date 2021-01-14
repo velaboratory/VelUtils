@@ -5,7 +5,6 @@ using UnityEngine.EventSystems;
 
 namespace unityutilities
 {
-
 #if UNITY_EDITOR
 	[CustomEditor(typeof(WorldMouseInputModule))]
 	[CanEditMultipleObjects]
@@ -44,12 +43,16 @@ namespace unityutilities
 		private List<PointerEventData> eventData = new List<PointerEventData>();
 		private List<GameObject> lastPressed = new List<GameObject>();
 		private static WorldMouseInputModule instance;
-		public static WorldMouseInputModule Instance {
-			get {
+
+		public static WorldMouseInputModule Instance
+		{
+			get
+			{
 				if (instance == null)
 				{
 					instance = new GameObject("WorldMouseInputModule").AddComponent<WorldMouseInputModule>();
 				}
+
 				return instance;
 			}
 		}
@@ -68,14 +71,33 @@ namespace unityutilities
 			//gui objects, and uses an "event camera" to do the actual raycasts
 			worldMouseCam = new GameObject("Controller UI Camera").AddComponent<Camera>();
 			worldMouseCam.nearClipPlane = .01f;
-			worldMouseCam.clearFlags = CameraClearFlags.Nothing;    //note the camera renders nothing
-			worldMouseCam.cullingMask = 0;  //and no objects even try to draw to the camera
+			worldMouseCam.depth = -100;
+			worldMouseCam.clearFlags = CameraClearFlags.Nothing; // set the camera to render nothing
+			worldMouseCam.cullingMask = 0; // and no objects even try to draw to the camera
 
 			FindCanvases();
 
 			foreach (WorldMouse wm in worldMice)
 			{
 				AddWorldMouse(wm);
+			}
+		}
+
+		protected override void OnEnable()
+		{
+			base.OnEnable();
+			if (instance != null && instance.worldMouseCam != null)
+			{
+				instance.worldMouseCam.gameObject.SetActive(true);
+			}
+		}
+
+		protected override void OnDisable()
+		{
+			base.OnDisable();
+			if (instance != null && instance.worldMouseCam != null)
+			{
+				instance.worldMouseCam.gameObject.SetActive(false);
 			}
 		}
 
@@ -94,9 +116,9 @@ namespace unityutilities
 			{
 				worldMice.Add(m);
 			}
+
 			eventData.Add(new PointerEventData(eventSystem));
 			lastPressed.Add(null);
-
 		}
 
 		public void RemoveWorldMouse(WorldMouse m)
@@ -110,7 +132,6 @@ namespace unityutilities
 		// Process is called by UI system to process events.  
 		public override void Process()
 		{
-
 			//the currently selected object may want to update something each frame
 			BaseEventData data = GetBaseEventData();
 			ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.updateSelectedHandler);
@@ -120,7 +141,7 @@ namespace unityutilities
 			{
 				WorldMouse wm = worldMice[i];
 
-				wm.rayDistance = 0.0f;//assume nothing was hit to start
+				wm.rayDistance = 0.0f; //assume nothing was hit to start
 
 				//this makes the event system camera align with the world mouse
 				worldMouseCam.transform.position = wm.transform.position;
@@ -131,7 +152,8 @@ namespace unityutilities
 				PointerEventData currentEventData = eventData[i];
 				currentEventData.Reset();
 				currentEventData.delta = Vector2.zero;
-				currentEventData.position = new Vector2(worldMouseCam.pixelWidth / 2.0f, worldMouseCam.pixelHeight / 2.0f);
+				currentEventData.position =
+					new Vector2(worldMouseCam.pixelWidth / 2.0f, worldMouseCam.pixelHeight / 2.0f);
 				currentEventData.scrollDelta = Vector2.zero;
 
 				//this is where all the magic actually happens
@@ -142,10 +164,10 @@ namespace unityutilities
 				{
 					continue; //don't process anything if a world object was hit
 				}
+
 				//if we hit something this will not be null
 				if (currentEventData.pointerCurrentRaycast.gameObject != null)
 				{
-
 					//this is useful to know where the object was hit (to draw a point or limit the lenght of a laser)
 					wm.rayDistance = currentEventData.pointerCurrentRaycast.distance;
 					//we can think of the object we hit as what we are hovering above (the simplest type)
@@ -169,9 +191,12 @@ namespace unityutilities
 						currentEventData.pointerPressRaycast = currentEventData.pointerCurrentRaycast;
 
 						//execute both the pointer down handler 
-						GameObject handledPointerDown = ExecuteEvents.ExecuteHierarchy(hoverObject, currentEventData, ExecuteEvents.pointerDownHandler);
+						GameObject handledPointerDown = ExecuteEvents.ExecuteHierarchy(hoverObject, currentEventData,
+							ExecuteEvents.pointerDownHandler);
 						//execute the click handler, either on the hoverObject if nothing handled  pointerdown or on whatever handled it
-						GameObject handledClick = ExecuteEvents.ExecuteHierarchy(handledPointerDown == null ? hoverObject : handledPointerDown, currentEventData, ExecuteEvents.pointerClickHandler);
+						GameObject handledClick = ExecuteEvents.ExecuteHierarchy(
+							handledPointerDown == null ? hoverObject : handledPointerDown, currentEventData,
+							ExecuteEvents.pointerClickHandler);
 						//something handled the click or pressed, so save a reference to it, needed later
 						GameObject newPressed = handledClick != null ? handledClick : handledPointerDown;
 
@@ -183,8 +208,8 @@ namespace unityutilities
 							{
 								eventSystem.SetSelectedGameObject(newPressed);
 							}
-
 						}
+
 						//execute a drag start event on the currently pressed object and save it
 						ExecuteEvents.Execute(newPressed, currentEventData, ExecuteEvents.beginDragHandler);
 						currentEventData.pointerDrag = newPressed;

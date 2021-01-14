@@ -27,6 +27,7 @@ namespace unityutilities {
 		/// <summary>
 		/// How many lines to wait before actually logging
 		/// </summary>
+		[Tooltip("How many lines to put in a cache before actually uploading them.")]
 		public int lineLogInterval = 50;
 		private static int numLinesLogged;
 
@@ -66,6 +67,15 @@ namespace unityutilities {
 				strBuilder.Append(DateTime.Now.ToString(dateFormat));
 				strBuilder.Append(delimiter);
 				strBuilder.Append(SystemInfo.deviceUniqueIdentifier);
+				strBuilder.Append(delimiter);
+				if (Application.isEditor)
+				{
+					strBuilder.Append(SystemInfo.operatingSystem + " (Editor)");
+				}
+				else
+				{
+					strBuilder.Append(SystemInfo.operatingSystem);
+				}
 				strBuilder.Append(delimiter);
 				foreach (var elem in data) {
 					if (elem.Contains(delimiter)) {

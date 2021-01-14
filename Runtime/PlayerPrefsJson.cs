@@ -26,7 +26,7 @@ namespace unityutilities
 		{
 			if (instance == null) instance = FindObjectOfType<PlayerPrefsJson>();
 			if (instance == null) instance = new GameObject("PlayerPrefsJson").AddComponent<PlayerPrefsJson>();
-			instance.data["default"] = null;
+			instance.data["default"] = new Dictionary<string, object>();
 			defaultPath = Path.Combine(Application.persistentDataPath, filename);
 			instance.Load();
 
@@ -258,7 +258,9 @@ namespace unityutilities
 		{
 			InitIfNot();
 			if (!instance.data.ContainsKey(path)) instance.Load(path);
-			return instance.data.ContainsKey(path) && instance.data[path].ContainsKey(id);
+			if (!instance.data.ContainsKey(path)) return false;
+			if (instance.data[path] == null) instance.data[path] = new Dictionary<string, object>();
+			return instance.data[path].ContainsKey(id);
 		}
 
 		public static bool HasKey(string id, string subkey, string path = "default")
@@ -284,9 +286,14 @@ namespace unityutilities
 		{
 			string path = key == "default" ? defaultPath : key;
 			if (!File.Exists(path)) return;
-
-			data[key] = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(path),
-				new JsonConverter[] {new NestedDictsConverter()});
+			try
+			{
+				data[key] = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(path), new NestedDictsConverter());
+			}
+			catch (Exception)
+			{
+				File.Delete(path);
+			}
 		}
 
 		public void Save()
