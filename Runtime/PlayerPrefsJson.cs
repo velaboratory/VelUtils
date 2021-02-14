@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -21,6 +22,8 @@ namespace unityutilities
 		private static string defaultPath;
 		private bool dirty;
 		private static bool init;
+		private float lastSaveTime;
+		private float saveInterval = 1f; // save at most once a second
 
 		private static void Init()
 		{
@@ -46,9 +49,10 @@ namespace unityutilities
 
 		private void Update()
 		{
-			if (dirty)
+			if (dirty && Time.time - lastSaveTime > saveInterval)
 			{
 				Save();
+				lastSaveTime = Time.time;
 			}
 		}
 
@@ -223,7 +227,7 @@ namespace unityutilities
 					case Dictionary<string, object> dict:
 						return dict;
 					default:
-						throw new System.Exception("What type?");
+						throw new Exception("What type?");
 				}
 
 				// return ((JObject) instance.data[path][id]);
@@ -288,7 +292,8 @@ namespace unityutilities
 			if (!File.Exists(path)) return;
 			try
 			{
-				data[key] = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(path), new NestedDictsConverter());
+				data[key] = JsonConvert.DeserializeObject<Dictionary<string, object>>(File.ReadAllText(path),
+					new NestedDictsConverter());
 			}
 			catch (Exception)
 			{
@@ -297,6 +302,11 @@ namespace unityutilities
 		}
 
 		public void Save()
+		{
+			Task.Run(() => SaveTask());
+		}
+
+		private void SaveTask()
 		{
 			foreach (string key in data.Keys)
 			{
@@ -367,7 +377,7 @@ namespace unityutilities
 					throw new Exception("Can't convert to Vector3");
 			}
 		}
-		
+
 		/// <summary>
 		/// Drops the z value
 		/// </summary>

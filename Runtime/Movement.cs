@@ -245,8 +245,12 @@ namespace unityutilities {
 		private void Awake() {
 			if (teleporter.blinkShader == null) return;
 			teleporter.blinkMaterial = new Material(teleporter.blinkShader);
-			teleporter.blinkMesh = rig.head.gameObject.AddComponent<MeshFilter>();
-			teleporter.blinkRenderer = rig.head.gameObject.AddComponent<MeshRenderer>();
+			GameObject blinkMeshObj = new GameObject("Blink Mesh");
+			blinkMeshObj.transform.SetParent(rig.head);
+			blinkMeshObj.transform.localPosition = Vector3.zero;
+			blinkMeshObj.transform.localRotation = Quaternion.identity;
+			teleporter.blinkMesh = blinkMeshObj.AddComponent<MeshFilter>();
+			teleporter.blinkRenderer = blinkMeshObj.AddComponent<MeshRenderer>();
 
 			Mesh mesh = new Mesh();
 			teleporter.blinkMesh.mesh = mesh;

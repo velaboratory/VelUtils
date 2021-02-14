@@ -5,6 +5,8 @@ using System.IO;
 using System.Text;
 using UnityEngine.Networking;
 using System.Collections;
+using System.CodeDom.Compiler;
+using System.CodeDom;
 
 namespace unityutilities {
 
@@ -27,9 +29,18 @@ namespace unityutilities {
 		/// <summary>
 		/// How many lines to wait before actually logging
 		/// </summary>
+		[Header("Log Interval")]
 		[Tooltip("How many lines to put in a cache before actually uploading them.")]
 		public int lineLogInterval = 50;
+		[Tooltip("How long two wait (in seconds) putting lines in a cache before actually uploading them.")]
+		public float timeLogInterval = 5;
 		private static int numLinesLogged;
+		private float lastLogTime = 0;
+		public TimeOrLines useTimeOrLineInterval;
+		public enum TimeOrLines
+		{
+			Time, Lines, WhicheverFirst, Both
+		}
 
 		public static bool usePerDeviceFolder = true;
 		public static bool usePerLaunchFolder = true;
@@ -38,8 +49,11 @@ namespace unityutilities {
 		public static bool enableLoggingRemote = true;
 		private static string debugLogFileName = "debug_log";
 
+		[Header("Debug.Log Logging")]
 		[Tooltip("Whether to log debug output to file and web. Can't change during runtime.")]
 		public bool enableDebugLogLogging = true;
+		public bool fullStackTraceForErrors = true;
+		public bool fullStackTraceForOtherMessages = true;
 
 		/// <summary>
 		/// Dictionary of filename and list of lines that haven't been logged yet
@@ -115,6 +129,8 @@ namespace unityutilities {
 			if (!enableLogging) {
 				return;
 			}
+
+			lastLogTime = Time.time;
 
 			StringBuilder allOutputData = new StringBuilder();
 
@@ -193,8 +209,32 @@ namespace unityutilities {
 		}
 
 		private void Update() {
-			if (numLinesLogged > lineLogInterval) {
-				ActuallyLog();
+			switch (useTimeOrLineInterval)
+			{
+				case TimeOrLines.Time:
+					if (Time.time - lastLogTime > timeLogInterval)
+					{
+						ActuallyLog();
+					}
+					break;
+				case TimeOrLines.Lines:
+					if (numLinesLogged > lineLogInterval)
+					{
+						ActuallyLog();
+					}
+					break;
+				case TimeOrLines.WhicheverFirst:
+					if (Time.time - lastLogTime > timeLogInterval || numLinesLogged > lineLogInterval)
+					{
+						ActuallyLog();
+					}
+					break;
+				case TimeOrLines.Both:
+					if (Time.time - lastLogTime > timeLogInterval && numLinesLogged > lineLogInterval)
+					{
+						ActuallyLog();
+					}
+					break;
 			}
 		}
 
@@ -210,12 +250,70 @@ namespace unityutilities {
 				Application.logMessageReceived -= LogCallback;
 		}
 
-		private void LogCallback(string condition, string stackTrace, LogType logType) {
-			LogRow(debugLogFileName, condition);
+		private void LogCallback(string condition, string stackTrace, LogType logType)
+		{
+			List<string> cols = new List<string>() { logType.ToString(), condition };
+			if (logType == LogType.Error && fullStackTraceForErrors)
+			{
+				cols.Add(ToLiteral2(stackTrace));
+			}
+			else if (logType != LogType.Error && fullStackTraceForOtherMessages)
+			{
+				cols.Add(ToLiteral2(stackTrace));
+			}
+			LogRow(debugLogFileName, cols);
 		}
 
 		public void EnableLogging(bool enable) {
 			enableLogging = enable;
+		}
+
+		private static string ToLiteral(string input)
+		{
+			using (var writer = new StringWriter())
+			{
+				using (var provider = CodeDomProvider.CreateProvider("CSharp"))
+				{
+					provider.GenerateCodeFromExpression(new CodePrimitiveExpression(input), writer, new CodeGeneratorOptions { IndentString = "\t" });
+					var literal = writer.ToString();
+					literal = literal.Replace(string.Format("\" +{0}\t\"", Environment.NewLine), "");
+					literal = literal.Replace("\\r\\n", "\\r\\n\"+\r\n\"");
+					return literal;
+				}
+			}
+		}
+
+		private static string ToLiteral2(string input)
+		{
+			input = input.Replace("\n", "\\n ");
+			input = input.Replace("\r\n", "\\n ");
+			input = input.Replace("\t", "\t ");
+			return input;
+		}
+
+		/// <summary>
+		/// Turn a string into a CSV cell output
+		/// </summary>
+		/// <param name="str">String to output</param>
+		/// <returns>The CSV cell formatted string</returns>
+		public static string StringToCSVCell(string str, string delimiter = "\t")
+		{
+			bool mustQuote = (str.Contains(delimiter) || str.Contains("\"") || str.Contains("\r") || str.Contains("\n"));
+			if (mustQuote)
+			{
+				StringBuilder sb = new StringBuilder();
+				sb.Append("\"");
+				foreach (char nextChar in str)
+				{
+					sb.Append(nextChar);
+					if (nextChar == '"')
+						sb.Append("\"");
+				}
+				sb.Append("\"");
+				return sb.ToString();
+			}
+
+			return str;
 		}
 
 		//close writers

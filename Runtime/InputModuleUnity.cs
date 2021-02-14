@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 using UnityEngine.XR;
 using static unityutilities.InputMan;
@@ -25,19 +24,23 @@ namespace unityutilities
 
 		private void Awake()
 		{
-			firstPressed = new Dictionary<InputStrings, bool[,]>();
-			firstPressed.Add(InputStrings.VR_Trigger, new bool[2, 3]);
-			firstPressed.Add(InputStrings.VR_Grip, new bool[2, 3]);
-			firstPressed.Add(InputStrings.VR_Thumbstick_X_Left, new bool[2, 3]);
-			firstPressed.Add(InputStrings.VR_Thumbstick_X_Right, new bool[2, 3]);
-			firstPressed.Add(InputStrings.VR_Thumbstick_Y_Up, new bool[2, 3]);
-			firstPressed.Add(InputStrings.VR_Thumbstick_Y_Down, new bool[2, 3]);
+			firstPressed = new Dictionary<InputStrings, bool[,]>
+			{
+				{InputStrings.VR_Trigger, new bool[2, 3]},
+				{InputStrings.VR_Grip, new bool[2, 3]},
+				{InputStrings.VR_Thumbstick_X_Left, new bool[2, 3]},
+				{InputStrings.VR_Thumbstick_X_Right, new bool[2, 3]},
+				{InputStrings.VR_Thumbstick_Y_Up, new bool[2, 3]},
+				{InputStrings.VR_Thumbstick_Y_Down, new bool[2, 3]}
+			};
 
-			directionalTimeoutValue = new Dictionary<InputStrings, float[]>();
-			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_X_Left, new float[] { 0, 0 });
-			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_X_Right, new float[] { 0, 0 });
-			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_Y_Up, new float[] { 0, 0 });
-			directionalTimeoutValue.Add(InputStrings.VR_Thumbstick_Y_Down, new float[] { 0, 0 });
+			directionalTimeoutValue = new Dictionary<InputStrings, float[]>
+			{
+				{InputStrings.VR_Thumbstick_X_Left, new float[] {0, 0}},
+				{InputStrings.VR_Thumbstick_X_Right, new float[] {0, 0}},
+				{InputStrings.VR_Thumbstick_Y_Up, new float[] {0, 0}},
+				{InputStrings.VR_Thumbstick_Y_Down, new float[] {0, 0}}
+			};
 		}
 
 		#region Navigation Vars
@@ -75,24 +78,15 @@ namespace unityutilities
 
 			foreach (XRNodeState ns in nodes)
 			{
-				if (side == Side.Left && ns.nodeType == XRNode.LeftHand)
+				switch (side)
 				{
-					return ns;
-				}
-
-				if (side == Side.Right && ns.nodeType == XRNode.RightHand)
-				{
-					return ns;
+					case Side.Left when ns.nodeType == XRNode.LeftHand:
+						return ns;
+					case Side.Right when ns.nodeType == XRNode.RightHand:
+						return ns;
 				}
 			}
-			if (nodes != null && nodes.Count > 0)
-			{
-				return nodes[0];
-			}
-			else
-			{
-				return new XRNodeState();
-			}
+			return nodes.Count > 0 ? nodes[0] : new XRNodeState();
 		}
 
 		public override void Vibrate(Side side, float intensity, float duration)
@@ -139,12 +133,12 @@ namespace unityutilities
 		{
 			if (key.IsAxis())
 			{
-				var threshold = key.IsThumbstickAxis() ? thumbstickThreshold : triggerThreshold;
-				var doubleSided = key.IsDoubleSidedAxis();
+				float threshold = key.IsThumbstickAxis() ? thumbstickThreshold : triggerThreshold;
+				bool doubleSided = key.IsDoubleSidedAxis();
 				bool left, right;
 
-				var leftValue = Input.GetAxis(inputManagerStrings[key][(int)Side.Left]);
-				var rightValue = Input.GetAxis(inputManagerStrings[key][(int)Side.Right]);
+				float leftValue = Input.GetAxis(inputManagerStrings[key][(int)Side.Left]);
+				float rightValue = Input.GetAxis(inputManagerStrings[key][(int)Side.Right]);
 				switch (side)
 				{
 					case Side.Both:
