@@ -2,13 +2,23 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace unityutilities {
+namespace unityutilities
+{
+	public enum Axis3D
+	{
+		X,
+		Y,
+		Z
+	}
+
 	/// <summary>
 	/// One object copies the position and/or rotation of another using a variety of techniques. Global or local offsets can be set.
 	/// </summary>
 	[AddComponentMenu("unityutilities/Copy Transform")]
-	public class CopyTransform : MonoBehaviour {
-		public enum FollowType {
+	public class CopyTransform : MonoBehaviour
+	{
+		public enum FollowType
+		{
 			Copy,
 			Velocity,
 			Force
@@ -36,64 +46,96 @@ namespace unityutilities {
 		public Vector3 rotationOffsetVector3;
 		public bool useVector3RotationOffset;
 		public Space rotationOffsetCoordinateSystem = Space.Self;
+		public bool singleAxisRotation;
+		public Axis3D singleAxisRotationAxis;
 		public float snapIfAngleGreaterThan;
 
 		public float smoothness;
 
 		private Rigidbody rb;
 
-		private void Start() {
-			if (GetComponent<Rigidbody>()) {
+		private void Start()
+		{
+			if (GetComponent<Rigidbody>())
+			{
 				rb = GetComponent<Rigidbody>();
 				rb.maxAngularVelocity = 1000f;
 			}
 		}
 
 
-		private void Update() {
+		private void Update()
+		{
 			if (!target) return;
 
-			if (followRotation && !useFixedUpdateRot) {
-				UpdateRotation(Time.smoothDeltaTime);
+			if (followRotation && !useFixedUpdateRot)
+			{
+				if (singleAxisRotation)
+				{
+					UpdateRotationSingleAxis(Time.smoothDeltaTime);
+				}
+				else
+				{
+					UpdateRotation(Time.smoothDeltaTime);
+				}
 			}
 
-			if (followPosition && !useFixedUpdatePos) {
+			if (followPosition && !useFixedUpdatePos)
+			{
 				UpdatePosition(Time.smoothDeltaTime);
 			}
 		}
 
-		private void FixedUpdate() {
+		private void FixedUpdate()
+		{
 			if (!target) return;
 
-			if (followPosition && useFixedUpdatePos) {
+			if (followPosition && useFixedUpdatePos)
+			{
 				UpdatePosition(Time.fixedDeltaTime);
 			}
 
-			if (followRotation && useFixedUpdateRot) {
-				UpdateRotation(Time.fixedDeltaTime);
+			if (followRotation && useFixedUpdateRot)
+			{
+				if (singleAxisRotation)
+				{
+					UpdateRotationSingleAxis(Time.fixedDeltaTime);
+				}
+				else
+				{
+					UpdateRotation(Time.fixedDeltaTime);
+				}
 			}
 		}
 
-		private void UpdatePosition(float timeStep) {
+		private void UpdatePosition(float timeStep)
+		{
+			if (timeStep == 0) return;
+
 			Vector3 t;
-			if (positionOffsetCoordinateSystem == Space.World) {
+			if (positionOffsetCoordinateSystem == Space.World)
+			{
 				t = target.position + positionOffset;
 			}
-			else {
+			else
+			{
 				t = target.TransformPoint(positionOffset);
 			}
 
-			switch (positionFollowType) {
+			switch (positionFollowType)
+			{
 				case FollowType.Copy:
 					transform.position = Vector3.Lerp(transform.position, t, 1 - smoothness);
-					if (rb) {
+					if (rb)
+					{
 						rb.velocity = Vector3.zero;
 					}
 
 					break;
 				case FollowType.Velocity:
 					if (Mathf.Abs(snapIfDistanceGreaterThan) > .001f &&
-					    Vector3.Distance(t, transform.position) > snapIfDistanceGreaterThan) {
+					    Vector3.Distance(t, transform.position) > snapIfDistanceGreaterThan)
+					{
 						transform.position = t;
 					}
 
@@ -101,41 +143,52 @@ namespace unityutilities {
 					break;
 				case FollowType.Force:
 					if (Mathf.Abs(snapIfDistanceGreaterThan) > .001f &&
-					    Vector3.Distance(t, transform.position) > snapIfDistanceGreaterThan) {
+					    Vector3.Distance(t, transform.position) > snapIfDistanceGreaterThan)
+					{
 						transform.position = t;
 					}
 
 					Vector3 dir = t - transform.position;
 					float mass = rb.mass;
 					rb.AddForce(
-						Vector3.ClampMagnitude(dir * (Vector3.Magnitude(dir) * positionForceMult * (mass) / timeStep),5000 * mass));
+						Vector3.ClampMagnitude(dir * (Vector3.Magnitude(dir) * positionForceMult * (mass) / timeStep),
+							5000 * mass));
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
 		}
 
-		private void UpdateRotation(float timeStep) {
+		private void UpdateRotation(float timeStep)
+		{
+			if (timeStep == 0) return;
+
 			Quaternion t;
-			if (rotationOffsetCoordinateSystem == Space.Self) {
-				if (useVector3RotationOffset) {
+			if (rotationOffsetCoordinateSystem == Space.Self)
+			{
+				if (useVector3RotationOffset)
+				{
 					t = target.rotation * Quaternion.Euler(rotationOffsetVector3);
 				}
-				else {
+				else
+				{
 					t = target.rotation * rotationOffset;
 				}
 			}
-			else {
+			else
+			{
 				t = target.rotation;
 			}
 
-			switch (rotationFollowType) {
+			switch (rotationFollowType)
+			{
 				case FollowType.Copy:
 					transform.rotation = Quaternion.Slerp(transform.rotation, t, 1 - smoothness);
 					break;
 				case FollowType.Velocity:
 					var angularVel1 = AngularVel(timeStep, t, out var angle1);
-					if (Mathf.Abs(snapIfAngleGreaterThan) > .01f && angle1 > snapIfAngleGreaterThan) {
+					if (Mathf.Abs(snapIfAngleGreaterThan) > .01f && angle1 > snapIfAngleGreaterThan)
+					{
 						transform.rotation = t;
 					}
 
@@ -143,7 +196,8 @@ namespace unityutilities {
 					break;
 				case FollowType.Force:
 					var angularVel2 = AngularVel(timeStep, t, out var angle2);
-					if (Mathf.Abs(snapIfAngleGreaterThan) > .01f && angle2 > snapIfAngleGreaterThan) {
+					if (Mathf.Abs(snapIfAngleGreaterThan) > .01f && angle2 > snapIfAngleGreaterThan)
+					{
 						transform.rotation = t;
 					}
 
@@ -155,7 +209,72 @@ namespace unityutilities {
 			}
 		}
 
-		private Vector3 AngularVel(float timeStep, Quaternion goalRotation, out float angle) {
+		private void UpdateRotationSingleAxis(float timeStep)
+		{
+			if (timeStep == 0) return;
+
+			Quaternion t;
+			if (rotationOffsetCoordinateSystem == Space.Self)
+			{
+				if (useVector3RotationOffset)
+				{
+					t = target.rotation * Quaternion.Euler(rotationOffsetVector3);
+				}
+				else
+				{
+					t = target.rotation * rotationOffset;
+				}
+			}
+			else
+			{
+				t = target.rotation;
+			}
+
+			switch (rotationFollowType)
+			{
+				case FollowType.Copy:
+					Vector3 newAngle = transform.eulerAngles;
+					switch (singleAxisRotationAxis)
+					{
+						case Axis3D.X:
+							newAngle.x = Mathf.LerpAngle(transform.eulerAngles.x, t.eulerAngles.x, 1 - smoothness);
+							break;
+						case Axis3D.Y:
+							newAngle.y = Mathf.LerpAngle(transform.eulerAngles.y, t.eulerAngles.y, 1 - smoothness);
+							break;
+						case Axis3D.Z:
+							newAngle.z = Mathf.LerpAngle(transform.eulerAngles.z, t.eulerAngles.z, 1 - smoothness);
+							break;
+					}
+
+					transform.eulerAngles = newAngle;
+					break;
+				case FollowType.Velocity:
+					Vector3 angularVel1 = AngularVel(timeStep, t, out var angle1);
+					if (Mathf.Abs(snapIfAngleGreaterThan) > .01f && angle1 > snapIfAngleGreaterThan)
+					{
+						transform.rotation = t;
+					}
+
+					rb.angularVelocity = Vector3.ClampMagnitude(angularVel1 * (1 - smoothness), 100);
+					break;
+				case FollowType.Force:
+					Vector3 angularVel2 = AngularVel(timeStep, t, out var angle2);
+					if (Mathf.Abs(snapIfAngleGreaterThan) > .01f && angle2 > snapIfAngleGreaterThan)
+					{
+						transform.rotation = t;
+					}
+
+					Vector3 angularTorq = angularVel2 * rotationForceMult;
+					rb.AddTorque(Vector3.ClampMagnitude(angularTorq, 100));
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+		private Vector3 AngularVel(float timeStep, Quaternion goalRotation, out float angle)
+		{
 			Quaternion rot = goalRotation * Quaternion.Inverse(transform.rotation);
 			rot.ToAngleAxis(out angle, out var axis);
 			Vector3 angularVel = axis * (angle * Mathf.Deg2Rad / timeStep);
@@ -167,17 +286,17 @@ namespace unityutilities {
 		/// Also sets the obj to follow pos and rot.
 		/// </summary>
 		/// <param name="newTarget">The target to follow</param>
-		public void SetTarget(Transform newTarget, bool generateOffsets = true) {
+		/// <param name="generateOffsets"></param>
+		public void SetTarget(Transform newTarget, bool generateOffsets = true)
+		{
 			target = newTarget;
-			if (generateOffsets && newTarget != null)
-			{
-				positionOffsetCoordinateSystem = Space.Self;
-				positionOffset = newTarget.InverseTransformPoint(transform.position);
+			if (!generateOffsets || newTarget == null) return;
+			
+			positionOffsetCoordinateSystem = Space.Self;
+			positionOffset = newTarget.InverseTransformPoint(transform.position);
 
-
-				rotationOffsetCoordinateSystem = Space.Self;
-				rotationOffset = Quaternion.Inverse(newTarget.transform.rotation) * transform.rotation;
-			}
+			rotationOffsetCoordinateSystem = Space.Self;
+			rotationOffset = Quaternion.Inverse(newTarget.transform.rotation) * transform.rotation;
 		}
 	}
 
@@ -186,16 +305,19 @@ namespace unityutilities {
 	/// Sets up the interface for the CopyTransform script.
 	/// </summary>
 	[CustomEditor(typeof(CopyTransform))]
-	public class CopyTransformEditor : Editor {
-		public override void OnInspectorGUI() {
+	public class CopyTransformEditor : Editor
+	{
+		public override void OnInspectorGUI()
+		{
 			var rbf = target as CopyTransform;
 
 			EditorGUILayout.Space();
 			EditorGUILayout.Space();
-			
+
 			if (rbf == null) return;
 
-			if (rbf != null && rbf.target == null) {
+			if (rbf != null && rbf.target == null)
+			{
 				EditorGUILayout.HelpBox(
 					"No target assigned. Please assign a target to follow.", MessageType.Error);
 			}
@@ -206,23 +328,29 @@ namespace unityutilities {
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Position", EditorStyles.boldLabel);
 			rbf.followPosition = GUILayout.Toggle(rbf.followPosition, "Follow Position");
-			using (new EditorGUI.DisabledScope(!rbf.followPosition)) {
+			using (new EditorGUI.DisabledScope(!rbf.followPosition))
+			{
 				rbf.positionFollowType =
 					(CopyTransform.FollowType) EditorGUILayout.EnumPopup("Position Follow Type",
 						rbf.positionFollowType);
 
-				if (rbf.positionFollowType != CopyTransform.FollowType.Copy) {
-					if (!rbf.GetComponent<Rigidbody>()) {
+				if (rbf.positionFollowType != CopyTransform.FollowType.Copy)
+				{
+					if (!rbf.GetComponent<Rigidbody>())
+					{
 						EditorGUILayout.HelpBox("No rigidbody attached.", MessageType.Error);
 						// add button to automatically add a rigidbody
-						if (GUILayout.Button("Add Rigidbody")) {
+						if (GUILayout.Button("Add Rigidbody"))
+						{
 							rbf.gameObject.AddComponent<Rigidbody>();
 						}
 					}
-					else {
+					else
+					{
 						float mass = rbf.GetComponent<Rigidbody>().mass;
 						float drag = rbf.GetComponent<Rigidbody>().drag;
-						if (drag / mass < 20) {
+						if (drag / mass < 20)
+						{
 							EditorGUILayout.HelpBox(
 								"Rigidbody drag of " + 40 * mass + " or so is recommended.",
 								MessageType.Info);
@@ -232,13 +360,15 @@ namespace unityutilities {
 
 				rbf.useFixedUpdatePos = GUILayout.Toggle(rbf.useFixedUpdatePos, "Use Fixed Update");
 
-				if (rbf.positionFollowType == CopyTransform.FollowType.Force) {
+				if (rbf.positionFollowType == CopyTransform.FollowType.Force)
+				{
 					rbf.positionForceMult =
 						EditorGUILayout.FloatField("Position Force Multiplier", rbf.positionForceMult);
 				}
 
 				if (rbf.positionFollowType == CopyTransform.FollowType.Velocity ||
-				    rbf.positionFollowType == CopyTransform.FollowType.Force) {
+				    rbf.positionFollowType == CopyTransform.FollowType.Force)
+				{
 					rbf.snapIfDistanceGreaterThan =
 						EditorGUILayout.FloatField(
 							new GUIContent("Snap Distance",
@@ -255,24 +385,30 @@ namespace unityutilities {
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Rotation", EditorStyles.boldLabel);
 			rbf.followRotation = GUILayout.Toggle(rbf.followRotation, "Follow Rotation");
-			using (new EditorGUI.DisabledScope(!rbf.followRotation)) {
+			using (new EditorGUI.DisabledScope(!rbf.followRotation))
+			{
 				EditorGUILayout.LabelField("Rotation", EditorStyles.boldLabel);
 				rbf.rotationFollowType =
 					(CopyTransform.FollowType) EditorGUILayout.EnumPopup("Rotation Follow Type",
 						rbf.rotationFollowType);
 
-				if (rbf.rotationFollowType != CopyTransform.FollowType.Copy) {
-					if (!rbf.GetComponent<Rigidbody>()) {
+				if (rbf.rotationFollowType != CopyTransform.FollowType.Copy)
+				{
+					if (!rbf.GetComponent<Rigidbody>())
+					{
 						EditorGUILayout.HelpBox("No rigidbody attached.", MessageType.Error);
 						// add button to automatically add a rigidbody
-						if (GUILayout.Button("Add Rigidbody")) {
+						if (GUILayout.Button("Add Rigidbody"))
+						{
 							rbf.gameObject.AddComponent<Rigidbody>();
 						}
 					}
-					else {
+					else
+					{
 						float mass = rbf.GetComponent<Rigidbody>().mass;
 						float angDrag = rbf.GetComponent<Rigidbody>().angularDrag;
-						if (angDrag / mass < 10) {
+						if (angDrag / mass < 10)
+						{
 							EditorGUILayout.HelpBox(
 								"Rigidbody angular drag of " + 20 * mass + " or so is recommended.",
 								MessageType.Info);
@@ -281,13 +417,15 @@ namespace unityutilities {
 				}
 
 				rbf.useFixedUpdateRot = GUILayout.Toggle(rbf.useFixedUpdateRot, "Use Fixed Update");
-				if (rbf.rotationFollowType == CopyTransform.FollowType.Force) {
+				if (rbf.rotationFollowType == CopyTransform.FollowType.Force)
+				{
 					rbf.rotationForceMult =
 						EditorGUILayout.FloatField("Rotation Force Multiplier", rbf.rotationForceMult);
 				}
 
 				if (rbf.rotationFollowType == CopyTransform.FollowType.Velocity ||
-				    rbf.rotationFollowType == CopyTransform.FollowType.Force) {
+				    rbf.rotationFollowType == CopyTransform.FollowType.Force)
+				{
 					rbf.snapIfAngleGreaterThan = EditorGUILayout.FloatField(
 						new GUIContent("Snap Angle",
 							"If the object needs to rotate farther than this angle in one frame, it will snap immediately. 0 to disable."),
@@ -296,11 +434,13 @@ namespace unityutilities {
 
 				rbf.useVector3RotationOffset =
 					EditorGUILayout.Toggle("Use Vector3 for rotation offset", rbf.useVector3RotationOffset);
-				if (rbf.useVector3RotationOffset) {
+				if (rbf.useVector3RotationOffset)
+				{
 					rbf.rotationOffsetVector3 =
 						EditorGUILayout.Vector3Field("Rotation Offset (Vector3 form)", rbf.rotationOffsetVector3);
 				}
-				else {
+				else
+				{
 					rbf.rotationOffset = Vector4ToQuaternion(
 						EditorGUILayout.Vector4Field("Rotation Offset (Quaternion form)",
 							QuaternionToVector4(rbf.rotationOffset)));
@@ -309,22 +449,32 @@ namespace unityutilities {
 				rbf.rotationOffsetCoordinateSystem =
 					(Space) EditorGUILayout.EnumPopup("Offset Coordinate System",
 						rbf.rotationOffsetCoordinateSystem);
+
+				rbf.singleAxisRotation = EditorGUILayout.Toggle("Rotate Around Single Axis", rbf.singleAxisRotation);
+				if (rbf.singleAxisRotation)
+				{
+					rbf.singleAxisRotationAxis = (Axis3D)
+						EditorGUILayout.EnumPopup("Which Axis to Rotate Around", rbf.singleAxisRotationAxis);
+				}
 			}
 
 			EditorGUILayout.Space();
 			EditorGUILayout.Space();
 
-			using (new EditorGUI.DisabledScope(!rbf.followRotation && !rbf.followPosition)) {
+			using (new EditorGUI.DisabledScope(!rbf.followRotation && !rbf.followPosition))
+			{
 				rbf.smoothness =
 					EditorGUILayout.Slider("Smoothness", rbf.smoothness, 0, 1);
 			}
 		}
 
-		static Vector4 QuaternionToVector4(Quaternion rot) {
+		static Vector4 QuaternionToVector4(Quaternion rot)
+		{
 			return new Vector4(rot.x, rot.y, rot.z, rot.w);
 		}
 
-		static Quaternion Vector4ToQuaternion(Vector4 rot) {
+		static Quaternion Vector4ToQuaternion(Vector4 rot)
+		{
 			return new Quaternion(rot.x, rot.y, rot.z, rot.w);
 		}
 	}

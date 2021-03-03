@@ -28,10 +28,12 @@ namespace unityutilities
 		None,
 		Rift,
 		RiftSQuest,
+		Quest2,
 		Vive,
 		Index,
 		WMR,
-		QuestHands
+		QuestHands,
+		Pico
 	}
 
 	/// <summary>
@@ -318,7 +320,12 @@ namespace unityutilities
 
 			controllerLayout = HeadsetControllerLayout.Thumbstick; // TODO correctly assign this
 
-			if (deviceName.Contains("oculus") || modelName.Contains("Oculus Rift S") || modelName.Contains("Quest"))
+			if (modelName.Contains("Quest 2") || modelName.Contains("Quest2") || modelName.Contains("Miramar"))
+			{
+				headsetSystem = HeadsetSystem.Oculus;
+				controllerStyle = HeadsetControllerStyle.Quest2;
+			}
+			else if (deviceName.Contains("oculus") || modelName.Contains("Oculus Rift S") || modelName.Contains("Quest"))
 			{
 				headsetSystem = HeadsetSystem.Oculus;
 				controllerStyle = HeadsetControllerStyle.RiftSQuest;
@@ -910,7 +917,7 @@ namespace unityutilities
 #region Controller Velocity
 
 		/// <summary>
-		/// Gets the controller velocity. Only works for global space for now.
+		/// Gets the controller velocity. Only works for local space for now.
 		/// </summary>
 		/// <param name="side">Which controller</param>
 		/// <param name="space">Local or global space of the tracking volume</param>

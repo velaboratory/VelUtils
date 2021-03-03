@@ -14,6 +14,8 @@ namespace unityutilities {
 	public class Movement : MonoBehaviour {
 		public Rig rig;
 
+		public bool setPhysicsTimestepToRefreshRate;
+
 
 		[Header("Hand-based Movement")]
 
@@ -79,7 +81,20 @@ namespace unityutilities {
 		private const string colorProperty = "_Color";
 
 
-
+		[Header("Monke Movement")]
+		public bool enableMonkeMovement;
+		public float minVelocityToBounce = .5f;
+		public float maxBounceSpeed = 50f;
+		public float bounceMultiplier = 10f;
+		public float monkeHandRadius = .06f;
+		public LayerMask validMonkeLayers = ~0;
+		public MonkeHand leftMonkeHand;
+		public MonkeHand rightMonkeHand;
+		public int colliderCount = 2;
+		private float timeSinceLastBounce;
+		public float bounceBufferDelay = .1f;
+		[ReadOnly] public bool leftIsTouching;
+		[ReadOnly] public bool rightIsTouching;
 
 
 		[Header("Weird Movement")]
@@ -107,9 +122,11 @@ namespace unityutilities {
 		private Transform lastRightHandGrabbedObj;
 		private GameObject leftHandGrabPos;
 		private GameObject rightHandGrabPos;
+		private Vector3 lastLeftHandPos;
+		private Vector3 lastRightHandPos;
 
-		private readonly Vector3[] lastVels = new Vector3[5];
-		private int lastVelsIndex;
+		private Queue<Vector3> lastVels = new Queue<Vector3>();
+		private int lastVelsLength = 5;
 
 		private CopyTransform cpt;
 
@@ -151,7 +168,7 @@ namespace unityutilities {
 			public float lineRendererWidth = .01f;
 			public float teleportCurve = .01f;
 			public float teleportArcInitialVel = .5f;
-			public float smoothTeleportTime = 0f;
+			public float smoothTeleportTime;
 			public GameObject teleportMarkerOverride;
 			public Material lineRendererMaterialOverride;
 			public LayerMask validLayers = ~0;
@@ -242,7 +259,15 @@ namespace unityutilities {
 		}
 
 
-		private void Awake() {
+		private void Awake()
+		{
+			SetupTeleporter();
+
+			Time.fixedDeltaTime = 1/XRDevice.refreshRate;
+		}
+
+		private void SetupTeleporter()
+		{
 			if (teleporter.blinkShader == null) return;
 			teleporter.blinkMaterial = new Material(teleporter.blinkShader);
 			GameObject blinkMeshObj = new GameObject("Blink Mesh");
@@ -255,27 +280,30 @@ namespace unityutilities {
 			Mesh mesh = new Mesh();
 			teleporter.blinkMesh.mesh = mesh;
 
-			float x = 1f;
-			float y = 1f;
-			float distance = .5f;
+			const float x = 1f;
+			const float y = 1f;
+			const float distance = .5f;
 
-			Vector3[] vertices = {
+			Vector3[] vertices =
+			{
 				new Vector3(-x, -y, distance),
 				new Vector3(x, -y, distance),
 				new Vector3(-x, y, distance),
 				new Vector3(x, y, distance)
 			};
 
-			int[] tris = { 0, 2, 1, 2, 3, 1 };
+			int[] tris = {0, 2, 1, 2, 3, 1};
 
-			Vector3[] normals = {
+			Vector3[] normals =
+			{
 				-Vector3.forward,
 				-Vector3.forward,
 				-Vector3.forward,
 				-Vector3.forward
 			};
 
-			Vector2[] uv = {
+			Vector2[] uv =
+			{
 				new Vector2(0, 0),
 				new Vector2(1, 0),
 				new Vector2(0, 1),
@@ -331,10 +359,15 @@ namespace unityutilities {
 			
 			SlidingMovement();
 
+			MonkeMovement();
+
 
 			// update lastVels
-			lastVels[lastVelsIndex] = rig.rb.velocity;
-			lastVelsIndex = ++lastVelsIndex % 5;
+			lastVels.Enqueue(rig.rb.velocity);
+			if (lastVels.Count > lastVelsLength) lastVels.Dequeue();
+
+			lastLeftHandPos = rig.leftHand.position;
+			lastRightHandPos = rig.rightHand.position;
 
 			// update last frame's grabbed objs
 			lastLeftHandGrabbedObj = leftHandGrabbedObj;
@@ -348,6 +381,143 @@ namespace unityutilities {
 
 			TranslationalGain();
 
+		}
+
+		private void MonkeMovement()
+		{
+			if (!enableMonkeMovement) return;
+
+
+			bool leftHandBounce = false;
+			bool rightHandBounce = false;
+			Vector3 leftHandBounceVelocity = Vector3.zero;
+			Vector3 rightHandBounceVelocity = Vector3.zero;
+			Vector3 leftHandMoveDistance = Vector3.zero;
+			Vector3 rightHandMoveDistance = Vector3.zero;
+
+			Vector3 leftHandVelocity = rig.transform.TransformVector(InputMan.ControllerVelocity(Side.Left, Space.World));
+			Debug.DrawRay(rig.leftHand.position, leftHandVelocity);
+			// if (Touching(lastLeftHandPos, rig.leftHand.position, out Vector3 finalLeftHandPos))
+			// if (Physics.OverlapSphere(rig.leftHand.position, monkeHandRadius, validMonkeLayers).Length > colliderCount)
+			if (leftMonkeHand.lastCollision != null)
+			{
+				ContactPoint contactPoint = leftMonkeHand.lastCollision.GetContact(0);
+				
+				if (Vector3.Dot(-leftHandVelocity, contactPoint.normal) > minVelocityToBounce)
+				{
+					leftHandBounceVelocity =leftHandVelocity.normalized * -(Mathf.Clamp(leftHandVelocity.magnitude, 0, maxBounceSpeed) * bounceMultiplier);
+					leftHandBounce = true;
+				}
+				else
+				{
+					leftHandMoveDistance = leftMonkeHand.transform.position - rig.leftHand.position;
+				}
+
+				leftIsTouching = true;
+			}
+			else
+			{
+				leftIsTouching = false;
+			}
+
+			Vector3 rightHandVelocity = rig.transform.TransformVector(InputMan.ControllerVelocity(Side.Right, Space.World));
+			Debug.DrawRay(rig.rightHand.position, rightHandVelocity);
+			// if (Touching(lastRightHandPos, rig.rightHand.position, out Vector3 finalRightHandPos))
+			// if (Physics.OverlapSphere(rig.rightHand.position, monkeHandRadius, validMonkeLayers).Length > colliderCount)
+			if (rightMonkeHand.lastCollision != null)
+			{
+
+				ContactPoint contactPoint = rightMonkeHand.lastCollision.GetContact(0);
+				
+				if (Vector3.Dot(-rightHandVelocity, contactPoint.normal) > minVelocityToBounce)
+				{
+					rightHandBounceVelocity =rightHandVelocity.normalized * -(Mathf.Clamp(rightHandVelocity.magnitude, 0, maxBounceSpeed) * bounceMultiplier);
+					rightHandBounce = true;
+				}
+				else
+				{
+					rightHandMoveDistance = rightMonkeHand.transform.position - rig.rightHand.position;
+				}
+
+				rightIsTouching = true;
+			}
+			else
+			{
+				rightIsTouching = false;
+			}
+			
+			
+			// actually do the movement
+			Vector3 bounceVel = Vector3.zero;
+			if (leftHandBounce && rightHandBounce)
+			{
+				if (leftHandBounceVelocity.magnitude > rightHandBounceVelocity.magnitude)
+				{
+					bounceVel = leftHandBounceVelocity;
+				}
+				else
+				{
+					bounceVel = rightHandBounceVelocity;
+				}
+			} else if (leftHandBounce)
+			{
+				bounceVel = leftHandBounceVelocity;
+			} else if (rightHandBounce)
+			{
+				bounceVel = rightHandBounceVelocity;
+			}
+			else
+			{
+				rig.transform.Translate(leftHandMoveDistance + rightHandMoveDistance / 2, Space.World);
+			}
+
+			if (leftIsTouching || rightIsTouching)
+			{
+				// simulate one timestep to get out of the collider
+				rig.transform.Translate(bounceVel * Time.deltaTime, Space.World);
+				
+				rig.rb.velocity = bounceVel;
+			}
+
+			// // left hand
+			// if (Touching(lastLeftHandPos, rig.leftHand.position, out Vector3 finalLeftHandPos))
+			// {
+			// 	rig.rb.velocity = Vector3.zero;
+			// 	rig.transform.Translate(finalLeftHandPos - rig.leftHand.position, Space.World);
+			// }
+			//
+			// // right hand
+			// if (Touching(lastRightHandPos, rig.rightHand.position, out Vector3 finalRightHandPos))
+			// {
+			// 	rig.rb.velocity = Vector3.zero;
+			// 	rig.transform.Translate(finalRightHandPos - rig.rightHand.position, Space.World);
+			// }
+			//
+			bool Touching(Vector3 startPos, Vector3 endPos, out Vector3 finalPos)
+			{
+				// finalPos = Vector3.zero;
+				// return Physics.SphereCast(endPos, monkeHandRadius, -Vector3.up, out RaycastHit raycastHit, monkeHandRadius);
+
+				// Collider[] touching = Physics.OverlapSphere(endPos, monkeHandRadius, validMonkeLayers, QueryTriggerInteraction.Ignore);
+				// if (touching.Length <= 0) return false;
+				//
+				// finalPos = Physics.ClosestPoint(endPos, touching[0], touching[0].transform.position,
+				// 	touching[0].transform.rotation);
+				// return true;
+
+
+				Vector3 movement = endPos - startPos;
+				Debug.DrawLine(startPos, endPos, Color.green, 1);
+				if (Physics.SphereCast(startPos, monkeHandRadius, movement.normalized, out RaycastHit raycastHit,
+					movement.magnitude + monkeHandRadius, validMonkeLayers))
+				{
+					finalPos = raycastHit.point + raycastHit.normal * monkeHandRadius;
+					return true;
+				}
+				
+				finalPos = Vector3.zero;
+				return false;
+			}
 		}
 
 		#region Teleporting

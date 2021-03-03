@@ -161,8 +161,7 @@ namespace unityutilities.VRInteraction
 			if (rig)
 			{
 				lastVels.Enqueue(rig.transform.TransformVector(InputMan.ControllerVelocity(side)));
-				if (lastVels.Count > lastVelsLength)
-					lastVels.Dequeue();
+				if (lastVels.Count > lastVelsLength) lastVels.Dequeue();
 			}
 		}
 

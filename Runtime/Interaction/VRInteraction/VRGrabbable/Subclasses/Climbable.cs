@@ -12,31 +12,34 @@ namespace unityutilities.VRInteraction
 		{
 			base.HandleGrab(h);
 
-			if (!m)
-				m = h.rig.GetComponent<Movement>();
+			if (!m) m = h.rig.GetComponent<Movement>();
+			if (!m) m = h.rig.GetComponentInParent<Movement>();
+			if (!m) m = h.rig.GetComponentInChildren<Movement>();
 
-			if (m)
-				m.SetGrabbedObj(transform, h.side);
+			if (m) m.SetGrabbedObj(transform, h.side);
 		}
 
 		public override void HandleRelease(VRGrabbableHand h = null)
 		{
 			base.HandleRelease(h);
 
-			if (!m)
-				m = h.rig.GetComponent<Movement>();
+			if (h != null)
+			{
+				if (!m) m = h.rig.GetComponent<Movement>();
+				if (!m) m = h.rig.GetComponentInParent<Movement>();
+				if (!m) m = h.rig.GetComponentInChildren<Movement>();
+			}
 
-			if (m)
-				m.SetGrabbedObj(null, h.side);
+			if (m) m.SetGrabbedObj(null, h != null ? h.side : Side.None);
 		}
-
-
 
 		public override byte[] PackData()
 		{
 			return new byte[0];
 		}
 
-		public override void UnpackData(byte[] data) { }
+		public override void UnpackData(byte[] data)
+		{
+		}
 	}
 }

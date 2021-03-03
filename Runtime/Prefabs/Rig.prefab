@@ -351,6 +351,17 @@ MonoBehaviour:
     blinkRenderer: {fileID: 0}
     blinkMesh: {fileID: 0}
     teleportMarkerInstance: {fileID: 0}
+  enableMonkeMovement: 0
+  minVelocityToBounce: 0.5
+  maxBounceSpeed: 50
+  bounceMultiplier: 10
+  monkeHandRadius: 0.06
+  validMonkeLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  colliderCount: 2
+  leftIsTouching: 0
+  rightIsTouching: 0
   translationalGain: 1
   translationalGainOffsetObj: {fileID: 0}
   leftHandGrabbedObj: {fileID: 0}
@@ -461,7 +472,11 @@ MonoBehaviour:
   canGrab: 1
   grabInput: 1
   vibrateOnGrab: 1
+  enableRemoteGrabbing: 1
   remoteGrabbingDistance: 5
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
   grabbedVRGrabbable: {fileID: 0}
   selectedVRGrabbable: {fileID: 0}
   touchedObjs: []
@@ -548,7 +563,11 @@ MonoBehaviour:
   canGrab: 1
   grabInput: 1
   vibrateOnGrab: 1
+  enableRemoteGrabbing: 1
   remoteGrabbingDistance: 5
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
   grabbedVRGrabbable: {fileID: 0}
   selectedVRGrabbable: {fileID: 0}
   touchedObjs: []
