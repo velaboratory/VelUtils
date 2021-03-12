@@ -1,7 +1,7 @@
 {
   "name": "com.franzco.unityutilities",
   "displayName": "unityutilities",
-  "version": "2.11.0",
+  "version": "2.11.1",
   "unity": "2019.1",
   "description": "A lightweight collection of flexible utilities for VR projects.",
   "keywords": [
@@ -21,7 +21,7 @@
       "path": "Samples~/OculusSDKSupport"
     },
     {
-      "displayName": "Finger Touch Module",
+      "displayName": "Finger Touch Module (Oculus)",
       "description": "Module to use an Oculus Avatar finger or Quest hand tracking finger as a touch input for UI. Requires Oculus Integration.",
       "path": "Samples~/FingerTouchModule"
     },
@@ -34,6 +34,11 @@
       "displayName": "Pico Neo 2 Support",
       "description": "Includes an input module for the Pico Neo 2 controllers",
       "path": "Samples~/Pico Neo 2 Support"
+    },
+    {
+      "displayName": "XR Interaction V2",
+      "description": "Compatible with XRInteractionToolkit v1.0.0",
+      "path": "Samples~/XRInteractionModule_v2"
     }
   ],
   "dependencies": {

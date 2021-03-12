@@ -37,7 +37,7 @@ namespace unityutilities.VRInteraction
 			}
 			else //if (!Input.GetMouseButton(2))
 			{
-				if (Physics.Raycast(mouseRay, out RaycastHit hit, 100, layerMask))
+				if (Physics.Raycast(mouseRay, out RaycastHit hit, 100, layerMask, QueryTriggerInteraction.Ignore))
 				{
 					targetHand.transform.position = hit.point + mouseRay.direction.normalized * extraDeepness;
 					distance = Vector3.Distance(mainCamera.transform.position, targetHand.transform.position);

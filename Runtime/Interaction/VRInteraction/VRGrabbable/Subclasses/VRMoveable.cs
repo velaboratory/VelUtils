@@ -52,7 +52,7 @@ namespace unityutilities.VRInteraction
 			// TODO work out better system
 			if (setKinematic)
 			{
-				if (!locallyOwned)
+				if (!locallyOwned && networkGrabbed)
 				{
 					rb.isKinematic = true;
 				}

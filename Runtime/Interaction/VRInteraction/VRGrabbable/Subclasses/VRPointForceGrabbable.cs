@@ -7,12 +7,12 @@ namespace unityutilities.VRInteraction
 	[RequireComponent(typeof(Rigidbody))]
 	public class VRPointForceGrabbable : VRGrabbable
 	{
+		private Rigidbody rb;
 
-		Rigidbody rb;
+		[Space] public float forceMultiplier = 1;
 
-		[Space]
-		public float forceMultiplier = 1;
-		private Dictionary<VRGrabbableHand, Vector3> localHandGrabPositions = new Dictionary<VRGrabbableHand, Vector3>();
+		private readonly Dictionary<VRGrabbableHand, Vector3> localHandGrabPositions =
+			new Dictionary<VRGrabbableHand, Vector3>();
 
 		private new void Awake()
 		{
@@ -30,11 +30,12 @@ namespace unityutilities.VRInteraction
 		{
 			if (GrabbedBy != null)
 			{
-				foreach (var hand in listOfGrabbedByHands)
+				foreach (VRGrabbableHand hand in listOfGrabbedByHands)
 				{
-					Vector3 diff = transform.InverseTransformPoint(hand.transform.position) - localHandGrabPositions[hand];
-					rb.AddForceAtPosition(forceMultiplier * 10000 * Time.deltaTime * transform.TransformVector(diff), transform.TransformPoint(localHandGrabPositions[hand]));
-
+					Vector3 diff = transform.InverseTransformPoint(hand.transform.position) -
+					               localHandGrabPositions[hand];
+					rb.AddForceAtPosition(forceMultiplier * 10000 * Time.deltaTime * transform.TransformVector(diff),
+						transform.TransformPoint(localHandGrabPositions[hand]));
 				}
 			}
 		}

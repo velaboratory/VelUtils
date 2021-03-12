@@ -56,6 +56,10 @@ namespace unityutilities.VRInteraction
 		/// Network feature. Is this object owned by this player?
 		/// </summary>
 		public bool locallyOwned = true;
+		/// <summary>
+		/// Network feature. Is this object being held by another player?
+		/// </summary>
+		public bool networkGrabbed = false;
 
 		protected void Awake()
 		{

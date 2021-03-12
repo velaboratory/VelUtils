@@ -182,6 +182,7 @@ namespace unityutilities {
 			public Shader blinkShader;
 			[HideInInspector] public MeshRenderer blinkRenderer;
 			[HideInInspector] public MeshFilter blinkMesh;
+			[HideInInspector] public Coroutine blinkCoroutine;
 
 
 
@@ -263,7 +264,10 @@ namespace unityutilities {
 		{
 			SetupTeleporter();
 
-			Time.fixedDeltaTime = 1/XRDevice.refreshRate;
+			if (setPhysicsTimestepToRefreshRate && XRDevice.refreshRate != 0)
+			{
+				Time.fixedDeltaTime = 1 / XRDevice.refreshRate;
+			}
 		}
 
 		private void SetupTeleporter()
@@ -720,6 +724,10 @@ namespace unityutilities {
 		/// </summary>
 		/// <param name="duration"></param>
 		public void FadeOut(float duration) {
+			if (teleporter.blinkCoroutine != null)
+			{
+				StopCoroutine(teleporter.blinkCoroutine);
+			}
 			StartCoroutine(Fade(0, 1, duration));
 		}
 
@@ -728,7 +736,11 @@ namespace unityutilities {
 		/// </summary>
 		/// <param name="duration"></param>
 		public void FadeIn(float duration) {
-			StartCoroutine(Fade(1, 0, duration));
+			if (teleporter.blinkCoroutine != null)
+			{
+				StopCoroutine(teleporter.blinkCoroutine);
+			}
+			teleporter.blinkCoroutine = StartCoroutine(Fade(1, 0, duration));
 		}
 
 		private IEnumerator Fade(float startVal, float endVal, float duration) {
@@ -741,7 +753,11 @@ namespace unityutilities {
 			SetBlinkOpacity(endVal);
 		}
 
-		public void SetBlinkOpacity(float value) {
+		public void SetBlinkOpacity(float value, bool stopOtherFades = false) {
+			if (stopOtherFades && teleporter.blinkCoroutine != null)
+			{
+				StopCoroutine(teleporter.blinkCoroutine);
+			}
 			Color color = Color.black;
 			color.a = value;
 			if (teleporter.blinkMaterial != null)

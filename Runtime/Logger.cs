@@ -39,7 +39,7 @@ namespace unityutilities {
 		public TimeOrLines useTimeOrLineInterval;
 		public enum TimeOrLines
 		{
-			Time, Lines, WhicheverFirst, Both
+			Time, Lines, WhicheverFirst, WhicheverLast
 		}
 
 		public static bool usePerDeviceFolder = true;
@@ -134,7 +134,7 @@ namespace unityutilities {
 
 			StringBuilder allOutputData = new StringBuilder();
 
-			foreach (var fileName in dataToLog.Keys) {
+			foreach (string fileName in dataToLog.Keys) {
 
 				if (enableLoggingLocal) {
 					string filePath, directoryPath;
@@ -192,7 +192,7 @@ namespace unityutilities {
 			form.AddField("version", Application.version);
 			using (UnityWebRequest www = UnityWebRequest.Post(webLogURL, form)) {
 				yield return www.SendWebRequest();
-				if (www.isNetworkError || www.isHttpError) {
+				if (www.isNetworkError) {
 					Debug.Log(www.error);
 				}
 			}
@@ -229,7 +229,7 @@ namespace unityutilities {
 						ActuallyLog();
 					}
 					break;
-				case TimeOrLines.Both:
+				case TimeOrLines.WhicheverLast:
 					if (Time.time - lastLogTime > timeLogInterval && numLinesLogged > lineLogInterval)
 					{
 						ActuallyLog();
@@ -266,21 +266,6 @@ namespace unityutilities {
 
 		public void EnableLogging(bool enable) {
 			enableLogging = enable;
-		}
-
-		private static string ToLiteral(string input)
-		{
-			using (var writer = new StringWriter())
-			{
-				using (var provider = CodeDomProvider.CreateProvider("CSharp"))
-				{
-					provider.GenerateCodeFromExpression(new CodePrimitiveExpression(input), writer, new CodeGeneratorOptions { IndentString = "\t" });
-					var literal = writer.ToString();
-					literal = literal.Replace(string.Format("\" +{0}\t\"", Environment.NewLine), "");
-					literal = literal.Replace("\\r\\n", "\\r\\n\"+\r\n\"");
-					return literal;
-				}
-			}
 		}
 
 		private static string ToLiteral2(string input)
