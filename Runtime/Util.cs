@@ -77,6 +77,13 @@ namespace unityutilities
 			};
 		}
 		#endregion
+	
+		
+		public static Quaternion MirrorX(this Quaternion input)
+		{
+			return new Quaternion(-input.x, input.y, input.z, -input.w);
+		}
+	
 	}
 
 	public static class TransformDeepChildExtension

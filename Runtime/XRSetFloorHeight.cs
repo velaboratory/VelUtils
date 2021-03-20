@@ -1,18 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR;
 
 public class XRSetFloorHeight : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        UnityEngine.XR.XRDevice.SetTrackingSpaceType(UnityEngine.XR.TrackingSpaceType.RoomScale);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+	void Start()
+	{
+		List<XRInputSubsystem> lst = new List<XRInputSubsystem>();
+		SubsystemManager.GetInstances(lst);
+		for (int i = 0; i < lst.Count; i++)
+		{
+			lst[i].TrySetTrackingOriginMode(TrackingOriginModeFlags.Floor);
+		}
+	}
 }

@@ -4,7 +4,7 @@ namespace unityutilities
 {
 	public class CursorWorldMouse : WorldMouse
 	{
-		public Camera myCamera;
+		public Camera screenCamera;
 
 		public override bool PressDown()
 		{
@@ -16,15 +16,16 @@ namespace unityutilities
 			return Input.GetMouseButtonUp(0);
 		}
 
-		// Update is called once per frame
 		protected override void Update()
 		{
-			Ray r = myCamera.ScreenPointToRay(Input.mousePosition);
+			if (screenCamera != null)
+			{
+				Ray r = screenCamera.ScreenPointToRay(Input.mousePosition);
 
-			transform.position = myCamera.transform.position;
-			transform.forward = r.direction;
+				transform.position = screenCamera.transform.position;
+				transform.forward = r.direction;
+			}
 			base.Update();
-			// Debug.Log(Input.mousePosition);
 		}
 	}
 }

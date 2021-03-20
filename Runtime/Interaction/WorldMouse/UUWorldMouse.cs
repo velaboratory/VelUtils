@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace unityutilities
@@ -31,7 +32,10 @@ namespace unityutilities
 		public VRInput input = VRInput.Trigger;
 		public Side side;
 
+
 		[Space]
+
+		public bool useLaser = true;
 
 		/// <summary>
 		/// Default laser color. Can't be changed during runtime
@@ -46,10 +50,34 @@ namespace unityutilities
 
 		private bool showThisFrame = false;
 
-		protected override void Start()
-		{
-			base.Start();
+		[Space]
 
+		public float vibrateOnClick = .5f;
+		public float vibrateOnHover = .1f;
+
+		protected void Start()
+		{
+			if (useLaser)
+			{
+				CreateLaser();
+			}
+
+			Clicked += OnClicked;
+			HoverEntered += OnHover;
+		}
+
+		private void OnHover(GameObject obj)
+		{
+			InputMan.Vibrate(side, vibrateOnHover);
+		}
+
+		private void OnClicked(GameObject obj)
+		{
+			InputMan.Vibrate(side, vibrateOnClick);
+		}
+
+		private void CreateLaser()
+		{
 			lineRend = new GameObject("UI Interaction").AddComponent<LineRenderer>();
 			lineRend.transform.SetParent(transform);
 			lineRend.transform.localPosition = Vector3.zero;
@@ -65,12 +93,15 @@ namespace unityutilities
 		protected override void Update()
 		{
 			base.Update();
-			if (rayDistance < Mathf.Infinity)
+			if (useLaser)
 			{
-				SetLaserLength(rayDistance);
-				ShowLaser(true);
+				if (rayDistance < Mathf.Infinity)
+				{
+					SetLaserLength(rayDistance);
+					ShowLaser(true);
+				}
+				ShowLaserUpdate();
 			}
-			ShowLaserUpdate();
 		}
 
 		public override bool PressDown()
@@ -96,12 +127,14 @@ namespace unityutilities
 		/// </summary>
 		private void ShowLaserUpdate()
 		{
+			if (lineRend == null) CreateLaser();
 			lineRend.gameObject.SetActive(showThisFrame);
 			showThisFrame = false;
 		}
 
 		public void SetLaserLength(float length)
 		{
+			if (lineRend == null) CreateLaser();
 			lineRend.SetPositions(new Vector3[] { transform.position, transform.position + transform.forward * length });
 		}
 	}

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace unityutilities
 {
@@ -23,16 +24,31 @@ namespace unityutilities
 		public Vector3 worldHitPoint { get; private set; }
 		public GameObject hitGameObject { get; private set; }
 		public Collider hitCollider { get; private set; }
+		public GameObject lastHoverObject { get; set; }
 
-		protected virtual void Start()
+		// event callbacks
+		public Action<GameObject> Clicked;
+		public Action<GameObject> ClickDown;
+		public Action<GameObject> HoverEntered;
+
+		protected virtual void OnEnable()
 		{
 			WorldMouseInputModule.Instance.AddWorldMouse(this);
 		}
 
+		protected virtual void OnDisable()
+		{
+			WorldMouseInputModule.Instance.RemoveWorldMouse(this);
+		}
+
 		protected virtual void Update()
 		{
+			// this auto-creates a worldmousemanager in the scene if there isn't one. 
+			// Disable it to disable worldmouse instead of deleting
+			if (WorldMouseInputModule.Instance == null) return;
+
 			worldRayDistance = Mathf.Infinity;
-			if (Physics.Raycast(new Ray(transform.position, transform.forward), out RaycastHit hit))
+			if (Physics.Raycast(new Ray(transform.position, transform.forward), out RaycastHit hit, Mathf.Infinity, ~0, QueryTriggerInteraction.Ignore))
 			{
 				Debug.DrawRay(transform.position, transform.forward);
 				worldRayDistance = hit.distance;
