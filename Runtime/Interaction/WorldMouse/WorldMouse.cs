@@ -27,7 +27,7 @@ namespace unityutilities
 		public GameObject lastHoverObject { get; set; }
 
 		// event callbacks
-		public Action<GameObject> Clicked;
+		public Action<GameObject> ClickUp;
 		public Action<GameObject> ClickDown;
 		public Action<GameObject> HoverEntered;
 

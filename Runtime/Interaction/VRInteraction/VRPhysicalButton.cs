@@ -20,7 +20,7 @@ namespace unityutilities.VRInteraction
 		[Space]
 		public ButtonClickedEvent onClick;
 
-		void Start()
+		private void Start()
 		{
 			rb = GetComponentInChildren<Rigidbody>();
 			rb.constraints = RigidbodyConstraints.FreezeAll ^ RigidbodyConstraints.FreezePositionY;
@@ -40,8 +40,7 @@ namespace unityutilities.VRInteraction
 			}
 		}
 
-		// Update is called once per frame
-		void FixedUpdate()
+		private void FixedUpdate()
 		{
 			float currentPos = rb.transform.localPosition.y;
 			if (!clicked && currentPos < depth)
@@ -69,21 +68,22 @@ namespace unityutilities.VRInteraction
 			}
 
 			// limit movement
-			if (currentPos < 0)
-			{
-				rb.transform.localPosition = new Vector3(0, 0, 0);
-				rb.velocity = Vector3.zero;
-			}
-			else if (currentPos > normalHeight)
-			{
-				rb.transform.localPosition = new Vector3(0, normalHeight, 0);
-				rb.velocity = Vector3.zero;
-			}
-
-			if (currentPos < normalHeight - depth)
-			{
-				rb.AddForce(0, 500 * Time.fixedDeltaTime * forceMultiplier, 0);
-			}
+			// if (currentPos < 0)
+			// {
+			// 	rb.transform.localPosition = new Vector3(0, 0, 0);
+			// 	rb.velocity = Vector3.zero;
+			// }
+			// else if (currentPos > normalHeight)
+			// {
+			// 	rb.transform.localPosition = new Vector3(0, normalHeight, 0);
+			// 	rb.velocity = Vector3.zero;
+			// }
+			//
+			// // add upwards force
+			// if (currentPos < normalHeight - depth)
+			// {
+			// 	rb.AddForce(0, forceMultiplier, 0);
+			// }
 		}
 	}
 

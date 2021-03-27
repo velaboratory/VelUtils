@@ -62,7 +62,7 @@ namespace unityutilities
 				CreateLaser();
 			}
 
-			Clicked += OnClicked;
+			ClickDown += OnClicked;
 			HoverEntered += OnHover;
 		}
 

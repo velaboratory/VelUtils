@@ -19,8 +19,7 @@ namespace unityutilities.VRInteraction
 
 		// public Transform centerOfMass;
 
-		[Space]
-		public bool useVelocityFollow = true;
+		[Space] public bool useVelocityFollow = true;
 		private bool wasKinematic;
 		private bool wasUsingGravity;
 		private CopyTransform copyTransform;
@@ -35,8 +34,12 @@ namespace unityutilities.VRInteraction
 		{
 			base.Awake();
 			rb = GetComponent<Rigidbody>();
-			wasKinematic = rb.isKinematic;
-			wasUsingGravity = rb.useGravity;
+			if (rb != null)
+			{
+				wasKinematic = rb.isKinematic;
+				wasUsingGravity = rb.useGravity;
+			}
+
 			copyTransform = GetComponent<CopyTransform>();
 		}
 
@@ -50,7 +53,7 @@ namespace unityutilities.VRInteraction
 
 
 			// TODO work out better system
-			if (setKinematic)
+			if (setKinematic && rb != null)
 			{
 				if (!locallyOwned && networkGrabbed)
 				{
@@ -67,7 +70,10 @@ namespace unityutilities.VRInteraction
 		{
 			base.HandleGrab(h);
 
-			rb.useGravity = false;
+			if (rb != null)
+			{
+				rb.useGravity = false;
+			}
 
 			// add a copytransform if it doesn't exist
 			if (!copyTransform)
@@ -86,11 +92,11 @@ namespace unityutilities.VRInteraction
 					copyTransform.positionFollowType = CopyTransform.FollowType.Copy;
 					copyTransform.rotationFollowType = CopyTransform.FollowType.Copy;
 				}
+
 				copyTransform.snapIfAngleGreaterThan = 90;
 				copyTransform.snapIfDistanceGreaterThan = 1f;
 				copyTransform.followPosition = true;
 				copyTransform.followRotation = true;
-
 			}
 
 			copyTransform.SetTarget(h.transform);
@@ -106,7 +112,10 @@ namespace unityutilities.VRInteraction
 		{
 			base.HandleRelease(h);
 
-			rb.useGravity = wasUsingGravity;
+			if (rb != null)
+			{
+				rb.useGravity = wasUsingGravity;
+			}
 
 			if (copyTransform)
 			{
@@ -128,7 +137,7 @@ namespace unityutilities.VRInteraction
 					//rb.velocity = h.lastVels.OrderBy(e => e.sqrMagnitude).ToList()[h.lastVels.Count / 2];
 
 					// get the last vel
-					if (h.lastVels.Count > 0)
+					if (h.lastVels.Count > 0 && rb != null)
 					{
 						rb.velocity = h.lastVels.Last();
 					}
@@ -151,6 +160,7 @@ namespace unityutilities.VRInteraction
 			{
 				total += item;
 			}
+
 			return total / list.Length;
 		}
 

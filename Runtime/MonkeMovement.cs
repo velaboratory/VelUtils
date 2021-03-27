@@ -44,7 +44,7 @@ namespace GorillaLocomotion
 			InitializeValues();
 		}
 
-		private void InitializeValues()
+		public void InitializeValues()
 		{
 			playerRigidBody = GetComponent<Rigidbody>();
 			velocityHistory = new Vector3[velocityHistorySize];

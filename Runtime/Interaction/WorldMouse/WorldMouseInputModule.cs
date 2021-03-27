@@ -280,7 +280,7 @@ namespace unityutilities
 							currentEventData.pointerDrag = null;
 							currentEventData.rawPointerPress = null;
 							currentEventData.pointerPress = null;
-							wm.Clicked?.Invoke(lastPressed[i]);
+							wm.ClickUp?.Invoke(lastPressed[i]);
 							globalLastPressed = lastPressed[i];
 							lastPressed[i] = null;
 						}

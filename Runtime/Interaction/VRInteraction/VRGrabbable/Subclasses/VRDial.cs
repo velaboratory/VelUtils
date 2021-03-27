@@ -233,7 +233,7 @@ namespace unityutilities.VRInteraction
 				{
 					if (GrabbedBy)
 					{
-						InputMan.Vibrate(GrabbedBy.side, 1f, .2f);
+						InputMan.Vibrate(GrabbedBy.side, 1f, .01f);
 					}
 					vibrationDeltaSum = 0;
 				}
