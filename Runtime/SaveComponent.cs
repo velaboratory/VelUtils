@@ -79,6 +79,11 @@ namespace unityutilities
 					if (PlayerPrefsJson.HasKey(key))
 						toggle.isOn = PlayerPrefsJson.GetBool(name + "_toggle");
 					break;
+				case Dropdown dropdown:
+					key = name + "_dropdown";
+					if (PlayerPrefsJson.HasKey(key))
+						dropdown.value = PlayerPrefsJson.GetInt(name + "_dropdown");
+					break;
 			}
 		}
 
@@ -116,6 +121,9 @@ namespace unityutilities
 					break;
 				case Toggle toggle:
 					PlayerPrefsJson.SetBool(name + "_toggle", toggle.isOn);
+					break;
+				case Dropdown dropdown:
+					PlayerPrefsJson.SetInt(name + "_dropdown", dropdown.value);
 					break;
 			}
 

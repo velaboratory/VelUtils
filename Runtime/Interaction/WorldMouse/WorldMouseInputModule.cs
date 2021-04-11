@@ -79,7 +79,8 @@ namespace unityutilities
 			{
 				if (instance == null)
 				{
-					instance = new GameObject("WorldMouseInputModule").AddComponent<WorldMouseInputModule>();
+					// Debug.Log("Creating new worldmouseinputmodule");
+					// instance = new GameObject("WorldMouseInputModule").AddComponent<WorldMouseInputModule>();
 				}
 
 				return instance;

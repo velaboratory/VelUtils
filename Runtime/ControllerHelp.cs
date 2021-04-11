@@ -222,6 +222,7 @@ namespace unityutilities
 		/// <param name="text">The text to show on the hint</param>
 		public static ControllerLabel[] ShowHint(Side side, ButtonHintType hintType, string text)
 		{
+			if (!instance) return null;
 			if (!instance.initialized)
 			{
 				instance.Start();
