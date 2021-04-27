@@ -64,6 +64,18 @@ namespace unityutilities.VRInteraction
 					rb.isKinematic = wasKinematic;
 				}
 			}
+
+
+			// this is to prevent objects from going near infinity
+			if (Mathf.Abs(transform.position.x) > 10000 ||
+			    Mathf.Abs(transform.position.y) > 10000 ||
+			    Mathf.Abs(transform.position.z) > 10000)
+			{
+				Debug.Log("Had to reset the position of an object.", this);
+				transform.position = Vector3.zero;
+				rb.velocity = Vector3.zero;
+				rb.angularVelocity = Vector3.zero;
+			}
 		}
 
 		public override void HandleGrab(VRGrabbableHand h)
