@@ -80,6 +80,10 @@ namespace unityutilities {
 		public Teleporter teleporter = new Teleporter();
 		private const string colorProperty = "_Color";
 
+		[Tooltip("Scoot backwards with thumbstick down")]
+		public bool scootBackMovement;
+		public Side scootBackMovementController = Side.None;
+
 
 		[Header("Monke Movement")]
 		public bool enableMonkeMovement;
@@ -379,6 +383,16 @@ namespace unityutilities {
 
 			if (teleportingMovement) {
 				Teleporting();
+			}
+
+			if (scootBackMovement)
+			{
+				if (InputMan.Down(scootBackMovementController))
+				{
+					Vector3 f = rig.head.forward;
+					f.y = 0;
+					TeleportTo(rig.head.position - f * .5f, rig.head.rotation);
+				}
 			}
 
 			snapTurnedThisFrame = false;

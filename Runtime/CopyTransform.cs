@@ -110,7 +110,7 @@ namespace unityutilities
 
 		private void UpdatePosition(float timeStep)
 		{
-			if (timeStep == 0) return;
+			if (Mathf.Abs(timeStep) <= float.Epsilon) return;
 
 			Vector3 t;
 			if (positionOffsetCoordinateSystem == Space.World)
@@ -161,7 +161,7 @@ namespace unityutilities
 
 		private void UpdateRotation(float timeStep)
 		{
-			if (timeStep == 0) return;
+			if (Mathf.Abs(timeStep) <= float.Epsilon) return;
 
 			Quaternion t;
 			if (rotationOffsetCoordinateSystem == Space.Self)
@@ -180,13 +180,15 @@ namespace unityutilities
 				t = target.rotation;
 			}
 
+			t = t.normalized;
+
 			switch (rotationFollowType)
 			{
 				case FollowType.Copy:
 					transform.rotation = Quaternion.Slerp(transform.rotation, t, 1 - smoothness);
 					break;
 				case FollowType.Velocity:
-					var angularVel1 = AngularVel(timeStep, t, out var angle1);
+					Vector3 angularVel1 = AngularVel(timeStep, t, out float angle1);
 					if (Mathf.Abs(snapIfAngleGreaterThan) > .01f && angle1 > snapIfAngleGreaterThan)
 					{
 						transform.rotation = t;
@@ -195,13 +197,13 @@ namespace unityutilities
 					rb.angularVelocity = Vector3.ClampMagnitude(angularVel1 * (1 - smoothness), 100);
 					break;
 				case FollowType.Force:
-					var angularVel2 = AngularVel(timeStep, t, out var angle2);
+					Vector3 angularVel2 = AngularVel(timeStep, t, out var angle2);
 					if (Mathf.Abs(snapIfAngleGreaterThan) > .01f && angle2 > snapIfAngleGreaterThan)
 					{
 						transform.rotation = t;
 					}
 
-					var angularTorq = angularVel2 * rotationForceMult;
+					Vector3 angularTorq = angularVel2 * rotationForceMult;
 					rb.AddTorque(Vector3.ClampMagnitude(angularTorq, 100));
 					break;
 				default:
@@ -276,7 +278,7 @@ namespace unityutilities
 		private Vector3 AngularVel(float timeStep, Quaternion goalRotation, out float angle)
 		{
 			Quaternion rot = goalRotation * Quaternion.Inverse(transform.rotation);
-			rot.ToAngleAxis(out angle, out var axis);
+			rot.ToAngleAxis(out angle, out Vector3 axis);
 			Vector3 angularVel = axis * (angle * Mathf.Deg2Rad / timeStep);
 			return angularVel;
 		}
