@@ -99,7 +99,7 @@ namespace unityutilities
 			//we create a camera that will be our raycasting camera and add it to all canvases
 			//this is necessary because unity requires a screen space position to do raycasts against
 			//gui objects, and uses an "event camera" to do the actual raycasts
-			worldMouseCam = new GameObject("Controller UI Camera").AddComponent<Camera>();
+			worldMouseCam = new GameObject("WorldMouse UI Camera").AddComponent<Camera>();
 			worldMouseCam.nearClipPlane = .01f;
 			worldMouseCam.fieldOfView = 1;
 			worldMouseCam.depth = -100;
@@ -112,7 +112,7 @@ namespace unityutilities
 
 			FindCanvases();
 
-			FindObjectsOfType<WorldMouse>().ToList().ForEach(m => AddWorldMouse(m));
+			FindObjectsOfType<WorldMouse>().ToList().ForEach(AddWorldMouse);
 
 			//SceneManager.sceneLoaded += SceneLoaded;
 		}
@@ -204,9 +204,18 @@ namespace unityutilities
 				//the event system takes care of raycasting from all cameras at all cursor locations into the world
 				eventSystem.RaycastAll(currentEventData, m_RaycastResultCache);
 				currentEventData.pointerCurrentRaycast = FindFirstRaycast(m_RaycastResultCache);
+				
+				// don't process anything if a world object was hit
 				if (wm.worldRayDistance < currentEventData.pointerCurrentRaycast.distance)
 				{
-					continue; //don't process anything if a world object was hit
+					continue; 
+				}
+				
+				// don't process anything if we are not within distance limits for this wm 
+				if (currentEventData.pointerCurrentRaycast.distance > wm.maxDistance || 
+				    currentEventData.pointerCurrentRaycast.distance < wm.minDistance)
+				{
+					continue; 
 				}
 
 				//if we hit something this will not be null

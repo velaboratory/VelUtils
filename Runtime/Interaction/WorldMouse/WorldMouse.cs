@@ -13,11 +13,13 @@ namespace unityutilities
 		public float rayDistance;
 
 		/// <summary>
-		/// The distance of closest UI object that was hit.
-		/// This is set from the WM InputModule
+		/// The distance of closest object that was hit.
 		/// </summary>
 		[ReadOnly]
 		public float worldRayDistance;
+
+		public float minDistance = 0;
+		public float maxDistance = Mathf.Infinity;
 
 		public RaycastHit? lastHit { get; private set; }
 		public Vector2 textureHitPoint { get; private set; }
