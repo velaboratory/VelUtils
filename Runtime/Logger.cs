@@ -5,11 +5,8 @@ using System.IO;
 using System.Text;
 using UnityEngine.Networking;
 using System.Collections;
-using System.CodeDom.Compiler;
-using System.CodeDom;
-using System.IO.Compression;
 using ICSharpCode.SharpZipLib.Zip;
-using ICSharpCode.SharpZipLib.Core;
+using System.Threading;
 
 namespace unityutilities
 {
@@ -80,6 +77,15 @@ namespace unityutilities
 		public bool fullStackTraceForOtherMessages = true;
 		private static string debugLogFileName = "debug_log";
 
+		[Header("Extra Info")]
+		public bool logSystemInfoOnStart;
+
+
+		[Space]
+		[Tooltip("Not required. Define a set of fields that get appended to every log line, such as photon user ids etc. by inheriting from the LoggerConstantFields class.")]
+		public LoggerConstantFields constantFields;
+
+
 		/// <summary>
 		/// Dictionary of filename and list of lines that haven't been logged yet
 		/// </summary>
@@ -92,6 +98,38 @@ namespace unityutilities
 		private void Awake()
 		{
 			if (instance == null) instance = this;
+
+			if (logSystemInfoOnStart)
+			{
+				LogRow(
+					"system_info",
+					SystemInfo.deviceModel,
+					SystemInfo.deviceName,
+					SystemInfo.deviceType.ToString(),
+
+					// OS
+					SystemInfo.operatingSystem,
+					SystemInfo.operatingSystemFamily.ToString(),
+
+					// GPU
+					SystemInfo.graphicsDeviceName,
+					SystemInfo.graphicsDeviceVendor,
+					SystemInfo.graphicsDeviceType.ToString(),
+					SystemInfo.graphicsDeviceVersion,
+					SystemInfo.graphicsMemorySize.ToString(),
+					SystemInfo.graphicsMultiThreaded.ToString(),
+
+					// CPU
+					SystemInfo.processorType,
+					SystemInfo.processorCount.ToString(),
+					SystemInfo.processorFrequency.ToString(),
+					SystemInfo.systemMemorySize.ToString(),
+
+					// battery
+					SystemInfo.batteryLevel.ToString(),
+					SystemInfo.batteryStatus.ToString()
+				);
+			}
 		}
 
 		/// <summary>
@@ -115,6 +153,8 @@ namespace unityutilities
 			try
 			{
 				StringBuilder strBuilder = new StringBuilder();
+
+				// add global constant fields
 				strBuilder.Append(DateTime.Now.ToString(dateFormat));
 				strBuilder.Append(delimiter);
 				strBuilder.Append(SystemInfo.deviceUniqueIdentifier);
@@ -128,6 +168,15 @@ namespace unityutilities
 					strBuilder.Append(SystemInfo.operatingSystem);
 				}
 				strBuilder.Append(delimiter);
+
+				// add custom constant fields
+				foreach (var elem in instance.constantFields.GetConstantFields())
+				{
+					strBuilder.Append(elem);
+					strBuilder.Append(delimiter);
+				}
+
+				// add actual data
 				foreach (string elem in data)
 				{
 					if (elem.Contains(delimiter))
@@ -138,6 +187,8 @@ namespace unityutilities
 					strBuilder.Append(elem);
 					strBuilder.Append(delimiter);
 				}
+
+				// add this data to the cache
 				if (!dataToLog.ContainsKey(fileName))
 				{
 					dataToLog.Add(fileName, new List<string>());
@@ -202,7 +253,7 @@ namespace unityutilities
 				// actually log data
 				try
 				{
-					foreach (var row in dataToLog[fileName])
+					foreach (string row in dataToLog[fileName])
 					{
 						if (enableLoggingLocal)
 						{
@@ -213,6 +264,11 @@ namespace unityutilities
 							allOutputData.Append(row);
 							allOutputData.Append(newLineChar);
 						}
+					}
+
+					foreach (StreamWriter writer in streamWriters.Values)
+					{
+						writer.Flush();
 					}
 					dataToLog[fileName].Clear();
 
@@ -287,26 +343,61 @@ namespace unityutilities
 				Debug.LogError("UploadZip() called, but no Logger.cs is in the scene.");
 				return;
 			}
+			instance.StartCoroutine(instance.UploadZipCo());
+		}
 
+		private IEnumerator UploadZipCo()
+		{
 			string dir = GetCurrentLogFolder();
 
-			CreateZipFromFolder(dir);
+			Thread thread = new Thread(() => CreateZipFromFolder(dir));
+			thread.Start();
+			// wait for folder to finish zipping
+			while (thread.IsAlive)
+			{
+				yield return null;
+			}
+
+			string zipFile = dir + ".zip";
+			byte[] data = File.ReadAllBytes(zipFile);
+
+			WWWForm form = new WWWForm();
+			form.AddField(passwordField, webLogPassword);
+			form.AddField("app", appName);
+			form.AddField("version", Application.version);
+			form.AddBinaryData("zip", data, $"{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss-ff}_{SystemInfo.deviceUniqueIdentifier}");
+			using (UnityWebRequest www = UnityWebRequest.Post(webLogURL, form))
+			{
+				yield return www.SendWebRequest();
+				if (www.result != UnityWebRequest.Result.Success)
+				{
+					Debug.Log(www.error);
+				}
+				else
+				{
+					Debug.Log("Uploaded .zip of logs.");
+					Debug.Log(www.downloadHandler.text);
+				}
+			}
 		}
 
 
-		public static void CreateZipFromFolder(string folderName)
+		public static string CreateZipFromFolder(string folderName)
 		{
 			// copy the files to a new folder first
-			string tempDir = $"{folderName}_{SystemInfo.deviceUniqueIdentifier}";
+			//string tempDir = $"{folderName}_{DateTime.UtcNow:s}";
+			string tempDir = $"{folderName}_temp";
 			Directory.CreateDirectory(tempDir);
 			DirectoryCopy(folderName, tempDir, true);
 
 			// zip them
 			FastZip fz = new FastZip();
-			fz.CreateZip(tempDir + ".zip", tempDir, true, "");
+			fz.CreateZip(folderName + ".zip", tempDir, true, "");
 
 			// delete the temp folder
 			Directory.Delete(tempDir, true);
+
+			return folderName + ".zip";
 		}
 
 		private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
