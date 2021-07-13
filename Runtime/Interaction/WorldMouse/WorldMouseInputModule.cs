@@ -45,7 +45,9 @@ namespace unityutilities
 				EditorGUILayout.ObjectField(mouse, typeof(WorldMouse), true);
 			}
 			GUI.enabled = true;
-			
+
+			WorldMouseInputModule.autoFindCanvases = EditorGUILayout.Toggle("Auto Find Canvases", WorldMouseInputModule.autoFindCanvases);
+
 			// last clicked object
 			EditorGUILayout.LabelField("Last clicked object:");
 			GUI.enabled = false;
@@ -72,6 +74,8 @@ namespace unityutilities
 		/// The last gameobject clicked by any mouse
 		/// </summary>
 		public static GameObject globalLastPressed;
+
+		public static bool autoFindCanvases = true;
 
 		public static WorldMouseInputModule Instance
 		{
@@ -146,6 +150,8 @@ namespace unityutilities
 
 		public static void FindCanvases()
 		{
+			if (!autoFindCanvases) return;
+
 			Canvas[] canvases = FindObjectsOfType<Canvas>();
 			foreach (Canvas canvas in canvases)
 			{
@@ -204,18 +210,18 @@ namespace unityutilities
 				//the event system takes care of raycasting from all cameras at all cursor locations into the world
 				eventSystem.RaycastAll(currentEventData, m_RaycastResultCache);
 				currentEventData.pointerCurrentRaycast = FindFirstRaycast(m_RaycastResultCache);
-				
+
 				// don't process anything if a world object was hit
 				if (wm.worldRayDistance < currentEventData.pointerCurrentRaycast.distance)
 				{
-					continue; 
+					continue;
 				}
-				
+
 				// don't process anything if we are not within distance limits for this wm 
-				if (currentEventData.pointerCurrentRaycast.distance > wm.maxDistance || 
-				    currentEventData.pointerCurrentRaycast.distance < wm.minDistance)
+				if (currentEventData.pointerCurrentRaycast.distance > wm.maxDistance ||
+					currentEventData.pointerCurrentRaycast.distance < wm.minDistance)
 				{
-					continue; 
+					continue;
 				}
 
 				//if we hit something this will not be null

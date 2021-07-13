@@ -1,5 +1,6 @@
 {
     "name": "FranzCo.unityutilities.VRInteraction",
+    "rootNamespace": "unityutilities.VRInteraction",
     "references": [
         "GUID:d33a3000215420f4cb2ac97834661416"
     ],

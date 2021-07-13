@@ -25,8 +25,10 @@ namespace unityutilities
 		/// </summary>
 		private static string logFolder = "Log";
 		private const string fileExtension = ".tsv";
-		private const string delimiter = "\t";
 		private const string dateFormat = "yyyy/MM/dd HH:mm:ss.fff";
+		private const string Y_M_D = "yyyy_MM_dd";
+		private const string fileTimeFormat = "yyyy-MM-dd_HH-mm-ss-ff";
+		private const string delimiter = "\t";
 		private const string newLineChar = "\n";
 
 		[Header("Web Server Information")]
@@ -35,6 +37,8 @@ namespace unityutilities
 		public string webLogPassword;
 		public string appName;
 		public static List<string> subFolders = new List<string>();
+		public static bool uploading;
+		private static float uploadProgress = 0;
 
 		[Header("Log destinations")]
 		[Tooltip("Enables constant logging to the local filesystem. This is required for uploading zips at the end.")]
@@ -46,12 +50,19 @@ namespace unityutilities
 
 		/// <summary>
 		/// Splits log files into new folders for each day (UTC) 
+		/// This is overriden by separateFoldersPerLaunch if that is true.
 		/// </summary>
-		public bool separateFoldersPerDay = true;
+		public bool separateFoldersPerDay = false;
 		/// <summary>
 		/// Splits log files into new folders based on the application version number
 		/// </summary>
 		public bool separateFoldersPerVersion = true;
+		/// <summary>
+		/// Splits log files into new folders based on the launch time of the application
+		/// </summary>
+		public bool separateFoldersPerLaunch = true;
+
+		private DateTime launchTime;
 
 
 		/// <summary>
@@ -95,9 +106,17 @@ namespace unityutilities
 		/// </summary>
 		private static Dictionary<string, StreamWriter> streamWriters = new Dictionary<string, StreamWriter>();
 
+
+		[Header("Debug")]
+		public bool testMessageWithF6;
+		public bool uploadWithF7;
+		public bool uploadAllWithF8;
+
 		private void Awake()
 		{
 			if (instance == null) instance = this;
+
+			launchTime = DateTime.UtcNow;
 
 			if (logSystemInfoOnStart)
 			{
@@ -155,7 +174,7 @@ namespace unityutilities
 				StringBuilder strBuilder = new StringBuilder();
 
 				// add global constant fields
-				strBuilder.Append(DateTime.Now.ToString(dateFormat));
+				strBuilder.Append(DateTime.UtcNow.ToString(dateFormat));
 				strBuilder.Append(delimiter);
 				strBuilder.Append(SystemInfo.deviceUniqueIdentifier);
 				strBuilder.Append(delimiter);
@@ -197,7 +216,7 @@ namespace unityutilities
 			}
 			catch (Exception e)
 			{
-				Debug.LogError(e.Message);
+				Debug.LogError(e);
 			}
 
 			numLinesLogged++;
@@ -289,25 +308,40 @@ namespace unityutilities
 		/// <summary>
 		/// Gets the folder that log files are saved to currently
 		/// </summary>
-		/// <param name="fileName">The name of the log file e.g. movement</param>
+		/// <param name="parentLogFolder">Uses the parent of all date-based folders.</param>
 		/// <returns>The full path to the folder that contains the log files</returns>
-		private static string GetCurrentLogFolder()
+		public static string GetCurrentLogFolder(bool parentLogFolder = false)
 		{
 			if (instance == null) return null;
 
 			string directoryPath;
+
 #if UNITY_ANDROID && !UNITY_EDITOR
-					directoryPath = Path.Combine(Application.persistentDataPath, logFolder);
+			directoryPath = Path.Combine(Application.persistentDataPath, logFolder);
 #else
 			directoryPath = Path.Combine(Application.dataPath, logFolder);
 #endif
+
 			if (instance.separateFoldersPerVersion)
 			{
 				directoryPath = Path.Combine(directoryPath, Application.version);
 			}
-			if (instance.separateFoldersPerDay)
+
+
+			if (!Directory.Exists(directoryPath))
 			{
-				directoryPath = Path.Combine(directoryPath, DateTime.UtcNow.ToString("yyyy_MM_dd"));
+				Directory.CreateDirectory(directoryPath);
+			}
+			if (parentLogFolder) return directoryPath;
+
+
+			if (instance.separateFoldersPerDay && !instance.separateFoldersPerLaunch)
+			{
+				directoryPath = Path.Combine(directoryPath, DateTime.UtcNow.ToString(Y_M_D));
+			}
+			else if (instance.separateFoldersPerLaunch)
+			{
+				directoryPath = Path.Combine(directoryPath, instance.launchTime.ToString(fileTimeFormat));
 			}
 
 			if (!Directory.Exists(directoryPath))
@@ -336,19 +370,21 @@ namespace unityutilities
 
 		}
 
-		public static void UploadZip(bool dailyOnly = true)
+		public static void UploadZip(bool uploadAll = false)
 		{
 			if (instance == null)
 			{
 				Debug.LogError("UploadZip() called, but no Logger.cs is in the scene.");
 				return;
 			}
-			instance.StartCoroutine(instance.UploadZipCo());
+			instance.StartCoroutine(instance.UploadZipCo(uploadAll));
 		}
 
-		private IEnumerator UploadZipCo()
+		private IEnumerator UploadZipCo(bool uploadAll = false)
 		{
-			string dir = GetCurrentLogFolder();
+			uploading = true;
+
+			string dir = GetCurrentLogFolder(parentLogFolder: uploadAll);
 
 			Thread thread = new Thread(() => CreateZipFromFolder(dir));
 			thread.Start();
@@ -379,6 +415,8 @@ namespace unityutilities
 					Debug.Log(www.downloadHandler.text);
 				}
 			}
+
+			uploading = false;
 		}
 
 
@@ -436,16 +474,6 @@ namespace unityutilities
 			}
 		}
 
-		/// <summary>
-		/// Not used currently
-		/// </summary>
-		private void UpdateSubFolders()
-		{
-			subFolders.Clear();
-			subFolders.Add(SystemInfo.deviceUniqueIdentifier);
-			subFolders.Add(DateTime.Now.ToString("yyyy-MM-dd_hh-mm"));
-		}
-
 		private void Update()
 		{
 			switch (useTimeOrLineInterval)
@@ -477,12 +505,17 @@ namespace unityutilities
 			}
 
 
-			if (Input.GetKey(KeyCode.BackQuote) && Input.GetKeyDown(KeyCode.S))
+			if (uploadWithF7 && Input.GetKey(KeyCode.F7))
 			{
 				UploadZip();
 			}
 
-			if (Input.GetKey(KeyCode.F6))
+			if (uploadAllWithF8 && Input.GetKey(KeyCode.F8))
+			{
+				UploadZip(uploadAll: true);
+			}
+
+			if (testMessageWithF6 && Input.GetKey(KeyCode.F6))
 			{
 				Debug.Log("Test Message");
 			}
