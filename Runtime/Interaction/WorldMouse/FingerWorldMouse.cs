@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace unityutilities
 {
@@ -9,8 +10,15 @@ namespace unityutilities
 		/// </summary>
 		public Side side;
 
-		[Space] public float vibrateOnClick = .5f;
+		[Header("On Click")]
+		public float vibrateOnClick = .5f;
+		public AudioSource soundOnClick;
+
+		[Header("On Hover")]
 		public float vibrateOnHover = .1f;
+		public AudioSource soundOnHover;
+
+		[Space]
 
 		public float activationDistance = .02f;
 		private bool wasActivated;
@@ -23,12 +31,20 @@ namespace unityutilities
 
 		private void OnHover(GameObject obj)
 		{
-			InputMan.Vibrate(side, vibrateOnHover);
+			if (obj.GetComponent<Selectable>() != null)
+			{
+				InputMan.Vibrate(side, vibrateOnHover);
+				if (soundOnHover != null) soundOnHover.Play();
+			}
 		}
 
 		private void OnClicked(GameObject obj)
 		{
-			InputMan.Vibrate(side, vibrateOnClick);
+			if (obj.GetComponent<Selectable>() != null)
+			{
+				InputMan.Vibrate(side, vibrateOnClick);
+				if (soundOnClick != null) soundOnClick.Play();
+			}
 		}
 
 		public override bool PressDown()

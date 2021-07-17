@@ -24,7 +24,7 @@ namespace unityutilities
 			RefreshSize();
 		}
 
-		private void RefreshSize()
+		public void RefreshSize()
 		{
 			string parentDirectory = Logger.GetCurrentLogFolder(parentLogFolder: uploadAllToggle.isOn);
 

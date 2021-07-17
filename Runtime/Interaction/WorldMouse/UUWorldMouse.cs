@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace unityutilities
 {
@@ -50,10 +51,14 @@ namespace unityutilities
 
 		private bool showThisFrame = false;
 
-		[Space]
 
+		[Header("On Click")]
 		public float vibrateOnClick = .5f;
+		public AudioClip soundOnClick;
+
+		[Header("On Hover")]
 		public float vibrateOnHover = .1f;
+		public AudioClip soundOnHover;
 
 		protected void Start()
 		{
@@ -66,14 +71,23 @@ namespace unityutilities
 			HoverEntered += OnHover;
 		}
 
+
 		private void OnHover(GameObject obj)
 		{
-			InputMan.Vibrate(side, vibrateOnHover);
+			if (obj.GetComponent<Selectable>() != null)
+			{
+				InputMan.Vibrate(side, vibrateOnHover);
+				if (soundOnHover != null) AudioSource.PlayClipAtPoint(soundOnHover, obj.transform.position, .5f);
+			}
 		}
 
 		private void OnClicked(GameObject obj)
 		{
-			InputMan.Vibrate(side, vibrateOnClick);
+			if (obj.GetComponent<Selectable>() != null)
+			{
+				InputMan.Vibrate(side, vibrateOnClick);
+				if (soundOnClick != null) AudioSource.PlayClipAtPoint(soundOnClick, obj.transform.position, .5f);
+			}
 		}
 
 		private void CreateLaser()

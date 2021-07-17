@@ -390,8 +390,10 @@ namespace unityutilities {
 				if (InputMan.Down(scootBackMovementController))
 				{
 					Vector3 f = rig.head.forward;
+					Vector3 p = rig.head.position;
 					f.y = 0;
-					TeleportTo(rig.head.position - f * .5f, rig.head.rotation);
+					p.y = rig.transform.position.y;
+					TeleportTo(p - f * .5f, Quaternion.LookRotation(f, Vector3.up));
 				}
 			}
 

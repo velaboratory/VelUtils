@@ -189,10 +189,13 @@ namespace unityutilities
 				strBuilder.Append(delimiter);
 
 				// add custom constant fields
-				foreach (var elem in instance.constantFields.GetConstantFields())
+				if (instance.constantFields != null)
 				{
-					strBuilder.Append(elem);
-					strBuilder.Append(delimiter);
+					foreach (var elem in instance.constantFields.GetConstantFields())
+					{
+						strBuilder.Append(elem);
+						strBuilder.Append(delimiter);
+					}
 				}
 
 				// add actual data
