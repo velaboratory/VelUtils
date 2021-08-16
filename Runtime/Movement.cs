@@ -412,7 +412,15 @@ namespace unityutilities {
 					currentTeleportingSide == Side.Right && InputMan.ThumbstickIdle(Side.Right)) {
 					// complete the teleport
 					TeleportTo(teleporter);
-					TeleportEnd?.Invoke(currentTeleportingSide, teleporter.Pos + rig.head.transform.position - transform.position);
+					try
+					{
+						TeleportEnd?.Invoke(currentTeleportingSide, teleporter.Pos + rig.head.transform.position - transform.position);
+					}
+					catch (Exception e)
+					{
+						Debug.LogError($"Error executing TeleportEnd event: {e}");
+					}
+
 					currentTeleportingSide = Side.None;
 
 					// delete the line renderer

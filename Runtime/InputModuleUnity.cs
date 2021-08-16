@@ -55,10 +55,10 @@ namespace unityutilities
 		protected static Dictionary<InputStrings, bool[,]> firstPressed = new Dictionary<InputStrings, bool[,]>();
 
 		// the distance necessary to count as a "press"
-		public static float triggerThreshold = .5f;
-		public static float gripThreshold = .5f;
+		public static float triggerThreshold = .8f;
+		public static float gripThreshold = .8f;
 		public static float touchpadThreshold = .5f;
-		public static float thumbstickThreshold = .5f;
+		public static float thumbstickThreshold = .8f;
 		public static float thumbstickIdleThreshold = .1f;
 		public static float directionalTimeout = 1f;
 

@@ -404,7 +404,7 @@ namespace unityutilities
 			form.AddField(passwordField, webLogPassword);
 			form.AddField("app", appName);
 			form.AddField("version", Application.version);
-			form.AddBinaryData("zip", data, $"{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss-ff}_{SystemInfo.deviceUniqueIdentifier}");
+			form.AddBinaryData("zip", data, $"{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss-ff}_{SystemInfo.deviceUniqueIdentifier}.zip");
 			using (UnityWebRequest www = UnityWebRequest.Post(webLogURL, form))
 			{
 				yield return www.SendWebRequest();
