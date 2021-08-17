@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -298,7 +299,14 @@ namespace unityutilities.Editor
 
 		private static bool CheckAllDefined()
 		{
-			return allAxes.All(axis => AxisDefined(axis.name, axis.descriptiveName));
+			try
+			{
+				return allAxes.All(axis => AxisDefined(axis.name, axis.descriptiveName));
+			}
+			catch (Exception)
+			{
+				return true;
+			}
 		}
 
 		private static void AddAxis(InputAxis axis)
