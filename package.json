@@ -39,11 +39,15 @@
       "displayName": "XR Interaction V2",
       "description": "Compatible with XRInteractionToolkit v1.0.0",
       "path": "Samples~/XRInteractionModule_v2"
+    },
+    {
+      "displayName": "InputSystem Support",
+      "description": "Compatible with the new InputSystem",
+      "path": "Samples~/InputSystem Support"
     }
   ],
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "2.0.0-preview",
-    "com.unity.xr.legacyinputhelpers": "2.1.7",
-    "com.unity.inputsystem": "1.1.0-pre.5"
+    "com.unity.xr.legacyinputhelpers": "2.1.7"
   }
 }

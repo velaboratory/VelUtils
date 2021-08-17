@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if ENABLE_INPUT_SYSTEM
+
+using System;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -332,3 +334,4 @@ namespace unityutilities
 	}
 #endif
 }
+#endif

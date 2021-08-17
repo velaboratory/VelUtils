@@ -3,8 +3,7 @@
     "rootNamespace": "unityutilities",
     "references": [
         "Unity.XR.Interaction.Toolkit",
-        "Unity.TextMeshPro",
-        "Unity.InputSystem"
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

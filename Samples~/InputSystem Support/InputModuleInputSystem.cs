@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if ENABLE_INPUT_SYSTEM
+using System;
 using UnityEngine;
 
 namespace unityutilities
@@ -214,12 +215,23 @@ namespace unityutilities
 
 		public override Vector3 ControllerVelocity(Side side, Space space)
 		{
-			return Vector3.zero;
+			return (side) switch
+			{
+				Side.Left => inputActions.Left.Velocity.ReadValue<Vector3>(),
+				Side.Right => inputActions.Right.Velocity.ReadValue<Vector3>(),
+				_ => Vector3.zero
+			};
 		}
 
 		public override Vector3 ControllerAngularVelocity(Side side, Space space)
 		{
-			return Vector3.zero;
+			return (side) switch
+			{
+				Side.Left => inputActions.Left.AngularVelocity.ReadValue<Vector3>(),
+				Side.Right => inputActions.Right.AngularVelocity.ReadValue<Vector3>(),
+				_ => Vector3.zero
+			};
 		}
 	}
 }
+#endif
