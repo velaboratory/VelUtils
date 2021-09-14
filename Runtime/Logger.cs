@@ -201,13 +201,21 @@ namespace unityutilities
 				// add actual data
 				foreach (string elem in data)
 				{
-					if (elem.Contains(delimiter))
+					if (elem == null)
 					{
-						throw new Exception("Data contains delimiter: " + elem);
+						strBuilder.Append("null");
+						strBuilder.Append(delimiter);
 					}
+					else
+					{
+						if (elem.Contains(delimiter))
+						{
+							throw new Exception("Data contains delimiter: " + elem);
+						}
 
-					strBuilder.Append(elem);
-					strBuilder.Append(delimiter);
+						strBuilder.Append(elem);
+						strBuilder.Append(delimiter);
+					}
 				}
 
 				// add this data to the cache
