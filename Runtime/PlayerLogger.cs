@@ -10,13 +10,14 @@ namespace unityutilities
 	{
 		public Rig rig;
 		public Movement m;
-		[Space]
-		private const string positionsFileName = "positions";
+		[Space] private const string positionsFileName = "positions";
+		private const string inputsFileName = "inputs";
 		private const string movementFileName = "movement";
-		[Space]
-		public float updateRateHz = 4;
+		[Space] public float updateRateHz = 4;
 
 		private float nextUpdateTime;
+
+		public bool logInputs;
 
 		// Start is called before the first frame update
 		void Start()
@@ -104,12 +105,53 @@ namespace unityutilities
 			positions.Add(rightHandMoment.z.ToString());
 
 			Logger.LogRow(positionsFileName, positions);
+
+
+			if (logInputs)
+			{
+				List<string> inputs = new List<string>
+				{
+					// trigger
+					InputMan.Trigger(Side.Left).ToString(),
+					InputMan.Trigger(Side.Right).ToString(),
+					InputMan.TriggerValue(Side.Left).ToString(),
+					InputMan.TriggerValue(Side.Right).ToString(),
+					// grip
+					InputMan.Grip(Side.Left).ToString(),
+					InputMan.Grip(Side.Right).ToString(),
+					InputMan.GripValue(Side.Left).ToString(),
+					InputMan.GripValue(Side.Right).ToString(),
+					// buttons
+					InputMan.Button1(Side.Left).ToString(),
+					InputMan.Button1(Side.Right).ToString(),
+					InputMan.Button2(Side.Left).ToString(),
+					InputMan.Button2(Side.Right).ToString(),
+					// thumbstick
+					InputMan.Up(Side.Left).ToString(),
+					InputMan.Up(Side.Right).ToString(),
+					InputMan.Down(Side.Left).ToString(),
+					InputMan.Down(Side.Right).ToString(),
+					InputMan.Left(Side.Left).ToString(),
+					InputMan.Left(Side.Right).ToString(),
+					InputMan.Right(Side.Left).ToString(),
+					InputMan.Right(Side.Right).ToString(),
+					InputMan.ThumbstickX(Side.Left).ToString(),
+					InputMan.ThumbstickX(Side.Right).ToString(),
+					InputMan.ThumbstickY(Side.Left).ToString(),
+					InputMan.ThumbstickY(Side.Right).ToString(),
+					InputMan.ThumbstickPress(Side.Left).ToString(),
+					InputMan.ThumbstickPress(Side.Right).ToString()
+				};
+
+				Logger.LogRow(inputsFileName, inputs);
+			}
 		}
 
 
 		void TeleportStart(Side side)
 		{
-			List<string> movement = new List<string> {
+			List<string> movement = new List<string>
+			{
 				"teleport-start",
 				side.ToString()
 			};
@@ -119,8 +161,8 @@ namespace unityutilities
 
 		void TeleportEnd(Side side, Vector3 translation)
 		{
-
-			List<string> movement = new List<string> {
+			List<string> movement = new List<string>
+			{
 				"teleport-end",
 				side.ToString(),
 				translation.x.ToString(),
@@ -129,12 +171,12 @@ namespace unityutilities
 			};
 
 			Logger.LogRow(movementFileName, movement);
-
 		}
 
 		void SnapTurn(Side side, string direction)
 		{
-			List<string> movement = new List<string> {
+			List<string> movement = new List<string>
+			{
 				"snap-turn",
 				side.ToString(),
 				direction
@@ -143,6 +185,7 @@ namespace unityutilities
 			Logger.LogRow(movementFileName, movement);
 		}
 	}
+
 	public static class PlayerLoggerExtensionMethods
 	{
 		public static Vector3 ToMomentVector(this Quaternion value)
