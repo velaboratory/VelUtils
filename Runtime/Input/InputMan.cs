@@ -316,7 +316,10 @@ namespace unityutilities
 #else
 			string modelName = "";
 #endif
-			Debug.Log("[UU] Loaded device: " + XRSettings.loadedDeviceName + " (" + modelName + ")", instance);
+			if (!string.IsNullOrEmpty(modelName))
+			{
+				Debug.Log("[UU] Loaded device: " + XRSettings.loadedDeviceName + " (" + modelName + ")", instance);
+			}
 
 			controllerLayout = HeadsetControllerLayout.Thumbstick; // TODO correctly assign this
 

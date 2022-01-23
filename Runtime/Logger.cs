@@ -364,6 +364,8 @@ namespace unityutilities
 
 		IEnumerator Upload(string name, string data, string appName)
 		{
+			if (string.IsNullOrEmpty(data)) yield break;
+			
 			WWWForm form = new WWWForm();
 			form.AddField(passwordField, webLogPassword);
 			form.AddField("file", name);
@@ -378,7 +380,6 @@ namespace unityutilities
 					Debug.Log(www.error);
 				}
 			}
-
 		}
 
 		public static void UploadZip(bool uploadAll = false)
