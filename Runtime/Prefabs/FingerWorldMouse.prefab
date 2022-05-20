@@ -29,6 +29,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -52,7 +53,7 @@ MonoBehaviour:
   side: 0
   vibrateOnClick: 0.5
   soundOnClick: {fileID: 7439889134737292555}
-  vibrateOnHover: 0.1
+  vibrateOnHover: 0
   soundOnHover: {fileID: 3024141069906874944}
   activationDistance: 0.017
 --- !u!82 &7439889134737292555
@@ -158,7 +159,7 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5879620571225009726}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: e3f35ac3415d63d469685dd1d7f1ca48, type: 3}

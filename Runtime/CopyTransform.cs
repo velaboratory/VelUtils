@@ -197,7 +197,7 @@ namespace unityutilities
 					rb.angularVelocity = Vector3.ClampMagnitude(angularVel1 * (1 - smoothness), 100);
 					break;
 				case FollowType.Force:
-					Vector3 angularVel2 = AngularVel(timeStep, t, out var angle2);
+					Vector3 angularVel2 = AngularVel(timeStep, t, out float angle2);
 					if (Mathf.Abs(snapIfAngleGreaterThan) > .01f && angle2 > snapIfAngleGreaterThan)
 					{
 						transform.rotation = t;
@@ -235,24 +235,33 @@ namespace unityutilities
 			switch (rotationFollowType)
 			{
 				case FollowType.Copy:
-					Vector3 newAngle = transform.eulerAngles;
+					Quaternion newAngle = transform.rotation;
+					Vector3 v;
+
+					// convert to euler angles and back only in single-axis case because of gimbal lock
 					switch (singleAxisRotationAxis)
 					{
 						case Axis3D.X:
-							newAngle.x = Mathf.LerpAngle(transform.eulerAngles.x, t.eulerAngles.x, 1 - smoothness);
+							v = newAngle.eulerAngles;
+							v.x = Mathf.LerpAngle(transform.eulerAngles.x, t.eulerAngles.x, 1 - smoothness);
+							newAngle = Quaternion.Euler(v);
 							break;
 						case Axis3D.Y:
-							newAngle.y = Mathf.LerpAngle(transform.eulerAngles.y, t.eulerAngles.y, 1 - smoothness);
+							v = newAngle.eulerAngles;
+							v.y = Mathf.LerpAngle(transform.eulerAngles.y, t.eulerAngles.y, 1 - smoothness);
+							newAngle = Quaternion.Euler(v);
 							break;
 						case Axis3D.Z:
-							newAngle.z = Mathf.LerpAngle(transform.eulerAngles.z, t.eulerAngles.z, 1 - smoothness);
+							v = newAngle.eulerAngles;
+							v.z = Mathf.LerpAngle(transform.eulerAngles.z, t.eulerAngles.z, 1 - smoothness);
+							newAngle = Quaternion.Euler(v);
 							break;
 					}
 
-					transform.eulerAngles = newAngle;
+					transform.rotation = newAngle;
 					break;
 				case FollowType.Velocity:
-					Vector3 angularVel1 = AngularVel(timeStep, t, out var angle1);
+					Vector3 angularVel1 = AngularVel(timeStep, t, out float angle1);
 					if (Mathf.Abs(snapIfAngleGreaterThan) > .01f && angle1 > snapIfAngleGreaterThan)
 					{
 						transform.rotation = t;
@@ -261,7 +270,7 @@ namespace unityutilities
 					rb.angularVelocity = Vector3.ClampMagnitude(angularVel1 * (1 - smoothness), 100);
 					break;
 				case FollowType.Force:
-					Vector3 angularVel2 = AngularVel(timeStep, t, out var angle2);
+					Vector3 angularVel2 = AngularVel(timeStep, t, out float angle2);
 					if (Mathf.Abs(snapIfAngleGreaterThan) > .01f && angle2 > snapIfAngleGreaterThan)
 					{
 						transform.rotation = t;
@@ -277,10 +286,14 @@ namespace unityutilities
 
 		private Vector3 AngularVel(float timeStep, Quaternion goalRotation, out float angle)
 		{
+			// calculate the difference between the goal and current
 			Quaternion rot = goalRotation * Quaternion.Inverse(transform.rotation);
 			rot.ToAngleAxis(out angle, out Vector3 axis);
+			// this fixes the stupid glitch where objects would flicker when the hand was at a certain pose
+			if (Math.Abs(rot.w - (-1)) < .001f) return Vector3.zero;
+			// apply the angular vel portion that should happen this frame.
 			Vector3 angularVel = axis * (angle * Mathf.Deg2Rad / timeStep);
-			return angularVel;
+			return float.IsNaN(angularVel.x) ? Vector3.zero : angularVel;
 		}
 
 		/// <summary>
@@ -293,7 +306,7 @@ namespace unityutilities
 		{
 			target = newTarget;
 			if (!generateOffsets || newTarget == null) return;
-			
+
 			positionOffsetCoordinateSystem = Space.Self;
 			positionOffset = newTarget.InverseTransformPoint(transform.position);
 
@@ -324,7 +337,7 @@ namespace unityutilities
 					"No target assigned. Please assign a target to follow.", MessageType.Error);
 			}
 
-			rbf.target = (Transform) EditorGUILayout.ObjectField(
+			rbf.target = (Transform)EditorGUILayout.ObjectField(
 				"Target", rbf.target, typeof(Transform), true);
 
 			EditorGUILayout.Space();
@@ -333,7 +346,7 @@ namespace unityutilities
 			using (new EditorGUI.DisabledScope(!rbf.followPosition))
 			{
 				rbf.positionFollowType =
-					(CopyTransform.FollowType) EditorGUILayout.EnumPopup("Position Follow Type",
+					(CopyTransform.FollowType)EditorGUILayout.EnumPopup("Position Follow Type",
 						rbf.positionFollowType);
 
 				if (rbf.positionFollowType != CopyTransform.FollowType.Copy)
@@ -379,7 +392,7 @@ namespace unityutilities
 				}
 
 				rbf.positionOffset = EditorGUILayout.Vector3Field("Position Offset", rbf.positionOffset);
-				rbf.positionOffsetCoordinateSystem = (Space) EditorGUILayout.EnumPopup("Offset Coordinate System",
+				rbf.positionOffsetCoordinateSystem = (Space)EditorGUILayout.EnumPopup("Offset Coordinate System",
 					rbf.positionOffsetCoordinateSystem);
 			}
 
@@ -391,7 +404,7 @@ namespace unityutilities
 			{
 				EditorGUILayout.LabelField("Rotation", EditorStyles.boldLabel);
 				rbf.rotationFollowType =
-					(CopyTransform.FollowType) EditorGUILayout.EnumPopup("Rotation Follow Type",
+					(CopyTransform.FollowType)EditorGUILayout.EnumPopup("Rotation Follow Type",
 						rbf.rotationFollowType);
 
 				if (rbf.rotationFollowType != CopyTransform.FollowType.Copy)
@@ -449,7 +462,7 @@ namespace unityutilities
 				}
 
 				rbf.rotationOffsetCoordinateSystem =
-					(Space) EditorGUILayout.EnumPopup("Offset Coordinate System",
+					(Space)EditorGUILayout.EnumPopup("Offset Coordinate System",
 						rbf.rotationOffsetCoordinateSystem);
 
 				rbf.singleAxisRotation = EditorGUILayout.Toggle("Rotate Around Single Axis", rbf.singleAxisRotation);

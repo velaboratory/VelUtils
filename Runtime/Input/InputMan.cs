@@ -7,7 +7,6 @@ using UnityEngine.XR;
 
 namespace unityutilities
 {
-
 	public enum HeadsetSystem
 	{
 		None,
@@ -50,7 +49,6 @@ namespace unityutilities
 
 	public static class SideMethods
 	{
-
 		public static bool Contains(this Side s, Side other)
 		{
 			switch (s)
@@ -76,17 +74,14 @@ namespace unityutilities
 		/// </summary>
 		public static Side OtherSide(this Side side)
 		{
-			if (side == Side.Left)
+			switch (side)
 			{
-				return Side.Right;
-			}
-			else if (side == Side.Right)
-			{
-				return Side.Left;
-			}
-			else
-			{
-				return Side.None;
+				case Side.Left:
+					return Side.Right;
+				case Side.Right:
+					return Side.Left;
+				default:
+					return Side.None;
 			}
 		}
 
@@ -99,13 +94,13 @@ namespace unityutilities
 			}
 			// if we are actually adding an option to the left side
 			else if (side == Side.Left &&
-				(other == Side.Right || other == Side.Either))
+			         (other == Side.Right || other == Side.Either))
 			{
 				return Side.Either;
 			}
 			// if we are actually adding an option to the right side
 			else if (side == Side.Right &&
-				(other == Side.Left || other == Side.Either))
+			         (other == Side.Left || other == Side.Either))
 			{
 				return Side.Either;
 			}
@@ -263,11 +258,12 @@ namespace unityutilities
 		public static HeadsetControllerStyle controllerStyle;
 
 
-
 		public static Side DominantHand { get; set; }
 
-		public static Side NonDominantHand {
-			get {
+		public static Side NonDominantHand
+		{
+			get
+			{
 				switch (DominantHand)
 				{
 					case Side.Left:
@@ -309,58 +305,57 @@ namespace unityutilities
 		private void UpdateInputDevices()
 		{
 			InputDevices.GetDevices(devices);
+			
+			Debug.Log($"Number of connected devices: {devices.Count}");
 
-			string deviceName = XRSettings.loadedDeviceName;
-#if UNITY_2019
-			string modelName = XRDevice.model;
-#else
-			string modelName = "";
-#endif
-			if (!string.IsNullOrEmpty(modelName))
+			string xrDeviceName = XRSettings.loadedDeviceName;
+
+			string modelName = SystemInfo.deviceModel; // e.g. Oculus Quest
+			string deviceName = SystemInfo.deviceName; // e.g. Oculus Quest 2
+
+			// if (!string.IsNullOrEmpty(modelName))
 			{
-				Debug.Log("[UU] Loaded device: " + XRSettings.loadedDeviceName + " (" + modelName + ")", instance);
+				Debug.Log($"[UU] Loaded device: {XRSettings.loadedDeviceName}", instance);
 			}
 
 			controllerLayout = HeadsetControllerLayout.Thumbstick; // TODO correctly assign this
 
-			if (modelName.Contains("Quest 2") || modelName.Contains("Quest2") || modelName.Contains("Miramar"))
+			if (modelName == "Oculus Quest")
 			{
 				headsetSystem = HeadsetSystem.Oculus;
+			}
+
+			if (deviceName == "Oculus Quest 2")
+			{
 				controllerStyle = HeadsetControllerStyle.Quest2;
 			}
-			else if (deviceName.Contains("oculus") || modelName.Contains("Oculus Rift S") || modelName.Contains("Quest"))
+			else if (xrDeviceName.Contains("oculus") || deviceName == "Oculus Quest 1") // TODO Quest 1 id?
 			{
 				headsetSystem = HeadsetSystem.Oculus;
 				controllerStyle = HeadsetControllerStyle.RiftSQuest;
 				// TODO detect if using hands
 			}
-			else if (modelName.Contains("Oculus Rift"))
-			{
-				headsetSystem = HeadsetSystem.Oculus;
-				controllerStyle = HeadsetControllerStyle.Rift;
-			}
-			else if (modelName.Contains("Vive"))
+			else if (xrDeviceName.Contains("Vive"))
 			{
 				headsetSystem = HeadsetSystem.SteamVR;
 				controllerStyle = HeadsetControllerStyle.Vive;
 			}
-			else if (modelName.Contains("Mixed") || modelName.Contains("WMR"))
+			else if (xrDeviceName.Contains("Mixed") || xrDeviceName.Contains("WMR"))
 			{
 				headsetSystem = HeadsetSystem.SteamVR;
 				controllerStyle = HeadsetControllerStyle.WMR;
 			}
+			
 		}
 
+		// TODO implement
 		public static bool UserPresent()
 		{
-#if UNITY_2019
-			return XRDevice.userPresence == UserPresenceState.Present;
-#else
 			return true;
-#endif
 		}
 
 		#region Generic Input
+
 		public static bool Get(VRInput input, Side side = Side.Either)
 		{
 			switch (input)
@@ -399,9 +394,10 @@ namespace unityutilities
 					return false;
 			}
 		}
-#endregion
 
-#region Trigger
+		#endregion
+
+		#region Trigger
 
 		public static float TriggerValue(Side side = Side.Either)
 		{
@@ -463,18 +459,20 @@ namespace unityutilities
 			return TriggerUp(NonDominantHand);
 		}
 
-#endregion
+		#endregion
 
-#region Grip
+		#region Grip
 
 		public static float GripValue(Side side = Side.Either)
 		{
 			return instance.inputModule.GetRawValue(InputStrings.VR_Grip, side);
 		}
+
 		public static bool Grip(Side side = Side.Either)
 		{
 			return instance.inputModule.GetRaw(InputStrings.VR_Grip, side);
 		}
+
 		public static bool GripDown(Side side = Side.Either)
 		{
 			return instance.inputModule.GetRawDown(InputStrings.VR_Grip, side);
@@ -485,9 +483,9 @@ namespace unityutilities
 			return instance.inputModule.GetRawUp(InputStrings.VR_Grip, side);
 		}
 
-#endregion
+		#endregion
 
-#region Thumbstick/Touchpad
+		#region Thumbstick/Touchpad
 
 		// TODO both should be one held down while other is pressed.
 		public static bool ThumbstickPress(Side side = Side.Either)
@@ -546,6 +544,7 @@ namespace unityutilities
 			{
 				return ThumbstickIdleY(side);
 			}
+
 			Debug.LogError("More axes than possible.");
 			return false;
 		}
@@ -576,6 +575,7 @@ namespace unityutilities
 			{
 				return ThumbstickY(side);
 			}
+
 			Debug.LogError("More axes than possible.");
 			return 0;
 		}
@@ -631,9 +631,9 @@ namespace unityutilities
 			return ThumbstickY(side);
 		}
 
-#endregion
+		#endregion
 
-#region Menu buttons
+		#region Menu buttons
 
 		/// <summary>
 		/// A or X on Oculus controllers.
@@ -715,9 +715,9 @@ namespace unityutilities
 			return Button1Down(side);
 		}
 
-#endregion
+		#endregion
 
-#region Directions
+		#region Directions
 
 		public static bool Up(Side side = Side.Either)
 		{
@@ -728,14 +728,14 @@ namespace unityutilities
 				if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 				{
 					return (instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Up, Side.Right)
-						&& instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Up, Side.Left)) ||
-						(instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Up, Side.Right)
-						&& instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Up, Side.Left));
+					        && instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Up, Side.Left)) ||
+					       (instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Up, Side.Right)
+					        && instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Up, Side.Left));
 				}
 				else
 				{
 					return instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Up, Side.Right)
-						&& instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Up, Side.Left) && (ThumbstickPress(Side.Both));
+					       && instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Up, Side.Left) && (ThumbstickPress(Side.Both));
 				}
 			}
 			else
@@ -760,14 +760,14 @@ namespace unityutilities
 				if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 				{
 					return (instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Down, Side.Right)
-						&& instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Down, Side.Left)) ||
-						(instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Down, Side.Right)
-						&& instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Down, Side.Left));
+					        && instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Down, Side.Left)) ||
+					       (instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_Y_Down, Side.Right)
+					        && instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Down, Side.Left));
 				}
 				else
 				{
 					return instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Down, Side.Right)
-						&& instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Down, Side.Left) && (ThumbstickPress(Side.Both));
+					       && instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_Y_Down, Side.Left) && (ThumbstickPress(Side.Both));
 				}
 			}
 			else
@@ -792,14 +792,14 @@ namespace unityutilities
 				if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 				{
 					return (instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Left, Side.Right)
-						&& instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Left, Side.Left)) ||
-						(instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Left, Side.Right)
-						&& instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Left, Side.Left));
+					        && instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Left, Side.Left)) ||
+					       (instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Left, Side.Right)
+					        && instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Left, Side.Left));
 				}
 				else
 				{
 					return instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Left, Side.Right)
-						&& instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Left, Side.Left) && (ThumbstickPress(Side.Both));
+					       && instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Left, Side.Left) && (ThumbstickPress(Side.Both));
 				}
 			}
 			else
@@ -824,14 +824,14 @@ namespace unityutilities
 				if (controllerLayout == HeadsetControllerLayout.Thumbstick)
 				{
 					return (instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Right, Side.Right)
-						&& instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Right, Side.Left)) ||
-						(instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Right, Side.Right)
-						&& instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Right, Side.Left));
+					        && instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Right, Side.Left)) ||
+					       (instance.inputModule.GetRawDown(InputStrings.VR_Thumbstick_X_Right, Side.Right)
+					        && instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Right, Side.Left));
 				}
 				else
 				{
 					return instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Right, Side.Right)
-						&& instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Right, Side.Left) && (ThumbstickPress(Side.Both));
+					       && instance.inputModule.GetRaw(InputStrings.VR_Thumbstick_X_Right, Side.Left) && (ThumbstickPress(Side.Both));
 				}
 			}
 			else
@@ -877,9 +877,9 @@ namespace unityutilities
 			return 0;
 		}
 
-#endregion
+		#endregion
 
-#region Vibrations
+		#region Vibrations
 
 		/// <summary>
 		/// Vibrate the controller
@@ -915,9 +915,9 @@ namespace unityutilities
 			Vibrate(side, intensity, duration);
 		}
 
-#endregion
+		#endregion
 
-#region Controller Velocity
+		#region Controller Velocity
 
 		/// <summary>
 		/// Gets the controller velocity. Only works for local space for now.
@@ -941,8 +941,7 @@ namespace unityutilities
 			return instance.inputModule.ControllerAngularVelocity(side, space);
 		}
 
-#endregion
-
+		#endregion
 	}
 
 #if UNITY_EDITOR

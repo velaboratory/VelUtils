@@ -368,6 +368,8 @@ namespace unityutilities
 		{
 			switch (val)
 			{
+				case System.Numerics.Vector3 vec:
+					return new Vector3(vec.X,vec.Y,vec.Z);
 				case Vector3 vec:
 					return vec;
 				case Dictionary<string, object> dict:
@@ -390,8 +392,10 @@ namespace unityutilities
 		{
 			switch (val)
 			{
-				case Quaternion quat:
-					return quat;
+				case System.Numerics.Quaternion q:
+					return new Quaternion(q.X, q.Y,q.Z,q.W);
+				case Quaternion q:
+					return q;
 				case Dictionary<string, object> dict:
 					return new Quaternion(
 						Convert.ToSingle(dict["x"]), Convert.ToSingle(dict["y"]),

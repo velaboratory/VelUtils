@@ -46,13 +46,12 @@ namespace unityutilities
 		[Tooltip("Enables constant uploading to the web server. Leave this off for only uploading zips at the end.")]
 		public bool enableLoggingRemote = true;
 
-		[Space]
-
 		/// <summary>
 		/// Splits log files into new folders for each day (UTC) 
 		/// This is overriden by separateFoldersPerLaunch if that is true.
 		/// </summary>
-		public bool separateFoldersPerDay = false;
+		[Space]
+		public bool separateFoldersPerDay;
 		/// <summary>
 		/// Splits log files into new folders based on the application version number
 		/// </summary>
@@ -74,7 +73,7 @@ namespace unityutilities
 		[Tooltip("How long two wait (in seconds) putting lines in a cache before actually uploading/saving them.")]
 		public float timeLogInterval = 5;
 		private static int numLinesLogged;
-		private float lastLogTime = 0;
+		private float lastLogTime;
 		public TimeOrLines useTimeOrLineInterval = TimeOrLines.WhicheverLast;
 		public enum TimeOrLines
 		{
@@ -191,7 +190,7 @@ namespace unityutilities
 				// add custom constant fields
 				if (instance.constantFields != null)
 				{
-					foreach (var elem in instance.constantFields.GetConstantFields())
+					foreach (string elem in instance.constantFields.GetConstantFields())
 					{
 						strBuilder.Append(elem);
 						strBuilder.Append(delimiter);
@@ -208,12 +207,20 @@ namespace unityutilities
 					}
 					else
 					{
-						if (elem.Contains(delimiter))
+						string elem1 = elem;
+						if (elem1.Contains(delimiter))
 						{
-							throw new Exception("Data contains delimiter: " + elem);
+							if (delimiter == "\t")
+							{
+								elem1 = elem1.Replace("\t", "    ");
+							}
+							else
+							{
+								throw new Exception("Data contains delimiter: " + elem1);	
+							}
 						}
 
-						strBuilder.Append(elem);
+						strBuilder.Append(elem1);
 						strBuilder.Append(delimiter);
 					}
 				}

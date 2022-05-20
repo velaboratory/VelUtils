@@ -27,6 +27,11 @@ namespace unityutilities.VRInteraction
 
 		public bool releaseVelocitySmoothing = true;
 
+		public bool useFixedPositionOffset;
+		public Vector3 fixedPositionOffset;
+		public bool useFixedRotationOffset;
+		public Quaternion fixedRotationOffset = Quaternion.identity;
+
 		//public bool allowMultiHandGrabbing = false;	// TODO
 
 		// Use this for initialization
@@ -87,7 +92,7 @@ namespace unityutilities.VRInteraction
 				rb.useGravity = false;
 			}
 
-			// add a copytransform if it doesn't exist
+			// add a CopyTransform if it doesn't exist
 			if (!copyTransform)
 			{
 				copyTransform = gameObject.AddComponent<CopyTransform>();
@@ -113,10 +118,20 @@ namespace unityutilities.VRInteraction
 
 			copyTransform.SetTarget(h.transform);
 
+			if (useFixedPositionOffset)
+			{
+				copyTransform.positionOffset = fixedPositionOffset;
+			}
+
+			if (useFixedRotationOffset)
+			{
+				copyTransform.rotationOffset = fixedRotationOffset;
+			}
+
 			// this obj has been grabbed by raycast, snap
 			if (h.raycastedObjs.Contains(this))
 			{
-				copyTransform.positionOffset = Vector3.zero;
+				copyTransform.positionOffset = fixedPositionOffset;
 			}
 		}
 
@@ -165,17 +180,6 @@ namespace unityutilities.VRInteraction
 			}
 		}
 
-		Vector3 AvgOfVector3s(Vector3[] list)
-		{
-			Vector3 total = new Vector3();
-			foreach (var item in list)
-			{
-				total += item;
-			}
-
-			return total / list.Length;
-		}
-
 		public override byte[] PackData()
 		{
 			using (MemoryStream outputStream = new MemoryStream())
@@ -214,9 +218,9 @@ namespace unityutilities.VRInteraction
 		{
 			DrawDefaultInspector();
 
-			var vrm = target as VRMoveable;
+			VRMoveable vrm = target as VRMoveable;
 
-			if (vrm.useVelocityFollow && !vrm.gameObject.GetComponent<Rigidbody>())
+			if (vrm != null && vrm.useVelocityFollow && !vrm.gameObject.GetComponent<Rigidbody>())
 			{
 				EditorGUILayout.HelpBox("Set to follow with velocity, but no rigidbody attached.", MessageType.Error);
 				if (GUILayout.Button("Add Rigidbody"))
