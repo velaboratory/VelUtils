@@ -17,6 +17,7 @@ namespace unityutilities
 
 			firstPressed.Add(InputStrings.VR_Button1, new bool[2, 3]);
 			firstPressed.Add(InputStrings.VR_Button2, new bool[2, 3]);
+			firstPressed.Add(InputStrings.VR_Menu, new bool[2, 3]);
 
 			firstPressed.Add(InputStrings.VR_Thumbstick_Press, new bool[2, 3]);
 
@@ -123,6 +124,8 @@ namespace unityutilities
 					return CommonUsages.primaryButton;
 				case InputStrings.VR_Button2:
 					return CommonUsages.secondaryButton;
+				case InputStrings.VR_Menu:
+					return CommonUsages.menuButton;
 				case InputStrings.VR_Thumbstick_X:
 				case InputStrings.VR_Thumbstick_Y:
 				case InputStrings.VR_Thumbstick_X_Left:
@@ -416,6 +419,7 @@ namespace unityutilities
 
 				UpdateDictionary(Button1((Side)i), i, InputStrings.VR_Button1);
 				UpdateDictionary(Button2((Side)i), i, InputStrings.VR_Button2);
+				UpdateDictionary(MenuButton((Side)i), i, InputStrings.VR_Menu);
 
 				UpdateDictionary(ThumbstickPress((Side)i), i, InputStrings.VR_Thumbstick_Press);
 

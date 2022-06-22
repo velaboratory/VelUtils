@@ -197,6 +197,24 @@ namespace unityutilities.Editor
 				positiveButton = "joystick button 0"
 			},
 
+			new InputAxis()
+			{
+				name = "VR_Menu_Left",
+				dead = 0.001f,
+				sensitivity = 1f,
+				type = AxisType.KeyOrMouseButton,
+				positiveButton = "joystick button 6"
+			},
+
+			new InputAxis()
+			{
+				name = "VR_Menu_Right",
+				dead = 0.001f,
+				sensitivity = 1f,
+				type = AxisType.KeyOrMouseButton,
+				positiveButton = "joystick button 7"
+			},
+
 			// thumbstick/touchpad click
 			new InputAxis()
 			{
@@ -286,12 +304,14 @@ namespace unityutilities.Editor
 			while (axesProperty.Next(false))
 			{
 				SerializedProperty axis = axesProperty.Copy();
-				axis.Next(true);
-				if (axis.stringValue != axisName) continue;
-				axis.Next(false);
+				if (axis.Next(true))
+				{
+					if (axis.stringValue != axisName) continue;
+					axis.Next(false);
 
-				if ((string.IsNullOrEmpty(axis.stringValue) && string.IsNullOrEmpty(descriptiveName)) ||
-				    axis.stringValue == descriptiveName) return true;
+					if ((string.IsNullOrEmpty(axis.stringValue) && string.IsNullOrEmpty(descriptiveName)) ||
+					    axis.stringValue == descriptiveName) return true;
+				}
 			}
 
 			return false;

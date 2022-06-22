@@ -172,7 +172,8 @@ namespace unityutilities
 		VR_Thumbstick_Y_Down,
 		VR_Thumbstick_Press,
 		VR_Button1,
-		VR_Button2
+		VR_Button2,
+		VR_Menu,
 	}
 
 	public static class InputStringsMethods
@@ -193,6 +194,7 @@ namespace unityutilities
 				case InputStrings.VR_Thumbstick_Press:
 				case InputStrings.VR_Button1:
 				case InputStrings.VR_Button2:
+				case InputStrings.VR_Menu:
 					return false;
 				default:
 					return false;
@@ -215,6 +217,7 @@ namespace unityutilities
 				case InputStrings.VR_Thumbstick_Press:
 				case InputStrings.VR_Button1:
 				case InputStrings.VR_Button2:
+				case InputStrings.VR_Menu:
 					return false;
 				default:
 					return false;
@@ -237,6 +240,7 @@ namespace unityutilities
 				case InputStrings.VR_Thumbstick_Press:
 				case InputStrings.VR_Button1:
 				case InputStrings.VR_Button2:
+				case InputStrings.VR_Menu:
 					return false;
 				default:
 					return false;
@@ -675,44 +679,20 @@ namespace unityutilities
 			return instance.inputModule.GetRawUp(InputStrings.VR_Button2, side);
 		}
 
-		public static bool MainMenuButton()
-		{
-			return Button1(DominantHand);
-		}
-
-		public static bool MainMenuButtonDown()
-		{
-			return Button1Down(DominantHand);
-		}
-
-		public static bool MainMenuButtonUp()
-		{
-			return Button1Up(DominantHand);
-		}
-
-		public static bool SecondaryMenuButton()
-		{
-			return Button1(NonDominantHand);
-		}
-
-		public static bool SecondaryMenuButtonDown()
-		{
-			return Button1Down(NonDominantHand);
-		}
-
-		public static bool SecondaryMenuButtonUp()
-		{
-			return Button1Up(NonDominantHand);
-		}
 
 		public static bool MenuButton(Side side = Side.Either)
 		{
-			return Button1(side);
+			return instance.inputModule.GetRaw(InputStrings.VR_Menu, side);
 		}
 
 		public static bool MenuButtonDown(Side side = Side.Either)
 		{
-			return Button1Down(side);
+			return instance.inputModule.GetRawDown(InputStrings.VR_Menu, side);
+		}
+
+		public static bool MenuButtonUp(Side side = Side.Either)
+		{
+			return instance.inputModule.GetRawUp(InputStrings.VR_Menu, side);
 		}
 
 		#endregion

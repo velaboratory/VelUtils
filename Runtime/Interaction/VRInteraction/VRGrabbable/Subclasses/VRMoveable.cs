@@ -101,8 +101,8 @@ namespace unityutilities.VRInteraction
 				{
 					copyTransform.positionFollowType = CopyTransform.FollowType.Velocity;
 					copyTransform.rotationFollowType = CopyTransform.FollowType.Velocity;
-					copyTransform.useFixedUpdatePos = true;
-					copyTransform.useFixedUpdateRot = true;
+					copyTransform.useFixedUpdatePos = false;
+					copyTransform.useFixedUpdateRot = false;
 				}
 				else
 				{

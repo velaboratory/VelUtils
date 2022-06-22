@@ -19,7 +19,8 @@ namespace unityutilities
 			{InputStrings.VR_Thumbstick_Y_Down, new[] {"VR_Thumbstick_Y_Down_Left", "VR_Thumbstick_Y_Down_Right"}},
 			{InputStrings.VR_Thumbstick_Press, new[] {"VR_Thumbstick_Press_Left", "VR_Thumbstick_Press_Right"}},
 			{InputStrings.VR_Button1, new[] {"VR_Button1_Left", "VR_Button1_Right"}},
-			{InputStrings.VR_Button2, new[] {"VR_Button2_Left", "VR_Button2_Right"}}
+			{InputStrings.VR_Button2, new[] {"VR_Button2_Left", "VR_Button2_Right"}},
+			{InputStrings.VR_Menu, new[] {"VR_Menu_Left", "VR_Menu_Right"}},
 		};
 
 		private void Awake()

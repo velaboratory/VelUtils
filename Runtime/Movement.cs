@@ -25,7 +25,15 @@ namespace unityutilities {
 
 		[Tooltip("Allows for hand-based movement by holding grip.")]
 		public bool grabAir;
-		public VRInput grabInput = VRInput.Grip;
+
+		public enum GrabInput
+		{
+			None,
+			Trigger,
+			Grip,
+			TriggerAndGrip
+		}
+		public GrabInput grabInput = GrabInput.Grip;
 
 		[Tooltip("Press left and right stick to boost and brake in head direction.")]
 		public bool stickBoostBrake;
@@ -116,7 +124,7 @@ namespace unityutilities {
 		private Queue<Vector3> lastVels = new Queue<Vector3>();
 		private int lastVelsLength = 5;
 
-		private CopyTransform cpt;
+		[NonSerialized] public CopyTransform cpt;
 
 		private Side grabbingSide = Side.None;
 		private bool wasKinematic;
@@ -835,19 +843,27 @@ namespace unityutilities {
 		}
 
 		private void GrabMove(ref Transform hand, ref GameObject grabPos, Side side, Transform parent = null) {
+			
+			// collect inputs
 			bool grabDown = false;
 			bool grab = false;
 			switch (grabInput) {
-				case VRInput.Trigger:
+				case GrabInput.Trigger:
 					grabDown = InputMan.TriggerDown(side);
 					grab = InputMan.Trigger(side);
 					break;
-				case VRInput.Grip:
+				case GrabInput.Grip:
 					grabDown = InputMan.GripDown(side);
 					grab = InputMan.Grip(side);
 					break;
+				case GrabInput.TriggerAndGrip:
+					grabDown = (InputMan.GripDown(side) && InputMan.Trigger(side)) || (InputMan.Grip(side) && InputMan.TriggerDown(side));
+					grab = InputMan.Grip(side) && InputMan.Trigger(side);
+					break;
 			}
 
+			// if we are initializing a new grab
+			// either we just pressed the button or we just touched a new object while already holding
 			if (grabDown || (grab &&
 				((side == Side.Left && leftHandGrabbedObj != null && lastLeftHandGrabbedObj == null) ||
 				(side == Side.Right && rightHandGrabbedObj != null && lastRightHandGrabbedObj == null)))) {

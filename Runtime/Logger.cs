@@ -33,7 +33,6 @@ namespace unityutilities
 
 		[Header("Web Server Information")]
 		public string webLogURL = "http://";
-		private const string passwordField = "password";
 		public string webLogPassword;
 		public string appName;
 		public static List<string> subFolders = new List<string>();
@@ -374,9 +373,9 @@ namespace unityutilities
 			if (string.IsNullOrEmpty(data)) yield break;
 			
 			WWWForm form = new WWWForm();
-			form.AddField(passwordField, webLogPassword);
-			form.AddField("file", name);
-			form.AddField("data", data);
+			form.AddField("password", webLogPassword);
+			form.AddField("appendfile", name);
+			form.AddField("appenddata", data);
 			form.AddField("app", appName);
 			form.AddField("version", Application.version);
 			using (UnityWebRequest www = UnityWebRequest.Post(webLogURL, form))
@@ -417,10 +416,10 @@ namespace unityutilities
 			byte[] data = File.ReadAllBytes(zipFile);
 
 			WWWForm form = new WWWForm();
-			form.AddField(passwordField, webLogPassword);
+			form.AddField("password", webLogPassword);
 			form.AddField("app", appName);
 			form.AddField("version", Application.version);
-			form.AddBinaryData("zip", data, $"{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss-ff}_{SystemInfo.deviceUniqueIdentifier}.zip");
+			form.AddBinaryData("upload", data, $"{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss-ff}_{SystemInfo.deviceUniqueIdentifier}.zip");
 			using (UnityWebRequest www = UnityWebRequest.Post(webLogURL, form))
 			{
 				yield return www.SendWebRequest();
