@@ -156,7 +156,7 @@ namespace unityutilities
 		{
 			InitIfNot();
 			if (HasKey(id, path))
-				return (int) instance.data[path][id];
+				return (int) (long) instance.data[path][id];
 			SetInt(id, defaultValue, path);
 			return defaultValue;
 		}

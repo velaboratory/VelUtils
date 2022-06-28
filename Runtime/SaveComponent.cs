@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,6 +16,7 @@ namespace unityutilities
 		public Component target;
 		[Space] public bool save = true;
 		public bool load = true;
+		[Tooltip("Only used for Transform types")]
 		[Space] public Space coordinateSystem = Space.Self;
 
 		private void Awake()
@@ -69,8 +71,13 @@ namespace unityutilities
 					}
 
 					break;
+				case TMP_InputField inputField:
+					string key = name + "_tmpinputfield";
+					if (PlayerPrefsJson.HasKey(key))
+						inputField.text = PlayerPrefsJson.GetString(key);
+					break;
 				case InputField inputField:
-					string key = name + "_inputfield";
+					key = name + "_inputfield";
 					if (PlayerPrefsJson.HasKey(key))
 						inputField.text = PlayerPrefsJson.GetString(key);
 					break;
@@ -78,6 +85,11 @@ namespace unityutilities
 					key = name + "_toggle";
 					if (PlayerPrefsJson.HasKey(key))
 						toggle.isOn = PlayerPrefsJson.GetBool(name + "_toggle");
+					break;
+				case TMP_Dropdown dropdown:
+					key = name + "_tmpdropdown";
+					if (PlayerPrefsJson.HasKey(key))
+						dropdown.value = PlayerPrefsJson.GetInt(name + "_tmpdropdown");
 					break;
 				case Dropdown dropdown:
 					key = name + "_dropdown";
@@ -116,11 +128,17 @@ namespace unityutilities
 					}
 
 					break;
+				case TMP_InputField inputField:
+					PlayerPrefsJson.SetString(name + "_tmpinputfield", inputField.text);
+					break;
 				case InputField inputField:
 					PlayerPrefsJson.SetString(name + "_inputfield", inputField.text);
 					break;
 				case Toggle toggle:
 					PlayerPrefsJson.SetBool(name + "_toggle", toggle.isOn);
+					break;
+				case TMP_Dropdown dropdown:
+					PlayerPrefsJson.SetInt(name + "_tmpdropdown", dropdown.value);
 					break;
 				case Dropdown dropdown:
 					PlayerPrefsJson.SetInt(name + "_dropdown", dropdown.value);
@@ -143,9 +161,29 @@ namespace unityutilities
 		private void OnEnable()
 		{
 			// add a transform as the default if nothing is added yet
-			if (target is SaveComponent sl && target != null && sl.target == null)
+			if (target is SaveComponent sl && target != null)
 			{
-				sl.target = sl.transform;
+				if (sl.target == null && sl.GetComponent<InputField>())
+				{
+					sl.target = sl.GetComponent<InputField>();
+				}
+				if (sl.target == null && sl.GetComponent<TMP_Dropdown>())
+				{
+					sl.target = sl.GetComponent<TMP_Dropdown>();
+				}
+				if (sl.target == null && sl.GetComponent<Dropdown>())
+				{
+					sl.target = sl.GetComponent<Dropdown>();
+				}
+				if (sl.target == null && sl.GetComponent<Toggle>())
+				{
+					sl.target = sl.GetComponent<Toggle>();
+				}
+				
+				if (sl.target == null)
+				{
+					sl.target = sl.transform;
+				}
 			}
 		}
 

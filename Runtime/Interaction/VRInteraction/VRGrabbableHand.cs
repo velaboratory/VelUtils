@@ -16,7 +16,10 @@ namespace unityutilities.VRInteraction
 		public bool canGrab = true;
 
 		[Tooltip("Can be set to none to use external input sources by using actions.")]
-		public VRInput grabInput = VRInput.Trigger;
+		public VRInput grabInput = VRInput.Grip;
+
+		[Tooltip("The normal grab input also needs to be held.")]
+		public VRInput distanceGrabInput = VRInput.Trigger;
 
 		public bool vibrateOnGrab = true;
 
@@ -26,19 +29,17 @@ namespace unityutilities.VRInteraction
 		[Tooltip("Which layers to interact with")]
 		public LayerMask layerMask = ~0;
 
-		[Header("Debug")]
-		[ReadOnly]
-		public VRGrabbable grabbedVRGrabbable;
+		[Header("Debug")] [ReadOnly] public VRGrabbable grabbedVRGrabbable;
+
 		/// <summary>
 		/// The current best grabbable object. The one that's highlighted.
 		/// </summary>
-		[ReadOnly]
-		public VRGrabbable selectedVRGrabbable;
-		[ReadOnly]
-		public List<VRGrabbable> touchedObjs = new List<VRGrabbable>();
+		[ReadOnly] public VRGrabbable selectedVRGrabbable;
 
-		[ReadOnly]
-		public List<VRGrabbable> raycastedObjs = new List<VRGrabbable>();
+		[ReadOnly] public List<VRGrabbable> touchedObjs = new List<VRGrabbable>();
+		[ReadOnly] public List<VRGrabbable> remoteTouchedObjs = new List<VRGrabbable>();
+
+		[ReadOnly] public List<VRGrabbable> raycastedObjs = new List<VRGrabbable>();
 
 
 		public Queue<Vector3> lastVels = new Queue<Vector3>();
@@ -60,6 +61,11 @@ namespace unityutilities.VRInteraction
 				Release();
 			}
 
+			if (InputMan.Get(grabInput, side) && InputMan.GetDown(distanceGrabInput, side))
+			{
+				Grab(true);
+			}
+
 			// Highlight 🖊
 			if (grabbedVRGrabbable)
 			{
@@ -71,15 +77,15 @@ namespace unityutilities.VRInteraction
 			}
 			else
 			{
-				VRGrabbable best = GetBestGrabbable();
+				VRGrabbable best = GetBestGrabbable(InputMan.Get(grabInput, side));
 				if (selectedVRGrabbable != best)
 				{
 					if (selectedVRGrabbable)
 						selectedVRGrabbable.HandleDeselection();
 
+					selectedVRGrabbable = best;
 					if (best != null)
 					{
-						selectedVRGrabbable = best;
 						selectedVRGrabbable.HandleSelection();
 					}
 				}
@@ -87,33 +93,14 @@ namespace unityutilities.VRInteraction
 
 
 			// Add remote objects to the touched list
-			RaycastHit[] hitList = null;
-			if (false && enableRemoteGrabbing && Physics.Raycast(transform.position, transform.forward, out RaycastHit directHit, remoteGrabbingDistance, layerMask))
+			RaycastHit[] hitList;
+			if (enableRemoteGrabbing)
 			{
-				// Find VRGrabbable
-				VRGrabbable vrGrabbable;
-				if (directHit.collider.attachedRigidbody)
-					vrGrabbable = directHit.collider.attachedRigidbody.GetComponent<VRGrabbable>();
-				else
-					vrGrabbable = directHit.collider.GetComponent<VRGrabbable>();
-
-				if (vrGrabbable && vrGrabbable.remoteGrabbable)
-				{
-					hitList = new RaycastHit[] { directHit };
-				}
+				hitList = Util.ConeCastAll(transform.position, transform.forward, 1.5f, remoteGrabbingDistance, layerMask);
 			}
-
-			// if there still isn't anything in the hitlist (no direct hits)
-			if (hitList == null)
+			else
 			{
-				if (enableRemoteGrabbing)
-				{
-					hitList = Util.ConeCastAll(transform.position, transform.forward, 1.5f, remoteGrabbingDistance, layerMask);	
-				}
-				else
-				{
-					hitList = new RaycastHit[0];
-				}
+				hitList = Array.Empty<RaycastHit>();
 			}
 
 			List<VRGrabbable> newRaycastedObjs = new List<VRGrabbable>();
@@ -134,9 +121,9 @@ namespace unityutilities.VRInteraction
 				{
 					newRaycastedObjs.Add(vrGrabbable);
 
-					if (!touchedObjs.Contains(vrGrabbable))
+					if (!remoteTouchedObjs.Contains(vrGrabbable))
 					{
-						touchedObjs.Add(vrGrabbable);
+						remoteTouchedObjs.Add(vrGrabbable);
 					}
 				}
 			}
@@ -146,7 +133,7 @@ namespace unityutilities.VRInteraction
 			{
 				if (!newRaycastedObjs.Contains(obj))
 				{
-					touchedObjs.Remove(obj);
+					remoteTouchedObjs.Remove(obj);
 					if (obj == selectedVRGrabbable)
 					{
 						selectedVRGrabbable.HandleDeselection();
@@ -169,11 +156,11 @@ namespace unityutilities.VRInteraction
 		/// Call this from somewhere to try to grab anything that is being hovered.
 		/// Allows for remote sources if input, such as for tracked hands.
 		/// </summary>
-		public void Grab()
+		public void Grab(bool includeRemote = false)
 		{
 			if (canGrab && !grabbedVRGrabbable)
 			{
-				VRGrabbable best = GetBestGrabbable();
+				VRGrabbable best = GetBestGrabbable(includeRemote);
 				if (best != null)
 				{
 					Grab(best);
@@ -190,7 +177,7 @@ namespace unityutilities.VRInteraction
 			if (grabbedVRGrabbable)
 			{
 				grabbedVRGrabbable.HandleRelease(this);
-				if (touchedObjs.Contains(grabbedVRGrabbable))
+				if (touchedObjs.Contains(grabbedVRGrabbable) || remoteTouchedObjs.Contains(grabbedVRGrabbable))
 				{
 					selectedVRGrabbable = grabbedVRGrabbable;
 					selectedVRGrabbable.HandleSelection();
@@ -217,6 +204,7 @@ namespace unityutilities.VRInteraction
 			{
 				InputMan.Vibrate(side, .5f, .1f);
 			}
+
 			GrabEvent?.Invoke(grabbable);
 		}
 
@@ -224,37 +212,70 @@ namespace unityutilities.VRInteraction
 		/// Finds the VRGrabbable obj being collided with that has the highest priority (or some other algorithm)
 		/// </summary>
 		/// <returns>The VRGrabbable</returns>
-		private VRGrabbable GetBestGrabbable()
+		private VRGrabbable GetBestGrabbable(bool includeRemote = false)
 		{
 			// remove any null objects 😊👌
 			touchedObjs.RemoveAll(item => item == null);
+			remoteTouchedObjs.RemoveAll(item => item == null);
 
 			// Cancel if not allowed to grab
 			if (!canGrab) return null;
 
 			// Cancel if not touching anything
-			if (touchedObjs.Count <= 0) return null;
 
-
-			// Sort the list of grabbables by priority, then distance
-			touchedObjs.Sort((a, b) =>
+			if (includeRemote)
 			{
-				if (a.priority != b.priority)
-					return b.priority.CompareTo(a.priority);
-				else
+				if (touchedObjs.Count <= 0 && remoteTouchedObjs.Count <= 0) return null;
+			}
+			else
+			{
+				if (touchedObjs.Count <= 0) return null;
+			}
+
+
+			if (touchedObjs.Count > 0)
+			{
+				// Sort the list of grabbables by priority, then distance
+				touchedObjs.Sort((a, b) =>
 				{
-					// combine both distance and angular distance from the center for remote grabbing
-					float dist = Vector3.Distance(a.transform.position, transform.position)
-						.CompareTo(Vector3.Distance(b.transform.position, transform.position));
-					float angle = Vector3.Angle(transform.forward, a.transform.position - transform.position)
-						.CompareTo(Vector3.Angle(transform.forward, b.transform.position - transform.position));
-					return (int)(0 * dist + angle);
-				}
+					if (a.priority != b.priority)
+						return b.priority.CompareTo(a.priority);
+					else
+					{
+						// combine both distance and angular distance from the center for remote grabbing
+						float dist = Vector3.Distance(a.transform.position, transform.position)
+							.CompareTo(Vector3.Distance(b.transform.position, transform.position));
+						float angle = Vector3.Angle(transform.forward, a.transform.position - transform.position)
+							.CompareTo(Vector3.Angle(transform.forward, b.transform.position - transform.position));
+						return (int)(0 * dist + angle);
+					}
+				});
+				// return the first element on the list
+				return touchedObjs[0];
+			}
 
-			});
+			if (includeRemote)
+			{
+				// Sort the list of grabbables by priority, then distance
+				remoteTouchedObjs.Sort((a, b) =>
+				{
+					if (a.priority != b.priority)
+						return b.priority.CompareTo(a.priority);
+					else
+					{
+						// combine both distance and angular distance from the center for remote grabbing
+						float dist = Vector3.Distance(a.transform.position, transform.position)
+							.CompareTo(Vector3.Distance(b.transform.position, transform.position));
+						float angle = Vector3.Angle(transform.forward, a.transform.position - transform.position)
+							.CompareTo(Vector3.Angle(transform.forward, b.transform.position - transform.position));
+						return (int)(0 * dist + angle);
+					}
+				});
+				// return the first element on the list
+				return remoteTouchedObjs[0];
+			}
 
-			// return the first element on the list
-			return touchedObjs[0];
+			return null;
 		}
 
 		private void OnTriggerStay(Collider other)

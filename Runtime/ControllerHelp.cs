@@ -17,6 +17,7 @@ namespace unityutilities
 
 		[Tooltip("Button meshes for highlighting. Order should be:\nTrigger\nGrip\nThumbstick\nButton1\nButton2")]
 		public Mesh[] leftButtonMeshes = new Mesh[5];
+
 		[Tooltip("Button meshes for highlighting. Order should be:\nTrigger\nGrip\nThumbstick\nButton1\nButton2")]
 		public Mesh[] rightButtonMeshes = new Mesh[5];
 
@@ -29,29 +30,29 @@ namespace unityutilities
 		private readonly Dictionary<ButtonHintType, Vector3[]> riftOffsets = new Dictionary<ButtonHintType, Vector3[]>
 		{
 			// format for vector3 is origin, direction
-			{ButtonHintType.Trigger, new[] {new Vector3(-0.0003f, -0.0209f, 0.0207f), new Vector3(-0.01f,0f,.1f)}},
-			{ButtonHintType.Grip, new[] {new Vector3(-0.0008f, -0.0311f, -0.0246f), new Vector3(.07f,-.020f,-.07f)}},
-			{ButtonHintType.Button1, new[] {new Vector3(0.0019f, 0f, -0.0074f), new Vector3(0.1f,.08f,-0.07f)}},
-			{ButtonHintType.Button2, new[] {new Vector3(0.009f, 0f, 0.0055f), new Vector3(0.1f,.1f,0f)}},
-			{ButtonHintType.Thumbstick, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
-			{ButtonHintType.ThumbstickClick, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
-			{ButtonHintType.ThumbstickX, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
-			{ButtonHintType.ThumbstickY, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
-			{ButtonHintType.OtherObject, new[] {new Vector3(0, 0f, 0f), new Vector3(0f,.2f,0f)}}
+			{ ButtonHintType.Trigger, new[] { new Vector3(-0.0003f, -0.0209f, 0.0207f), new Vector3(-0.01f, 0f, .1f) } },
+			{ ButtonHintType.Grip, new[] { new Vector3(-0.0008f, -0.0311f, -0.0246f), new Vector3(.07f, -.020f, -.07f) } },
+			{ ButtonHintType.Button1, new[] { new Vector3(0.0019f, 0f, -0.0074f), new Vector3(0.1f, .08f, -0.07f) } },
+			{ ButtonHintType.Button2, new[] { new Vector3(0.009f, 0f, 0.0055f), new Vector3(0.1f, .1f, 0f) } },
+			{ ButtonHintType.Thumbstick, new[] { new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f, .1f, 0f) } },
+			{ ButtonHintType.ThumbstickClick, new[] { new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f, .1f, 0f) } },
+			{ ButtonHintType.ThumbstickX, new[] { new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f, .1f, 0f) } },
+			{ ButtonHintType.ThumbstickY, new[] { new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f, .1f, 0f) } },
+			{ ButtonHintType.OtherObject, new[] { new Vector3(0, 0f, 0f), new Vector3(0f, .2f, 0f) } }
 		};
 
 		private readonly Dictionary<ButtonHintType, Vector3[]> riftSQuestOffsets = new Dictionary<ButtonHintType, Vector3[]>
 		{
 			// format for vector3 is origin, direction
-			{ButtonHintType.Trigger, new[] {new Vector3(-0.0003f, -0.0209f, 0.0207f), new Vector3(-0.01f, 0f,.1f)}},
-			{ButtonHintType.Grip, new[] {new Vector3(-0.0008f, -0.0311f, -0.0246f), new Vector3(.07f,-.020f,-.07f)}},
-			{ButtonHintType.Button1, new[] {new Vector3(0.0019f, 0f, -0.0074f), new Vector3(0.1f,.08f,-0.07f)}},
-			{ButtonHintType.Button2, new[] {new Vector3(0.009f, 0f, 0.0055f), new Vector3(0.1f,.1f,0f)}},
-			{ButtonHintType.Thumbstick, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
-			{ButtonHintType.ThumbstickClick, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
-			{ButtonHintType.ThumbstickX, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
-			{ButtonHintType.ThumbstickY, new[] {new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f,.1f,0f)}},
-			{ButtonHintType.OtherObject, new[] {new Vector3(0, 0f, 0f), new Vector3(0f,.2f,0f)}}
+			{ ButtonHintType.Trigger, new[] { new Vector3(-0.0003f, -0.0209f, 0.0207f), new Vector3(-0.01f, 0f, .1f) } },
+			{ ButtonHintType.Grip, new[] { new Vector3(-0.0008f, -0.0311f, -0.0246f), new Vector3(.07f, -.020f, -.07f) } },
+			{ ButtonHintType.Button1, new[] { new Vector3(0.0019f, 0f, -0.0074f), new Vector3(0.1f, .08f, -0.07f) } },
+			{ ButtonHintType.Button2, new[] { new Vector3(0.009f, 0f, 0.0055f), new Vector3(0.1f, .1f, 0f) } },
+			{ ButtonHintType.Thumbstick, new[] { new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f, .1f, 0f) } },
+			{ ButtonHintType.ThumbstickClick, new[] { new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f, .1f, 0f) } },
+			{ ButtonHintType.ThumbstickX, new[] { new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f, .1f, 0f) } },
+			{ ButtonHintType.ThumbstickY, new[] { new Vector3(-0.0105f, 0.0034f, 0.005f), new Vector3(-.05f, .1f, 0f) } },
+			{ ButtonHintType.OtherObject, new[] { new Vector3(0, 0f, 0f), new Vector3(0f, .2f, 0f) } }
 		};
 
 		private static Dictionary<ButtonHintType, Vector3[]> offsets;
@@ -69,6 +70,7 @@ namespace unityutilities
 			public Color flashColor = Color.red;
 			private readonly Transform controller;
 			private readonly Camera cam;
+
 			/// <summary>
 			/// Change this value to fit worlds with a scaled camera rig
 			/// </summary>
@@ -89,22 +91,25 @@ namespace unityutilities
 			/// <param name="side">Which controller</param>
 			/// <param name="type">Type of input</param>
 			/// <param name="offset">Position and direction of label offset</param>
-			public ControllerLabel(Side side, ButtonHintType type, Transform parent, Transform controller, GameObject labelPrefab, Vector3[] offset, Mesh mesh = null, Material meshMaterial = null)
+			public ControllerLabel(Side side, ButtonHintType type, Transform parent, Transform controller, GameObject labelPrefab, Vector3[] offset, Mesh mesh = null, Material meshMaterial = null, bool onlyHighlight = false)
 			{
 				labelObj = Instantiate(labelPrefab, parent);
 				canvasObj = labelObj.GetComponentInChildren<Canvas>().GetComponent<RectTransform>();
 				text = labelObj.GetComponentInChildren<Text>();
 
-				this.side = side;
-				this.offset = offset;
-				this.type = type;
-				this.controller = controller;
-				line = labelObj.AddComponent<LineRenderer>();
-				line.widthMultiplier = lineWidth * scale;
-				line.material.shader = Shader.Find("Unlit/Color");
-				line.material.color = lineColor;
-				line.positionCount = 2;
-				cam = Camera.main;
+				if (!onlyHighlight)
+				{
+					this.side = side;
+					this.offset = offset;
+					this.type = type;
+					this.controller = controller;
+					line = labelObj.AddComponent<LineRenderer>();
+					line.widthMultiplier = lineWidth * scale;
+					line.material.shader = Shader.Find("Unlit/Color");
+					line.material.color = lineColor;
+					line.positionCount = 2;
+					cam = Camera.main;
+				}
 
 				meshHighlight = new GameObject("Highlight");
 				meshHighlight.transform.SetParent(controller);
@@ -122,6 +127,9 @@ namespace unityutilities
 
 			public void UpdatePos()
 			{
+				// if this is highlight-only
+				if (offset == null) return;
+				
 				Vector3 pos = controller.TransformPoint(offset[0] * scale);
 				Vector3 dir = controller.TransformPoint(offset[1] * scale);
 				labelObj.transform.position = dir;
@@ -130,6 +138,7 @@ namespace unityutilities
 				{
 					canvasObj.pivot = new Vector2(1, .5f);
 				}
+
 				canvasObj.anchoredPosition = Vector2.zero;
 				line.SetPositions(new[] { pos, labelObj.transform.position });
 
@@ -144,7 +153,7 @@ namespace unityutilities
 
 			public void SetText(string labelText)
 			{
-				text.text = labelText;
+				if (text != null) text.text = labelText;
 			}
 		}
 
@@ -185,21 +194,28 @@ namespace unityutilities
 					offsets = riftOffsets;
 				}
 
-				buttonMeshesDict = new Dictionary<Side, Dictionary<ButtonHintType, Mesh>> {
-					{ Side.Left, new Dictionary<ButtonHintType, Mesh> {
-						{ ButtonHintType.Trigger, leftButtonMeshes[0] },
-						{ ButtonHintType.Grip, leftButtonMeshes[1] },
-						{ ButtonHintType.Thumbstick, leftButtonMeshes[2] },
-						{ ButtonHintType.Button1, leftButtonMeshes[3] },
-						{ ButtonHintType.Button2, leftButtonMeshes[4] }
+				buttonMeshesDict = new Dictionary<Side, Dictionary<ButtonHintType, Mesh>>
+				{
+					{
+						Side.Left, new Dictionary<ButtonHintType, Mesh>
+						{
+							{ ButtonHintType.Trigger, leftButtonMeshes[0] },
+							{ ButtonHintType.Grip, leftButtonMeshes[1] },
+							{ ButtonHintType.Thumbstick, leftButtonMeshes[2] },
+							{ ButtonHintType.Button1, leftButtonMeshes[3] },
+							{ ButtonHintType.Button2, leftButtonMeshes[4] }
+						}
+					},
+					{
+						Side.Right, new Dictionary<ButtonHintType, Mesh>
+						{
+							{ ButtonHintType.Trigger, rightButtonMeshes[0] },
+							{ ButtonHintType.Grip, rightButtonMeshes[1] },
+							{ ButtonHintType.Thumbstick, rightButtonMeshes[2] },
+							{ ButtonHintType.Button1, rightButtonMeshes[3] },
+							{ ButtonHintType.Button2, rightButtonMeshes[4] }
+						}
 					}
-					},{ Side.Right, new Dictionary<ButtonHintType, Mesh> {
-						{ ButtonHintType.Trigger, rightButtonMeshes[0] },
-						{ ButtonHintType.Grip, rightButtonMeshes[1] },
-						{ ButtonHintType.Thumbstick, rightButtonMeshes[2] },
-						{ ButtonHintType.Button1, rightButtonMeshes[3] },
-						{ ButtonHintType.Button2, rightButtonMeshes[4] }
-					}}
 				};
 			}
 
@@ -219,7 +235,7 @@ namespace unityutilities
 		/// </summary>
 		/// <param name="side">Which controller</param>
 		/// <param name="hintType">The type of input to show the hint for</param>
-		/// <param name="text">The text to show on the hint</param>
+		/// <param name="text">The text to show on the hint, if this is empty, no label will be shown, only a highlight</param>
 		public static ControllerLabel[] ShowHint(Side side, ButtonHintType hintType, string text)
 		{
 			if (!instance) return null;
@@ -227,6 +243,7 @@ namespace unityutilities
 			{
 				instance.Start();
 			}
+
 			// these two could be combined if destroy method also deleted gameobject
 			instance.instantiatedLabels.FindAll(e => e.type == hintType).ForEach(e => e.Remove());
 			instance.instantiatedLabels.RemoveAll(e => e.type == hintType);
@@ -240,16 +257,18 @@ namespace unityutilities
 				ControllerLabel label;
 				if (buttonMeshesDict[Side.Left].ContainsKey(hintType))
 				{
-					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.leftHand, instance.labelPrefab, offsets[hintType], buttonMeshesDict[Side.Left][hintType], instance.highlightMaterial);
+					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.leftHand, instance.labelPrefab, offsets[hintType], buttonMeshesDict[Side.Left][hintType], instance.highlightMaterial, onlyHighlight: text == "");
 				}
 				else
 				{
-					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.leftHand, instance.labelPrefab, offsets[hintType]);
+					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.leftHand, instance.labelPrefab, offsets[hintType], onlyHighlight: text == "");
 				}
+
 				label.SetText(text);
 				instance.instantiatedLabels.Add(label);
 				labels.Add(label);
 			}
+
 			if (side == Side.Right || side == Side.Both)
 			{
 				Vector3[] flippedOffsets = new Vector3[] { offsets[hintType][0], offsets[hintType][1] };
@@ -258,12 +277,13 @@ namespace unityutilities
 				ControllerLabel label;
 				if (buttonMeshesDict[Side.Right].ContainsKey(hintType))
 				{
-					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.rightHand, instance.labelPrefab, flippedOffsets, buttonMeshesDict[Side.Right][hintType], instance.highlightMaterial);
+					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.rightHand, instance.labelPrefab, flippedOffsets, buttonMeshesDict[Side.Right][hintType], instance.highlightMaterial, onlyHighlight: text == "");
 				}
 				else
 				{
-					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.rightHand, instance.labelPrefab, flippedOffsets);
+					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.rightHand, instance.labelPrefab, flippedOffsets, onlyHighlight: text == "");
 				}
+
 				label.SetText(text);
 				instance.instantiatedLabels.Add(label);
 				labels.Add(label);
@@ -282,6 +302,15 @@ namespace unityutilities
 			// these two could be combined if destroy method also deleted gameobject
 			instance.instantiatedLabels.FindAll(e => (e.type == hintType && e.side == side)).ForEach(e => e.Remove());
 			instance.instantiatedLabels.RemoveAll(e => (e.type == hintType && e.side == side));
+		}
+
+		public static void HideHint(params ControllerLabel[] hints)
+		{
+			foreach (ControllerLabel l in hints)
+			{
+				l.Remove();
+				instance.instantiatedLabels.Remove(l);
+			}
 		}
 
 		public static void HideAllHints(Side side = Side.Both)

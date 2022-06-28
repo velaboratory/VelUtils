@@ -116,10 +116,7 @@ namespace unityutilities {
 		public Transform rightHandGrabbedObj;
 		private Transform lastLeftHandGrabbedObj;
 		private Transform lastRightHandGrabbedObj;
-		private GameObject leftHandGrabPos;
-		private GameObject rightHandGrabPos;
-		private Vector3 lastLeftHandPos;
-		private Vector3 lastRightHandPos;
+		private GameObject[] grabPos = new GameObject[2];
 
 		private Queue<Vector3> lastVels = new Queue<Vector3>();
 		private int lastVelsLength = 5;
@@ -342,16 +339,16 @@ namespace unityutilities {
 			// grab walls and air
 			if (grabWalls && !grabAir) {
 				if (leftHandGrabbedObj != null || grabbingSide == Side.Left) {
-					GrabMove(ref rig.leftHand, ref leftHandGrabPos, Side.Left, leftHandGrabbedObj);
+					GrabMove(Side.Left, leftHandGrabbedObj);
 				}
 
 				if (rightHandGrabbedObj != null || grabbingSide == Side.Right) {
-					GrabMove(ref rig.rightHand, ref rightHandGrabPos, Side.Right, rightHandGrabbedObj);
+					GrabMove(Side.Right, rightHandGrabbedObj);
 				}
 			}
 			else if (grabAir && !snapTurnedThisFrame) {
-				GrabMove(ref rig.leftHand, ref leftHandGrabPos, Side.Left);
-				GrabMove(ref rig.rightHand, ref rightHandGrabPos, Side.Right);
+				GrabMove(Side.Left);
+				GrabMove(Side.Right);
 			}
 
 			Boosters();
@@ -362,9 +359,6 @@ namespace unityutilities {
 			// update lastVels
 			lastVels.Enqueue(rig.rb.velocity);
 			if (lastVels.Count > lastVelsLength) lastVels.Dequeue();
-
-			lastLeftHandPos = rig.leftHand.position;
-			lastRightHandPos = rig.rightHand.position;
 
 			// update last frame's grabbed objs
 			lastLeftHandGrabbedObj = leftHandGrabbedObj;
@@ -842,7 +836,7 @@ namespace unityutilities {
 			rig.rb.transform.localRotation = Quaternion.identity;
 		}
 
-		private void GrabMove(ref Transform hand, ref GameObject grabPos, Side side, Transform parent = null) {
+		private void GrabMove(Side side, Transform parent = null) {
 			
 			// collect inputs
 			bool grabDown = false;
@@ -869,15 +863,15 @@ namespace unityutilities {
 				(side == Side.Right && rightHandGrabbedObj != null && lastRightHandGrabbedObj == null)))) {
 				grabbingSide = side;
 
-				if (grabPos != null) {
-					Destroy(grabPos.gameObject);
+				if (grabPos[(int)side] != null) {
+					Destroy(grabPos[(int)side].gameObject);
 				}
 
-				grabPos = new GameObject(side + " Hand Grab Pos");
-				grabPos.transform.position = hand.position;
-				grabPos.transform.SetParent(parent);
-				cpt.SetTarget(grabPos.transform, false);
-				cpt.positionOffset = rig.rb.position - hand.position;
+				grabPos[(int)side] = new GameObject(side + " Hand Grab Pos");
+				grabPos[(int)side].transform.position = rig.GetHand(side).position;
+				grabPos[(int)side].transform.SetParent(parent);
+				cpt.SetTarget(grabPos[(int)side].transform, false);
+				cpt.positionOffset = rig.rb.position - rig.GetHand(side).position;
 				cpt.snapIfDistanceGreaterThan = 1f;
 				rig.rb.isKinematic = false;
 
@@ -888,26 +882,32 @@ namespace unityutilities {
 			}
 			else if (side == grabbingSide) {
 				if (grab) {
-					cpt.positionOffset = rig.rb.position - hand.position;
-					if (!snapTurnedThisFrame) {
-						cpt.enabled = true;
-					}
+					cpt.positionOffset = rig.rb.position - rig.GetHand(side).position;
+					cpt.enabled = !snapTurnedThisFrame;
 				}
-				else {
-					if (side == grabbingSide) {
-						grabbingSide = Side.None;
-					}
+				else
+				{
+					Release(side);
+				}
+			}
+		}
 
-					if (grabPos != null) {
-						OnRelease?.Invoke(grabPos.transform, side);
-						Destroy(grabPos.gameObject);
-						cpt.SetTarget(null);
-						//rig.rb.velocity = MedianAvg(lastVels);
-						rig.rb.velocity = -rig.transform.TransformVector(InputMan.ControllerVelocity(side));
-						RoundVelToZero();
-						rig.rb.isKinematic = wasKinematic;
-					}
-				}
+		public void Release(Side side)
+		{
+			if (side == grabbingSide)
+			{
+				grabbingSide = Side.None;
+			}
+
+			if (grabPos[(int)side] != null)
+			{
+				OnRelease?.Invoke(grabPos[(int)side].transform, side);
+				Destroy(grabPos[(int)side].gameObject);
+				cpt.SetTarget(null);
+				//rig.rb.velocity = MedianAvg(lastVels);
+				rig.rb.velocity = -rig.transform.TransformVector(InputMan.ControllerVelocity(side));
+				RoundVelToZero();
+				rig.rb.isKinematic = wasKinematic;
 			}
 		}
 
