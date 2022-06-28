@@ -26,6 +26,10 @@ namespace unityutilities {
 		[Tooltip("Allows for hand-based movement by holding grip.")]
 		public bool grabAir;
 
+		[Tooltip("Control-display ratio for grabbing movement. Basically a speed multiplier.")]
+		[Range(0,16)]
+		public float cdRatioGrabbing = 1;
+
 		public enum GrabInput
 		{
 			None,
@@ -883,6 +887,7 @@ namespace unityutilities {
 			else if (side == grabbingSide) {
 				if (grab) {
 					cpt.positionOffset = rig.rb.position - rig.GetHand(side).position;
+					cpt.target.Translate(-rig.transform.TransformVector(InputMan.ControllerVelocity(side)) * Time.deltaTime * Mathf.Clamp(cdRatioGrabbing-1, 0, 100));
 					cpt.enabled = !snapTurnedThisFrame;
 				}
 				else
@@ -905,7 +910,7 @@ namespace unityutilities {
 				Destroy(grabPos[(int)side].gameObject);
 				cpt.SetTarget(null);
 				//rig.rb.velocity = MedianAvg(lastVels);
-				rig.rb.velocity = -rig.transform.TransformVector(InputMan.ControllerVelocity(side));
+				rig.rb.velocity = -rig.transform.TransformVector(InputMan.ControllerVelocity(side)) * cdRatioGrabbing;
 				RoundVelToZero();
 				rig.rb.isKinematic = wasKinematic;
 			}
