@@ -50,20 +50,23 @@ namespace unityutilities.VRInteraction
 
 		private void Update()
 		{
-			// Grab ✊
-			if (InputMan.GetDown(grabInput, side))
+			if (canGrab)
 			{
-				Grab();
-			}
-			// Release 🤚
-			else if (InputMan.GetUp(grabInput, side))
-			{
-				Release();
-			}
+				// Grab ✊
+				if (InputMan.GetDown(grabInput, side))
+				{
+					Grab();
+				}
+				// Release 🤚
+				else if (InputMan.GetUp(grabInput, side))
+				{
+					Release();
+				}
 
-			if (InputMan.Get(grabInput, side) && InputMan.GetDown(distanceGrabInput, side))
-			{
-				Grab(true);
+				if (InputMan.Get(grabInput, side) && InputMan.GetDown(distanceGrabInput, side))
+				{
+					Grab(true);
+				}
 			}
 
 			// Highlight 🖊
@@ -158,7 +161,7 @@ namespace unityutilities.VRInteraction
 		/// </summary>
 		public void Grab(bool includeRemote = false)
 		{
-			if (canGrab && !grabbedVRGrabbable)
+			if (!grabbedVRGrabbable)
 			{
 				VRGrabbable best = GetBestGrabbable(includeRemote);
 				if (best != null)
@@ -222,7 +225,6 @@ namespace unityutilities.VRInteraction
 			if (!canGrab) return null;
 
 			// Cancel if not touching anything
-
 			if (includeRemote)
 			{
 				if (touchedObjs.Count <= 0 && remoteTouchedObjs.Count <= 0) return null;

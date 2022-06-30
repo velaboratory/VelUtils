@@ -21,10 +21,12 @@ namespace unityutilities {
 
 		[Tooltip("Whether to move with hands when colliding with an object. " +
 			"Only really makes sense when \"Grab Air\" is false.")]
-		public bool grabWalls;
+		public bool grabWallsLeft;
+		public bool grabWallsRight;
 
 		[Tooltip("Allows for hand-based movement by holding grip.")]
-		public bool grabAir;
+		public bool grabAirLeft;
+		public bool grabAirRight;
 
 		[Tooltip("Control-display ratio for grabbing movement. Basically a speed multiplier.")]
 		[Range(0,16)]
@@ -341,17 +343,25 @@ namespace unityutilities {
 			Turn();
 
 			// grab walls and air
-			if (grabWalls && !grabAir) {
-				if (leftHandGrabbedObj != null || grabbingSide == Side.Left) {
+			if (grabWallsLeft && !grabAirLeft)
+			{
+				if (leftHandGrabbedObj != null || grabbingSide == Side.Left)
+				{
 					GrabMove(Side.Left, leftHandGrabbedObj);
 				}
-
+			}
+			else if (!snapTurnedThisFrame && grabAirLeft)
+			{
+				GrabMove(Side.Left);
+			}
+			
+			if (grabWallsRight && !grabAirRight) {
 				if (rightHandGrabbedObj != null || grabbingSide == Side.Right) {
 					GrabMove(Side.Right, rightHandGrabbedObj);
 				}
 			}
-			else if (grabAir && !snapTurnedThisFrame) {
-				GrabMove(Side.Left);
+			else if (!snapTurnedThisFrame && grabAirRight)
+			{
 				GrabMove(Side.Right);
 			}
 

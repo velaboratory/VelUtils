@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -16,11 +17,16 @@ namespace unityutilities
 		public Component target;
 		[Space] public bool save = true;
 		public bool load = true;
-		[Tooltip("Only used for Transform types")]
-		[Space] public Space coordinateSystem = Space.Self;
+
+		[Tooltip("Only used for Transform types")] [Space]
+		public Space coordinateSystem = Space.Self;
+
+		private static readonly List<SaveComponent> allInstances = new List<SaveComponent>();
 
 		private void Awake()
 		{
+			allInstances.Add(this);
+
 			if (load)
 			{
 				Load();
@@ -33,6 +39,14 @@ namespace unityutilities
 			{
 				Save();
 			}
+		}
+
+		public static void SaveAll()
+		{
+			allInstances
+				.Where(i => i != null)
+				.Where(i => i.save)
+				.ToList().ForEach(i => i.Save());
 		}
 
 		// ReSharper disable once MemberCanBePrivate.Global
@@ -167,19 +181,22 @@ namespace unityutilities
 				{
 					sl.target = sl.GetComponent<InputField>();
 				}
+
 				if (sl.target == null && sl.GetComponent<TMP_Dropdown>())
 				{
 					sl.target = sl.GetComponent<TMP_Dropdown>();
 				}
+
 				if (sl.target == null && sl.GetComponent<Dropdown>())
 				{
 					sl.target = sl.GetComponent<Dropdown>();
 				}
+
 				if (sl.target == null && sl.GetComponent<Toggle>())
 				{
 					sl.target = sl.GetComponent<Toggle>();
 				}
-				
+
 				if (sl.target == null)
 				{
 					sl.target = sl.transform;

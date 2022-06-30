@@ -58,6 +58,7 @@ namespace unityutilities
 
 		private void OnApplicationQuit()
 		{
+			SaveComponent.SaveAll();
 			Save();
 		}
 
@@ -303,7 +304,7 @@ namespace unityutilities
 
 		public void Save()
 		{
-			Task.Run(() => SaveTask());
+			Task.Run(SaveTask);
 		}
 
 		private void SaveTask()
