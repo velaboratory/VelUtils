@@ -1,84 +1,128 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
-namespace unityutilities
+namespace unityutilities.Interaction.WorldMouse
 {
-	public abstract class WorldMouse : MonoBehaviour
+	public class WorldMouse : MonoBehaviour
 	{
-		/// <summary>
-		/// The distance of closest UI object that was hit.
-		/// This is set from the WM InputModule
-		/// </summary>
-		[ReadOnly]
-		public float rayDistance;
+		[Header("Ray settings")] public float raycastLength = 10f;
+		public float currentRayLength = 0;
+		public LayerMask UILayer;
+		public bool autoEnable = true;
 
-		/// <summary>
-		/// The distance of closest object that was hit.
-		/// </summary>
-		[ReadOnly]
-		public float worldRayDistance;
+		[FormerlySerializedAs("StartSelect")] [Header("Events")] [Tooltip("Called on click down")] public UnityEvent ClickDown;
+		[FormerlySerializedAs("ClickRelease")] [FormerlySerializedAs("StopSelect")] [Tooltip("Called on click up")] public UnityEvent ClickUp;
+		[FormerlySerializedAs("StartPoint")] [Tooltip("Called on hover start")] public UnityEvent HoverStart;
+		[FormerlySerializedAs("StopPoint")] [Tooltip("Called on hover stop")] public UnityEvent HoverStop;
 
-		public float minDistance = 0;
-		public float maxDistance = Mathf.Infinity;
+		public Action<GameObject> OnClickDown;
+		public Action OnClickUp;
+		public Action<GameObject> OnHoverStart;
+		public Action OnHoverStop;
 
-		public RaycastHit? lastHit { get; private set; }
-		public Vector2 textureHitPoint { get; private set; }
-		public Vector3 worldHitPoint { get; private set; }
-		public GameObject hitGameObject { get; private set; }
-		public Collider hitCollider { get; private set; }
-		public GameObject lastHoverObject { get; set; }
+		// Internal variables
+		private bool hover = false;
 
-		// event callbacks
-		public Action<GameObject> ClickUp;
-		public Action<GameObject> ClickDown;
-		public Action<GameObject> HoverEntered;
+		internal int pointerIndex;
 
-		protected virtual void OnEnable()
+		private void OnEnable()
 		{
-			WorldMouseInputModule.Instance.AddWorldMouse(this);
+			if (autoEnable) Enable();
 		}
 
-		protected virtual void OnDisable()
+		protected void Enable()
 		{
-			WorldMouseInputModule.Instance.RemoveWorldMouse(this);
+			StartCoroutine(AddPointerDelayed(this));
+		}
+
+		private IEnumerator AddPointerDelayed(WorldMouse wm)
+		{
+			yield return null;
+
+			WorldMouseInputModule.AddWorldMouse(this);
+		}
+
+		private void OnDisable()
+		{
+			if (autoEnable) Disable();
+		}
+
+		protected void Disable()
+		{
+			WorldMouseInputModule.RemoveWorldMouse(this);
+		}
+
+		public void SetIndex(int index)
+		{
+			pointerIndex = index;
+		}
+
+		internal virtual Vector3 GetPosition()
+		{
+			return transform.position;
+		}
+
+		internal virtual Vector3 GetForward()
+		{
+			return transform.forward;
+		}
+
+		internal virtual float GetMaxDistance()
+		{
+			return raycastLength;
+		}
+
+		public void Press()
+		{
+			// Handle the UI events
+			GameObject obj = WorldMouseInputModule.ProcessPress(pointerIndex);
+
+			// Fire the Unity event
+			ClickDown?.Invoke();
+
+			OnClickDown?.Invoke(obj);
+		}
+
+		public void Release()
+		{
+			// Handle the UI events
+			WorldMouseInputModule.ProcessRelease(pointerIndex);
+
+			// Fire the Unity event
+			ClickUp?.Invoke();
+
+			OnClickUp?.Invoke();
 		}
 
 		protected virtual void Update()
 		{
-			// this auto-creates a worldmousemanager in the scene if there isn't one. 
-			// Disable it to disable worldmouse instead of deleting
-			if (WorldMouseInputModule.Instance == null) return;
+			PointerEventData data = WorldMouseInputModule.GetData(pointerIndex);
 
-			worldRayDistance = Mathf.Infinity;
-			if (Physics.Raycast(new Ray(transform.position, transform.forward), out RaycastHit hit, Mathf.Infinity, ~0, QueryTriggerInteraction.Ignore))
+			currentRayLength = data.pointerCurrentRaycast.distance;
+			if (currentRayLength > raycastLength) currentRayLength = 0;
+
+			if (currentRayLength != 0 && !hover)
 			{
-				Debug.DrawRay(transform.position, transform.forward);
-				worldRayDistance = hit.distance;
-				lastHit = hit;
-				worldHitPoint = hit.point;
-				textureHitPoint = hit.textureCoord;
-				hitCollider = hit.collider;
-				if (worldRayDistance < rayDistance)
-				{
-					if (hit.collider.attachedRigidbody != null)
-					{
-						hitGameObject = hit.collider.attachedRigidbody.gameObject;
-					}
-					else
-					{
-						hitGameObject = hit.transform.gameObject;
-					}
-				}
+				// Fire the Unity event
+				HoverStart?.Invoke();
+
+				hover = true;
+
+				OnHoverStart?.Invoke(data.pointerCurrentRaycast.gameObject);
 			}
-			else
+			else if (currentRayLength == 0 && hover)
 			{
-				lastHit = null;
-				hitGameObject = null;
+				// Fire the Unity event
+				HoverStop?.Invoke();
+
+				hover = false;
+
+				OnHoverStop?.Invoke();
 			}
 		}
-
-		public abstract bool PressDown();
-
-		public abstract bool PressUp();
 	}
 }

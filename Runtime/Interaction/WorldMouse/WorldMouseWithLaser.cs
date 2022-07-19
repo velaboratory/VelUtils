@@ -1,23 +1,16 @@
-﻿using System;
+﻿#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace unityutilities
+namespace unityutilities.Interaction.WorldMouse
 {
-
 #if UNITY_EDITOR
-	[CustomEditor(typeof(UUWorldMouse))]
+	[CustomEditor(typeof(WorldMouseWithLaser))]
 	[CanEditMultipleObjects]
-	public class UUWorldMouseEditor : Editor
+	public class WorldMouseWithLaserEditor : Editor
 	{
-		UUWorldMouse uuWorldMouse;
-
-		private void OnEnable()
-		{
-			uuWorldMouse = target as UUWorldMouse;
-		}
-
 		public override void OnInspectorGUI()
 		{
 			EditorGUILayout.LabelField("Provides a laser pointer as well as interaction with UI.");
@@ -28,15 +21,13 @@ namespace unityutilities
 	}
 #endif
 
-	public class UUWorldMouse : WorldMouse
+	public class WorldMouseWithLaser : WorldMouse
 	{
 		public VRInput input = VRInput.Trigger;
 		public Side side;
 
 
-		[Space]
-
-		public bool useLaser = true;
+		[Space] public bool useLaser = true;
 
 		/// <summary>
 		/// Default laser color. Can't be changed during runtime
@@ -47,17 +38,16 @@ namespace unityutilities
 		/// Default laser width. Can't be changed during runtime
 		/// </summary>
 		public float laserThickness = .005f;
+
 		private LineRenderer lineRend;
 
 		private bool showThisFrame = false;
 
 
-		[Header("On Click")]
-		public float vibrateOnClick = .5f;
+		[Header("On Click")] public float vibrateOnClick = .5f;
 		public AudioClip soundOnClick;
 
-		[Header("On Hover")]
-		public float vibrateOnHover = .1f;
+		[Header("On Hover")] public float vibrateOnHover = .1f;
 		public AudioClip soundOnHover;
 
 		protected void Start()
@@ -67,14 +57,14 @@ namespace unityutilities
 				CreateLaser();
 			}
 
-			ClickDown += OnClicked;
-			HoverEntered += OnHover;
+			OnClickDown += OnClicked;
+			OnHoverStart += OnHover;
 		}
 
 
 		private void OnHover(GameObject obj)
 		{
-			if (obj.GetComponent<Selectable>() != null)
+			if (obj != null && obj.GetComponentInParent<Selectable>() != null)
 			{
 				InputMan.Vibrate(side, vibrateOnHover);
 				if (soundOnHover != null) AudioSource.PlayClipAtPoint(soundOnHover, obj.transform.position, .5f);
@@ -83,7 +73,7 @@ namespace unityutilities
 
 		private void OnClicked(GameObject obj)
 		{
-			if (obj.GetComponent<Selectable>() != null)
+			if (obj != null && obj.GetComponentInParent<Selectable>() != null)
 			{
 				InputMan.Vibrate(side, vibrateOnClick);
 				if (soundOnClick != null) AudioSource.PlayClipAtPoint(soundOnClick, obj.transform.position, .5f);
@@ -106,26 +96,28 @@ namespace unityutilities
 
 		protected override void Update()
 		{
-			base.Update();
 			if (useLaser)
 			{
-				if (rayDistance < Mathf.Infinity)
+				if (currentRayLength < Mathf.Infinity)
 				{
-					SetLaserLength(rayDistance);
+					SetLaserLength(currentRayLength);
 					ShowLaser(true);
 				}
+
 				ShowLaserUpdate();
 			}
-		}
 
-		public override bool PressDown()
-		{
-			return InputMan.GetDown(input, side);
-		}
+			if (InputMan.GetDown(input, side))
+			{
+				Press();
+			}
 
-		public override bool PressUp()
-		{
-			return InputMan.GetUp(input, side);
+			if (InputMan.GetUp(input, side))
+			{
+				Release();
+			}
+			
+			base.Update();
 		}
 
 		public void ShowLaser(bool show)

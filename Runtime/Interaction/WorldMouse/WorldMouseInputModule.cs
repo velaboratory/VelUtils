@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Linq;
 
-namespace unityutilities
+namespace unityutilities.Interaction.WorldMouse
 {
 #if UNITY_EDITOR
 	[CustomEditor(typeof(WorldMouseInputModule))]
 	[CanEditMultipleObjects]
 	public class WorldMouseInputModuleEditor : Editor
 	{
-		WorldMouseInputModule worldMouseInputModule;
+		private WorldMouseInputModule worldMouseInputModule;
 
 		private void OnEnable()
 		{
@@ -44,6 +44,7 @@ namespace unityutilities
 			{
 				EditorGUILayout.ObjectField(mouse, typeof(WorldMouse), true);
 			}
+
 			GUI.enabled = true;
 
 			WorldMouseInputModule.autoFindCanvases = EditorGUILayout.Toggle("Auto Find Canvases", WorldMouseInputModule.autoFindCanvases);
@@ -56,35 +57,40 @@ namespace unityutilities
 		}
 	}
 #endif
-
 	public class WorldMouseInputModule : BaseInputModule
 	{
-		[ReadOnly] [System.NonSerialized] public readonly List<WorldMouse> worldMice = new List<WorldMouse>();
-		private Camera worldMouseCam;
-		/// <summary>
-		/// The last pointer event data for each mouse
-		/// </summary>
-		private readonly List<PointerEventData> eventData = new List<PointerEventData>();
-		/// <summary>
-		/// The last pressed object for each mouse
-		/// </summary>
-		private readonly List<GameObject> lastPressed = new List<GameObject>();
+		internal readonly List<WorldMouse> worldMice = new List<WorldMouse>();
+		private PointerEventData[] eventData;
+
 		private static WorldMouseInputModule instance;
+
 		/// <summary>
-		/// The last gameobject clicked by any mouse
+		/// The last gameobject clicked by any mouse. Just for debugging
 		/// </summary>
-		public static GameObject globalLastPressed;
+		internal static GameObject globalLastPressed;
 
 		public static bool autoFindCanvases = true;
+		private Camera cam;
 
-		public static WorldMouseInputModule Instance
+		private static WorldMouseInputModule Instance
 		{
 			get
 			{
 				if (instance == null)
 				{
-					// Debug.Log("Creating new worldmouseinputmodule");
-					// instance = new GameObject("WorldMouseInputModule").AddComponent<WorldMouseInputModule>();
+					// TODO this causes problems:
+					// Some objects were not cleaned up when closing the scene. (Did you spawn new GameObjects from OnDestroy?)
+
+					// Debug.Log("Creating new WorldMouseInputModule");
+					// EventSystem eventSystem = FindObjectOfType<EventSystem>();
+					// if (eventSystem != null)
+					// {
+					// 	instance = eventSystem.gameObject.AddComponent<WorldMouseInputModule>();
+					// }
+					// else
+					// {
+					// 	instance = new GameObject("WorldMouseInputModule").AddComponent<WorldMouseInputModule>();
+					// }
 				}
 
 				return instance;
@@ -94,58 +100,35 @@ namespace unityutilities
 		protected override void Awake()
 		{
 			instance = this;
+			base.Awake();
 		}
 
 		protected override void Start()
 		{
-			base.Start(); //required...baseinputmodule does something clearly :-)
+			base.Start();
 
-			//we create a camera that will be our raycasting camera and add it to all canvases
-			//this is necessary because unity requires a screen space position to do raycasts against
-			//gui objects, and uses an "event camera" to do the actual raycasts
-			worldMouseCam = new GameObject("WorldMouse UI Camera").AddComponent<Camera>();
-			worldMouseCam.nearClipPlane = .01f;
-			worldMouseCam.fieldOfView = 1;
-			worldMouseCam.depth = -100;
-			worldMouseCam.clearFlags = CameraClearFlags.Nothing; // set the camera to render nothing
-			worldMouseCam.cullingMask = 0; // and no objects even try to draw to the camera
-			worldMouseCam.stereoTargetEye = StereoTargetEyeMask.None;
+			if (cam == null)
+			{
+				cam = new GameObject("World Mouse UI Camera").AddComponent<Camera>();
+				cam.clearFlags = CameraClearFlags.Nothing;
+				cam.stereoTargetEye = StereoTargetEyeMask.None;
+				cam.orthographic = true;
+				cam.orthographicSize = 0.001f;
+				cam.cullingMask = 0;
+				cam.nearClipPlane = 0.01f;
+				cam.depth = 0f;
+				cam.allowHDR = false;
+				cam.enabled = false;
+				cam.fieldOfView = 0.00001f;
 
-			// if this object is dontdestroyonload, apply that to the camera as well - parenting doesn't work because of positions
-			if (gameObject.scene.buildIndex == -1) DontDestroyOnLoad(worldMouseCam);
+
+				// if this object is dontdestroyonload, apply that to the camera as well - parenting doesn't work because of positions
+				if (gameObject.scene.buildIndex == -1) DontDestroyOnLoad(cam);
+			}
 
 			FindCanvases();
 
 			FindObjectsOfType<WorldMouse>().ToList().ForEach(AddWorldMouse);
-
-			//SceneManager.sceneLoaded += SceneLoaded;
-		}
-
-		//private void SceneLoaded(Scene arg0, LoadSceneMode arg1)
-		//{
-		//	FindCanvases();
-		//	foreach (WorldMouse wm in worldMice)
-		//	{
-		//		AddWorldMouse(wm);
-		//	}
-		//}
-
-		protected override void OnEnable()
-		{
-			base.OnEnable();
-			if (instance != null && instance.worldMouseCam != null)
-			{
-				instance.worldMouseCam.gameObject.SetActive(true);
-			}
-		}
-
-		protected override void OnDisable()
-		{
-			base.OnDisable();
-			if (instance != null && instance.worldMouseCam != null)
-			{
-				instance.worldMouseCam.gameObject.SetActive(false);
-			}
 		}
 
 		public static void FindCanvases()
@@ -155,163 +138,159 @@ namespace unityutilities
 			Canvas[] canvases = FindObjectsOfType<Canvas>();
 			foreach (Canvas canvas in canvases)
 			{
-				canvas.worldCamera = instance.worldMouseCam;
+				canvas.worldCamera = instance.cam;
 			}
 		}
 
-		public void AddWorldMouse(WorldMouse m)
+		public static void AddWorldMouse(WorldMouse wm)
 		{
-			if (!worldMice.Contains(m))
+			Instance.AddWorldMouseLocal(wm);
+		}
+
+		private void AddWorldMouseLocal(WorldMouse wm)
+		{
+			if (!worldMice.Contains(wm))
 			{
-				worldMice.Add(m);
+				worldMice.Add(wm);
+				eventData = new PointerEventData[worldMice.Count];
+
+				for (int i = 0; i < eventData.Length; i++)
+				{
+					eventData[i] = new PointerEventData(eventSystem)
+					{
+						delta = Vector2.zero,
+						position = new Vector2(Screen.width / 2f, Screen.height / 2f)
+					};
+				}
 			}
 
-			eventData.Add(new PointerEventData(eventSystem));
-			lastPressed.Add(null);
-
-			FindCanvases();
+			wm.pointerIndex = worldMice.IndexOf(wm);
 		}
 
-		public void RemoveWorldMouse(WorldMouse m)
+		public static void RemoveWorldMouse(WorldMouse wm)
 		{
-			int index = worldMice.IndexOf(m);
-			worldMice.RemoveAt(index);
-			eventData.RemoveAt(index);
-			lastPressed.RemoveAt(index);
+			Instance.RemoveWorldMouseLocal(wm);
 		}
 
-		// Process is called by UI system to process events.  
+		private void RemoveWorldMouseLocal(WorldMouse wm)
+		{
+			if (worldMice.Contains(wm))
+			{
+				worldMice.Remove(wm);
+			}
+
+			foreach (WorldMouse point in worldMice)
+			{
+				point.SetIndex(worldMice.IndexOf(point));
+			}
+
+			eventData = new PointerEventData[worldMice.Count];
+			for (int i = 0; i < eventData.Length; i++)
+			{
+				eventData[i] = new PointerEventData(eventSystem)
+				{
+					delta = Vector2.zero,
+					position = new Vector2(Screen.width / 2f, Screen.height / 2f)
+				};
+			}
+		}
+
 		public override void Process()
 		{
-			//the currently selected object may want to update something each frame
-			BaseEventData data = GetBaseEventData();
-			ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.updateSelectedHandler);
-
-			//we process each world mouse separately, which encapsulates the concept of a mouse within a camera space that will raycast into the world
-			for (int i = 0; i < eventData.Count && i < worldMice.Count; i++)
+#pragma warning disable
+			for (int index = 0; index < worldMice.Count; index++)
 			{
-				WorldMouse wm = worldMice[i];
-
-				wm.rayDistance = 0.0f; //assume nothing was hit to start
-
-				//this makes the event system camera align with the world mouse
-				worldMouseCam.transform.position = wm.transform.position;
-				worldMouseCam.transform.forward = wm.transform.forward;
-				//we reset the event data for the current frame.  Since the cursor doesn't actually move, these are constant
-				//this may cause some problems down the road...in which case we would probably create a camera for each canvas
-				//and then move the cursor to the raycast intersection with the quad encapsulating the GUI, updating these deltas
-				PointerEventData currentEventData = eventData[i];
-				currentEventData.Reset();
-				currentEventData.delta = Vector2.zero;
-				currentEventData.position = new Vector2(worldMouseCam.pixelWidth / 2.0f, worldMouseCam.pixelHeight / 2.0f);
-				currentEventData.scrollDelta = Vector2.zero;
-
-				//this is where all the magic actually happens
-				//the event system takes care of raycasting from all cameras at all cursor locations into the world
-				eventSystem.RaycastAll(currentEventData, m_RaycastResultCache);
-				currentEventData.pointerCurrentRaycast = FindFirstRaycast(m_RaycastResultCache);
-
-				// don't process anything if a world object was hit
-				if (wm.worldRayDistance < currentEventData.pointerCurrentRaycast.distance)
+				try
 				{
-					continue;
-				}
-
-				// don't process anything if we are not within distance limits for this wm 
-				if (currentEventData.pointerCurrentRaycast.distance > wm.maxDistance ||
-					currentEventData.pointerCurrentRaycast.distance < wm.minDistance)
-				{
-					continue;
-				}
-
-				//if we hit something this will not be null
-				if (currentEventData.pointerCurrentRaycast.gameObject != null)
-				{
-					//this is useful to know where the object was hit (to draw a point or limit the lenght of a laser)
-					wm.rayDistance = currentEventData.pointerCurrentRaycast.distance;
-					//we can think of the object we hit as what we are hovering above (the simplest type)
-					GameObject hoverObject = currentEventData.pointerCurrentRaycast.gameObject;
-					if (wm.lastHoverObject != hoverObject)
+					if (worldMice[index] != null && worldMice[index].enabled)
 					{
-						wm.HoverEntered?.Invoke(hoverObject);
-					}
-
-					wm.lastHoverObject = hoverObject;
-
-					// handle enter and exit events (highlight)
-					HandlePointerExitAndEnter(currentEventData, hoverObject);
-
-					//if the user clicks, other events may need to be handled
-					if (wm.PressDown())
-					{
-						//if we click, we want to clear the current selection 
-						//and fire associated events
-						if (eventSystem.currentSelectedGameObject)
+						cam.transform.position = worldMice[index].GetPosition();
+						cam.transform.forward = worldMice[index].GetForward();
+						float dist = worldMice[index].GetMaxDistance();
+						
+						// Hooks in to Unity's event system to handle hovering
+						eventSystem.RaycastAll(eventData[index], m_RaycastResultCache);
+						RaycastResult ray = FindFirstRaycast(m_RaycastResultCache);
+						eventData[index].pointerCurrentRaycast = ray;
+						if (dist > ray.distance)
 						{
-							eventSystem.SetSelectedGameObject(null);
-						}
 
-						//these are important for those handling a click event
-						currentEventData.pressPosition = currentEventData.position;
-						currentEventData.pointerPressRaycast = currentEventData.pointerCurrentRaycast;
+							HandlePointerExitAndEnter(eventData[index], eventData[index].pointerCurrentRaycast.gameObject);
 
-						//execute both the pointer down handler 
-						GameObject handledPointerDown = ExecuteEvents.ExecuteHierarchy(hoverObject, currentEventData,
-							ExecuteEvents.pointerDownHandler);
-						//execute the click handler, either on the hoverObject if nothing handled  pointerdown or on whatever handled it
-						GameObject handledClick = ExecuteEvents.ExecuteHierarchy(
-							handledPointerDown == null ? hoverObject : handledPointerDown, currentEventData,
-							ExecuteEvents.pointerClickHandler);
-						//something handled the click or pressed, so save a reference to it, needed later
-						GameObject newPressed = handledClick != null ? handledClick : handledPointerDown;
-
-						//we need to deal with a new selection if the press/click was handled
-						if (newPressed != null)
-						{
-							currentEventData.pointerPress = newPressed;
-							if (ExecuteEvents.GetEventHandler<ISelectHandler>(newPressed))
-							{
-								eventSystem.SetSelectedGameObject(newPressed);
-							}
-						}
-
-						//execute a drag start event on the currently pressed object and save it
-						ExecuteEvents.Execute(newPressed, currentEventData, ExecuteEvents.beginDragHandler);
-						currentEventData.pointerDrag = newPressed;
-
-						//we save what was currently pressed for when we release
-						lastPressed[i] = newPressed == null ? hoverObject : newPressed;
-
-						wm.ClickDown?.Invoke(lastPressed[i]);
-					}
-
-					//handle releasing the "click"
-					if (wm.PressUp())
-					{
-						if (lastPressed[i] != null)
-						{
-							ExecuteEvents.Execute(lastPressed[i], currentEventData, ExecuteEvents.endDragHandler);
-							ExecuteEvents.ExecuteHierarchy(lastPressed[i], currentEventData, ExecuteEvents.dropHandler);
-							ExecuteEvents.Execute(lastPressed[i], currentEventData, ExecuteEvents.pointerUpHandler);
-							currentEventData.pointerDrag = null;
-							currentEventData.rawPointerPress = null;
-							currentEventData.pointerPress = null;
-							wm.ClickUp?.Invoke(lastPressed[i]);
-							globalLastPressed = lastPressed[i];
-							lastPressed[i] = null;
+							ExecuteEvents.Execute(eventData[index].pointerDrag, eventData[index], ExecuteEvents.dragHandler);
 						}
 					}
-
-					// drag handling
-					if (lastPressed[i] != null)
-					{
-						ExecuteEvents.Execute(lastPressed[i], currentEventData, ExecuteEvents.dragHandler);
-					}
 				}
-
-
-				m_RaycastResultCache.Clear();
+				catch
+				{
+					// ignored
+				}
 			}
+#pragma warning restore
+		}
+
+		public static GameObject ProcessPress(int index)
+		{
+			return Instance.ProcessPressLocal(index);
+		}
+
+		private GameObject ProcessPressLocal(int index)
+		{
+			cam.transform.position = worldMice[index].GetPosition();
+			cam.transform.forward = worldMice[index].GetForward();
+			float dist = worldMice[index].GetMaxDistance();
+
+			if (dist > eventData[index].pointerCurrentRaycast.distance)
+			{
+				// Hooks in to Unity's event system to process a press
+				eventData[index].pointerPressRaycast = eventData[index].pointerCurrentRaycast;
+
+				eventData[index].pointerPress = ExecuteEvents.GetEventHandler<IPointerClickHandler>(eventData[index].pointerPressRaycast.gameObject);
+				eventData[index].pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(eventData[index].pointerPressRaycast.gameObject);
+
+				ExecuteEvents.Execute(eventData[index].pointerPress, eventData[index], ExecuteEvents.pointerDownHandler);
+				ExecuteEvents.Execute(eventData[index].pointerDrag, eventData[index], ExecuteEvents.beginDragHandler);
+
+				return eventData[index].pointerPressRaycast.gameObject;
+			}
+
+			return null;
+		}
+
+		public static void ProcessRelease(int index)
+		{
+			Instance.ProcessReleaseLocal(index);
+		}
+
+		private void ProcessReleaseLocal(int index)
+		{
+			cam.transform.position = worldMice[index].GetPosition();
+			cam.transform.forward = worldMice[index].GetForward();
+
+			// Hooks in to Unity's event system to process a release
+			GameObject pointerRelease = ExecuteEvents.GetEventHandler<IPointerClickHandler>(eventData[index].pointerCurrentRaycast.gameObject);
+
+			if (eventData[index].pointerPress == pointerRelease)
+			{
+				ExecuteEvents.Execute(eventData[index].pointerPress, eventData[index], ExecuteEvents.pointerClickHandler);
+			}
+
+			ExecuteEvents.Execute(eventData[index].pointerPress, eventData[index], ExecuteEvents.pointerUpHandler);
+			ExecuteEvents.Execute(eventData[index].pointerDrag, eventData[index], ExecuteEvents.endDragHandler);
+
+			eventData[index].pointerPress = null;
+			eventData[index].pointerDrag = null;
+
+			eventData[index].pointerCurrentRaycast.Clear();
+		}
+
+		/// <summary>
+		/// Returns a raycast even if past the max distance.
+		/// Make sure to limit distance for things like linerenderers
+		/// </summary>
+		public static PointerEventData GetData(int index)
+		{
+			return Instance.eventData[index];
 		}
 	}
 }

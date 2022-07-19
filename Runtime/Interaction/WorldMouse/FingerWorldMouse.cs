@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace unityutilities
+namespace unityutilities.Interaction.WorldMouse
 {
 	public class FingerWorldMouse : WorldMouse
 	{
@@ -25,13 +25,37 @@ namespace unityutilities
 
 		protected void Start()
 		{
-			ClickDown += OnClicked;
-			HoverEntered += OnHover;
+			OnClickDown += OnClicked;
+			OnHoverStart += OnHover;
+		}
+
+		protected override void Update()
+		{
+			if (currentRayLength < activationDistance)
+			{
+				if (!wasActivated)
+				{
+					wasActivated = true;
+					Press();
+				}
+			}
+			
+			
+			if (currentRayLength > activationDistance || float.IsInfinity(currentRayLength))
+			{
+				if (wasActivated)
+				{
+					wasActivated = false;
+					Release();
+				}
+			}
+			
+			base.Update();
 		}
 
 		private void OnHover(GameObject obj)
 		{
-			if (obj.GetComponent<Selectable>() != null)
+			if (obj != null && obj.GetComponent<Selectable>() != null)
 			{
 				InputMan.Vibrate(side, vibrateOnHover);
 				if (soundOnHover != null) soundOnHover.Play();
@@ -40,39 +64,11 @@ namespace unityutilities
 
 		private void OnClicked(GameObject obj)
 		{
-			if (obj.GetComponent<Selectable>() != null)
+			if (obj != null && obj.GetComponent<Selectable>() != null)
 			{
 				InputMan.Vibrate(side, vibrateOnClick);
 				if (soundOnClick != null) soundOnClick.Play();
 			}
-		}
-
-		public override bool PressDown()
-		{
-			if (rayDistance < activationDistance)
-			{
-				if (!wasActivated)
-				{
-					wasActivated = true;
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		public override bool PressUp()
-		{
-			if (rayDistance > activationDistance || float.IsInfinity(rayDistance))
-			{
-				if (wasActivated)
-				{
-					wasActivated = false;
-					return true;
-				}
-			}
-
-			return false;
 		}
 	}
 }

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace unityutilities
+namespace unityutilities.Interaction.WorldMouse
 {
 	public class CursorWorldMouse : WorldMouse
 	{
@@ -11,40 +11,8 @@ namespace unityutilities
 
 		protected void Start()
 		{
-			ClickDown += OnClicked;
-			HoverEntered += OnHover;
-		}
-
-		private void OnHover(GameObject obj)
-		{
-			if (obj.GetComponent<Selectable>() != null)
-			{
-				if (soundOnHover != null)
-				{
-					AudioSource.PlayClipAtPoint(soundOnHover, obj.transform.position, .5f);
-				}
-			}
-		}
-
-		private void OnClicked(GameObject obj)
-		{
-			if (obj.GetComponent<Selectable>() != null)
-			{
-				if (soundOnClick != null)
-				{
-					AudioSource.PlayClipAtPoint(soundOnClick, obj.transform.position, .5f);
-				}
-			}
-		}
-
-		public override bool PressDown()
-		{
-			return Input.GetMouseButtonDown(0);
-		}
-
-		public override bool PressUp()
-		{
-			return Input.GetMouseButtonUp(0);
+			OnClickDown += OnClicked;
+			OnHoverStart += OnHover;
 		}
 
 		protected override void Update()
@@ -56,7 +24,32 @@ namespace unityutilities
 				transform.position = screenCamera.transform.position;
 				transform.forward = r.direction;
 			}
+
+			if (Input.GetMouseButtonDown(0)) Press();
+			if (Input.GetMouseButtonUp(0)) Release();
 			base.Update();
+		}
+
+		private void OnHover(GameObject obj)
+		{
+			if (obj != null && obj.GetComponent<Selectable>() != null)
+			{
+				if (soundOnHover != null)
+				{
+					AudioSource.PlayClipAtPoint(soundOnHover, obj.transform.position, .5f);
+				}
+			}
+		}
+
+		private void OnClicked(GameObject obj)
+		{
+			if (obj != null && obj.GetComponent<Selectable>() != null)
+			{
+				if (soundOnClick != null)
+				{
+					AudioSource.PlayClipAtPoint(soundOnClick, obj.transform.position, .5f);
+				}
+			}
 		}
 	}
 }
