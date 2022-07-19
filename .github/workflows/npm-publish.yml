@@ -1,12 +1,11 @@
 name: Publish to Verdaccio
-
 on:
   push:
     branches:
     - main
-
 jobs:
   publish-npm:
+    name: publish npm verdaccio
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -14,6 +13,7 @@ jobs:
         with:
           node-version: 16
           registry-url: http://npm.ugavel.com/
-      - run: npm publish
+      - name: publish npm verdaccio
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.VERDACCIO_TOKEN}}
