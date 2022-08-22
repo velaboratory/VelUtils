@@ -5,31 +5,33 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.XR;
 
-namespace unityutilities {
+namespace unityutilities
+{
 	/// <summary>
 	/// Adds several movement techniques while maintaining compatibility with many rig setups.
 	/// </summary>
 	[RequireComponent(typeof(Rigidbody))]
 	[AddComponentMenu("unityutilities/Movement")]
-	public class Movement : MonoBehaviour {
+	public class Movement : MonoBehaviour
+	{
 		public Rig rig;
 
 		public bool setPhysicsTimestepToRefreshRate;
 
 
 		[Header("Hand-based Movement")]
-
 		[Tooltip("Whether to move with hands when colliding with an object. " +
-			"Only really makes sense when \"Grab Air\" is false.")]
+		         "Only really makes sense when \"Grab Air\" is false.")]
 		public bool grabWallsLeft;
+
 		public bool grabWallsRight;
 
 		[Tooltip("Allows for hand-based movement by holding grip.")]
 		public bool grabAirLeft;
+
 		public bool grabAirRight;
 
-		[Tooltip("Control-display ratio for grabbing movement. Basically a speed multiplier.")]
-		[Range(0,16)]
+		[Tooltip("Control-display ratio for grabbing movement. Basically a speed multiplier.")] [Range(0, 16)]
 		public float cdRatioGrabbing = 1;
 
 		public enum GrabInput
@@ -39,6 +41,7 @@ namespace unityutilities {
 			Grip,
 			TriggerAndGrip
 		}
+
 		public GrabInput grabInput = GrabInput.Grip;
 
 		[Tooltip("Press left and right stick to boost and brake in head direction.")]
@@ -55,15 +58,12 @@ namespace unityutilities {
 		public float mainBoosterCost = 1f;
 		private float mainBoosterBudget = 1f;
 		public float minVel = .1f;
+		public float grabMovementMaxThrowSpeed = 4f;
 
 
-
-
-
-		[Header("Stick-based Movement")]
-
-		[Tooltip("Which controller to use for snap turn. Always `Right` if roll is enabled.")]
+		[Header("Stick-based Movement")] [Tooltip("Which controller to use for snap turn. Always `Right` if roll is enabled.")]
 		public Side turnInput = Side.Either;
+
 		public bool continuousRotation;
 		public float continuousRotationSpeed = 100f;
 		public float snapRotationAmount = 30f;
@@ -86,9 +86,7 @@ namespace unityutilities {
 		public float slidingSpeed = 3f;
 
 
-		[Header("Teleporting")]
-
-		[Tooltip("Enable thumbstick teleporting.")]
+		[Header("Teleporting")] [Tooltip("Enable thumbstick teleporting.")]
 		public bool teleportingMovement;
 
 		public Teleporter teleporter = new Teleporter();
@@ -96,19 +94,17 @@ namespace unityutilities {
 
 		[Tooltip("Scoot backwards with thumbstick down")]
 		public bool scootBackMovement;
+
 		public Side scootBackMovementController = Side.None;
 
 
-		[Header("Weird Movement")]
-
-		[Tooltip("Values > 1 increase the effect of head translation on movement in space.")]
+		[Header("Weird Movement")] [Tooltip("Values > 1 increase the effect of head translation on movement in space.")]
 		public float translationalGain = 1;
 
 		[Tooltip("The \"Tracking Space\" object for Oculus rigs works well.")]
 		public Transform translationalGainOffsetObj;
 
 
-		
 		// Private junk
 
 		private float normalDrag;
@@ -116,10 +112,8 @@ namespace unityutilities {
 		public Action<Transform, Side> OnGrab;
 		public Action<Transform, Side> OnRelease;
 
-		[HideInInspector]
-		public Transform leftHandGrabbedObj;
-		[HideInInspector]
-		public Transform rightHandGrabbedObj;
+		[HideInInspector] public Transform leftHandGrabbedObj;
+		[HideInInspector] public Transform rightHandGrabbedObj;
 		private Transform lastLeftHandGrabbedObj;
 		private Transform lastRightHandGrabbedObj;
 		private GameObject[] grabPos = new GameObject[2];
@@ -135,8 +129,7 @@ namespace unityutilities {
 
 		// teleporting vars
 		private LineRenderer lineRenderer;
-		[HideInInspector]
-		public Side currentTeleportingSide = Side.None;
+		[HideInInspector] public Side currentTeleportingSide = Side.None;
 		private RaycastHit teleportHit;
 
 		/// <summary>
@@ -159,7 +152,8 @@ namespace unityutilities {
 		/// The current chosen spot to teleport to
 		/// </summary>
 		[Serializable]
-		public class Teleporter {
+		public class Teleporter
+		{
 			// inspector values
 			public Side inputSide = Side.Either;
 			public bool rotateOnTeleport;
@@ -172,8 +166,7 @@ namespace unityutilities {
 			public Material lineRendererMaterialOverride;
 			public LayerMask validLayers = ~0;
 
-			[Header("Blink")]
-			public bool blink = true;
+			[Header("Blink")] public bool blink = true;
 			public float blinkDuration = .1f;
 
 			public int renderQueue = 5000;
@@ -184,21 +177,23 @@ namespace unityutilities {
 			[HideInInspector] public Coroutine blinkCoroutine;
 
 
-
-			[HideInInspector]
-			public GameObject teleportMarkerInstance;
+			[HideInInspector] public GameObject teleportMarkerInstance;
 
 
-			public Teleporter() {
+			public Teleporter()
+			{
 				Active = false;
 			}
 
-			public Teleporter(Vector3 pos, Vector3 dir) {
+			public Teleporter(Vector3 pos, Vector3 dir)
+			{
 				Pos = pos;
 				Dir = dir;
 				Active = true;
 			}
-			public Teleporter(Teleporter t) {
+
+			public Teleporter(Teleporter t)
+			{
 				Pos = t.Pos;
 				Dir = t.Dir;
 				blinkShader = t.blinkShader;
@@ -207,24 +202,30 @@ namespace unityutilities {
 			}
 
 
-
 			private bool active;
 
 			private Vector3 pos;
 			private Vector3 dir;
 
-			public bool Active {
+			public bool Active
+			{
 				get => active;
-				set {
-					if (active != value) {
-						if (teleportMarkerInstance != null) {
+				set
+				{
+					if (active != value)
+					{
+						if (teleportMarkerInstance != null)
+						{
 							teleportMarkerInstance.SetActive(value);
 						}
-						else {
-							if (teleportMarkerOverride != null) {
+						else
+						{
+							if (teleportMarkerOverride != null)
+							{
 								teleportMarkerInstance = Instantiate(teleportMarkerOverride);
 							}
-							else {
+							else
+							{
 								teleportMarkerInstance = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
 								Destroy(teleportMarkerInstance.GetComponent<Collider>());
 								teleportMarkerInstance.transform.localScale = new Vector3(.1f, .01f, .1f);
@@ -237,21 +238,27 @@ namespace unityutilities {
 				}
 			}
 
-			public Vector3 Pos {
+			public Vector3 Pos
+			{
 				get => pos;
-				set {
+				set
+				{
 					pos = value;
-					if (teleportMarkerInstance != null) {
+					if (teleportMarkerInstance != null)
+					{
 						teleportMarkerInstance.transform.position = pos;
 					}
 				}
 			}
 
-			public Vector3 Dir {
+			public Vector3 Dir
+			{
 				get => dir;
-				set {
+				set
+				{
 					dir = value;
-					if (teleportMarkerInstance != null) {
+					if (teleportMarkerInstance != null)
+					{
 						teleportMarkerInstance.transform.rotation = Quaternion.LookRotation(dir);
 					}
 				}
@@ -267,6 +274,8 @@ namespace unityutilities {
 			{
 				Time.fixedDeltaTime = 1 / XRDevice.refreshRate;
 			}
+			
+			
 		}
 
 		private void SetupTeleporter()
@@ -295,7 +304,7 @@ namespace unityutilities {
 				new Vector3(x, y, distance)
 			};
 
-			int[] tris = {0, 2, 1, 2, 3, 1};
+			int[] tris = { 0, 2, 1, 2, 3, 1 };
 
 			Vector3[] normals =
 			{
@@ -324,9 +333,11 @@ namespace unityutilities {
 			SetBlinkOpacity(0);
 		}
 
-		private void Start() {
+		private void Start()
+		{
 			cpt = null;
-			if (cpt == null) {
+			if (cpt == null)
+			{
 				cpt = gameObject.AddComponent<CopyTransform>();
 			}
 
@@ -337,8 +348,8 @@ namespace unityutilities {
 			wasKinematic = rig.rb.isKinematic;
 		}
 
-		private void Update() {
-
+		private void Update()
+		{
 			// turn
 			Turn();
 
@@ -354,9 +365,11 @@ namespace unityutilities {
 			{
 				GrabMove(Side.Left);
 			}
-			
-			if (grabWallsRight && !grabAirRight) {
-				if (rightHandGrabbedObj != null || grabbingSide == Side.Right) {
+
+			if (grabWallsRight && !grabAirRight)
+			{
+				if (rightHandGrabbedObj != null || grabbingSide == Side.Right)
+				{
 					GrabMove(Side.Right, rightHandGrabbedObj);
 				}
 			}
@@ -367,7 +380,7 @@ namespace unityutilities {
 
 			Boosters();
 
-			
+
 			SlidingMovement();
 
 			// update lastVels
@@ -378,7 +391,8 @@ namespace unityutilities {
 			lastLeftHandGrabbedObj = leftHandGrabbedObj;
 			lastRightHandGrabbedObj = rightHandGrabbedObj;
 
-			if (teleportingMovement) {
+			if (teleportingMovement)
+			{
 				Teleporting();
 			}
 
@@ -397,35 +411,41 @@ namespace unityutilities {
 			snapTurnedThisFrame = false;
 
 			TranslationalGain();
-
 		}
 
 
 		#region Teleporting
 
-		private void Teleporting() {
-
+		private void Teleporting()
+		{
 			// check for start of teleports
-			if (InputMan.Up(Side.Left) && teleporter.inputSide.Contains(Side.Left)) {
-				if (currentTeleportingSide == Side.None) {
+			if (InputMan.Up(Side.Left) && teleporter.inputSide.Contains(Side.Left))
+			{
+				if (currentTeleportingSide == Side.None)
+				{
 					TeleportStart?.Invoke(Side.Left);
 				}
+
 				currentTeleportingSide = Side.Left;
 			}
 
-			if (InputMan.Up(Side.Right) && teleporter.inputSide.Contains(Side.Right)) {
-				if (currentTeleportingSide == Side.None) {
+			if (InputMan.Up(Side.Right) && teleporter.inputSide.Contains(Side.Right))
+			{
+				if (currentTeleportingSide == Side.None)
+				{
 					TeleportStart?.Invoke(Side.Right);
 				}
+
 				currentTeleportingSide = Side.Right;
 			}
 
 			// if the teleport laser is visible
-			if (currentTeleportingSide != Side.None) {
-
+			if (currentTeleportingSide != Side.None)
+			{
 				// check for end of teleport
 				if (currentTeleportingSide == Side.Left && InputMan.ThumbstickIdle(Side.Left) ||
-					currentTeleportingSide == Side.Right && InputMan.ThumbstickIdle(Side.Right)) {
+				    currentTeleportingSide == Side.Right && InputMan.ThumbstickIdle(Side.Right))
+				{
 					// complete the teleport
 					TeleportTo(teleporter);
 					try
@@ -443,16 +463,19 @@ namespace unityutilities {
 					Destroy(lineRenderer);
 					teleporter.Active = false;
 				}
-				else {
-
+				else
+				{
 					// add a new linerenderer if needed
-					if (lineRenderer == null) {
+					if (lineRenderer == null)
+					{
 						lineRenderer = gameObject.AddComponent<LineRenderer>();
 						lineRenderer.widthMultiplier = teleporter.lineRendererWidth;
-						if (teleporter.lineRendererMaterialOverride != null) {
+						if (teleporter.lineRendererMaterialOverride != null)
+						{
 							lineRenderer.material = teleporter.lineRendererMaterialOverride;
 						}
-						else {
+						else
+						{
 							Material material;
 							(material = lineRenderer.material).shader = Shader.Find("Unlit/Color");
 							material.color = Color.black;
@@ -465,11 +488,13 @@ namespace unityutilities {
 					float velocity = teleporter.teleportArcInitialVel;
 					List<Vector3> points = new List<Vector3>();
 
-					if (currentTeleportingSide == Side.Left) {
+					if (currentTeleportingSide == Side.Left)
+					{
 						lastPos = rig.leftHand.position;
 						lastDir = rig.leftHand.forward;
 					}
-					else {
+					else
+					{
 						lastPos = rig.rightHand.position;
 						lastDir = rig.rightHand.forward;
 					}
@@ -485,17 +510,21 @@ namespace unityutilities {
 					points.Add(lastPos);
 
 					// the teleport line will stop at a max distance
-					for (int i = 0; i < maxSegments; i++) {
-						if (Physics.Raycast(lastPos, lastDir.normalized, out teleportHit, lastDir.magnitude, teleporter.validLayers)) {
+					for (int i = 0; i < maxSegments; i++)
+					{
+						if (Physics.Raycast(lastPos, lastDir.normalized, out teleportHit, lastDir.magnitude, teleporter.validLayers))
+						{
 							points.Add(teleportHit.point);
 
 							// if the hit point is valid
-							if (Vector3.Angle(teleportHit.normal, Vector3.up) < teleporter.maxTeleportableSlope) {
+							if (Vector3.Angle(teleportHit.normal, Vector3.up) < teleporter.maxTeleportableSlope)
+							{
 								// define the point as a good teleportable point
 								teleporter.Pos = teleportHit.point;
 								Vector3 dir = rig.head.forward;
 								dir = Vector3.ProjectOnPlane(dir, Vector3.up);
-								if (teleporter.rotateOnTeleport) {
+								if (teleporter.rotateOnTeleport)
+								{
 									Vector3 thumbstickDir = new Vector3(
 										InputMan.ThumbstickX(currentTeleportingSide),
 										0,
@@ -509,9 +538,9 @@ namespace unityutilities {
 
 
 								teleporter.Active = true;
-
 							}
-							else {
+							else
+							{
 								// if the hit point is close enough to the last valid point
 								teleporter.Active = !(Vector3.Distance(teleporter.Pos, teleportHit.point) > .1f);
 							}
@@ -519,7 +548,8 @@ namespace unityutilities {
 
 							break;
 						}
-						else {
+						else
+						{
 							// calculate the next ray
 							lastPos = lastPos + lastDir;
 							Vector3 newPos = lastPos + xVelocity + Vector3.up * yVelocity;
@@ -531,7 +561,9 @@ namespace unityutilities {
 						}
 
 						// if we reached the end of the arc without hitting something
-						if (i + 1 == maxSegments) {;
+						if (i + 1 == maxSegments)
+						{
+							;
 							teleporter.Active = false;
 						}
 					}
@@ -547,13 +579,16 @@ namespace unityutilities {
 		/// May not actually teleport if goal is not active
 		/// </summary>
 		/// <param name="goal">The target pos</param>
-		private void TeleportTo(Teleporter goal) {
-			if (goal.Active) {
+		private void TeleportTo(Teleporter goal)
+		{
+			if (goal.Active)
+			{
 				TeleportTo(goal.Pos, goal.Dir);
 			}
 		}
 
-		public void TeleportTo(Vector3 position, Vector3 direction) {
+		public void TeleportTo(Vector3 position, Vector3 direction)
+		{
 			TeleportTo(position, Quaternion.LookRotation(direction));
 		}
 
@@ -564,7 +599,8 @@ namespace unityutilities {
 		/// <param name="position">Global target position</param>
 		/// <param name="rotation">Global target rotation</param>
 		/// <param name="noBlinkOverride">Set to true to avoid fading to black even if that is set normally</param>
-		public void TeleportTo(Vector3 position, Quaternion rotation, bool noBlinkOverride = false) {
+		public void TeleportTo(Vector3 position, Quaternion rotation, bool noBlinkOverride = false)
+		{
 			float headRotOffset = Vector3.SignedAngle(transform.forward, Vector3.ProjectOnPlane(rig.head.transform.forward, Vector3.up), Vector3.up);
 			rotation = Quaternion.Euler(0, -headRotOffset, 0) * rotation;
 			Quaternion origRot = transform.rotation;
@@ -579,17 +615,20 @@ namespace unityutilities {
 			StartCoroutine(DoSmoothTeleport(position + headPosOffset, rotation, teleporter.smoothTeleportTime, noBlinkOverride));
 		}
 
-		private IEnumerator DoSmoothTeleport(Vector3 position, Quaternion rotation, float time, bool noBlinkOverride = false) {
+		private IEnumerator DoSmoothTeleport(Vector3 position, Quaternion rotation, float time, bool noBlinkOverride = false)
+		{
 			float distance = Vector3.Distance(transform.position, position);
 
 			transform.rotation = rotation;
 
-			if (teleporter.blink && !noBlinkOverride) {
+			if (teleporter.blink && !noBlinkOverride)
+			{
 				FadeOut(teleporter.blinkDuration / 2);
 				yield return new WaitForSeconds(4 * teleporter.blinkDuration / 5);
 			}
 
-			for (float i = 0; i < time; i += Time.deltaTime) {
+			for (float i = 0; i < time; i += Time.deltaTime)
+			{
 				transform.position = Vector3.MoveTowards(transform.position, position, (Time.deltaTime / time) * distance);
 				//transform.RotateAround(rig.head.position, axis,angle*(Time.deltaTime/time));
 				yield return null;
@@ -598,21 +637,23 @@ namespace unityutilities {
 			transform.rotation = rotation;
 			transform.position = position;
 
-			if (teleporter.blink && !noBlinkOverride) {
+			if (teleporter.blink && !noBlinkOverride)
+			{
 				FadeIn(teleporter.blinkDuration / 2);
 			}
-
 		}
 
 		/// <summary>
 		/// Fades the screen to black
 		/// </summary>
 		/// <param name="duration"></param>
-		public void FadeOut(float duration) {
+		public void FadeOut(float duration)
+		{
 			if (teleporter.blinkCoroutine != null)
 			{
 				StopCoroutine(teleporter.blinkCoroutine);
 			}
+
 			StartCoroutine(Fade(0, 1, duration));
 		}
 
@@ -620,29 +661,36 @@ namespace unityutilities {
 		/// Fades the screen from black back to normal
 		/// </summary>
 		/// <param name="duration"></param>
-		public void FadeIn(float duration) {
+		public void FadeIn(float duration)
+		{
 			if (teleporter.blinkCoroutine != null)
 			{
 				StopCoroutine(teleporter.blinkCoroutine);
 			}
+
 			teleporter.blinkCoroutine = StartCoroutine(Fade(1, 0, duration));
 		}
 
-		private IEnumerator Fade(float startVal, float endVal, float duration) {
+		private IEnumerator Fade(float startVal, float endVal, float duration)
+		{
 			float time = 0;
-			while (time < duration) {
+			while (time < duration)
+			{
 				SetBlinkOpacity(Mathf.Lerp(startVal, endVal, time / duration));
 				time += Time.deltaTime;
 				yield return null;
 			}
+
 			SetBlinkOpacity(endVal);
 		}
 
-		public void SetBlinkOpacity(float value, bool stopOtherFades = false) {
+		public void SetBlinkOpacity(float value, bool stopOtherFades = false)
+		{
 			if (stopOtherFades && teleporter.blinkCoroutine != null)
 			{
 				StopCoroutine(teleporter.blinkCoroutine);
 			}
+
 			Color color = Color.black;
 			color.a = value;
 			if (teleporter.blinkMaterial != null)
@@ -655,8 +703,10 @@ namespace unityutilities {
 
 		#endregion
 
-		private void TranslationalGain() {
-			if (translationalGain == 1) {
+		private void TranslationalGain()
+		{
+			if (translationalGain == 1)
+			{
 				return;
 			}
 
@@ -666,13 +716,16 @@ namespace unityutilities {
 			translationalGainOffsetObj.localPosition = trackingPosOffset * (translationalGain - 1);
 		}
 
-		private void RoundVelToZero() {
-			if (rig.rb.velocity.magnitude < minVel) {
+		private void RoundVelToZero()
+		{
+			if (rig.rb.velocity.magnitude < minVel)
+			{
 				rig.rb.velocity = Vector3.zero;
 			}
 		}
 
-		private void SlidingMovement() {
+		private void SlidingMovement()
+		{
 			if (!slidingMovement) return;
 
 			float horizontal = InputMan.ThumbstickX(Side.Left);
@@ -686,18 +739,22 @@ namespace unityutilities {
 			Vector3 right = new Vector3(-forward.z, 0, forward.x);
 
 
-			if (useForce) {
+			if (useForce)
+			{
 				Vector3 forwardForce = Time.deltaTime * vertical * forward * 1000f;
-				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.forward)) < slidingSpeed) {
+				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.forward)) < slidingSpeed)
+				{
 					rig.rb.AddForce(forwardForce);
 				}
 
 				Vector3 rightForce = Time.deltaTime * horizontal * right * 1000f;
-				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.right)) < slidingSpeed) {
+				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.right)) < slidingSpeed)
+				{
 					rig.rb.AddForce(rightForce);
 				}
 			}
-			else {
+			else
+			{
 				Vector3 currentSpeed = rig.rb.velocity;
 				Vector3 forwardSpeed = vertical * forward;
 				Vector3 rightSpeed = horizontal * right;
@@ -706,18 +763,23 @@ namespace unityutilities {
 			}
 		}
 
-		private void Boosters() {
+		private void Boosters()
+		{
 			// update timers
 			mainBoosterBudget += Time.deltaTime;
 			mainBoosterBudget = Mathf.Clamp01(mainBoosterBudget);
 
+
 			// use main booster
-			if (stickBoostBrake && InputMan.ThumbstickPressDown(Side.Left) && InputMan.ThumbstickIdle(Side.Left)) {
+			if (stickBoostBrake && InputMan.ThumbstickPressDown(Side.Left) && InputMan.ThumbstickIdle(Side.Left))
+			{
 				// add timeout
-				if (mainBoosterBudget - mainBoosterCost > 0) {
+				if (mainBoosterBudget - mainBoosterCost > 0)
+				{
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
-					if (Vector3.Dot(rig.rb.velocity, rig.head.forward) < mainBoosterMaxSpeed) {
+					if (Vector3.Dot(rig.rb.velocity, rig.head.forward) < mainBoosterMaxSpeed)
+					{
 						// add the force
 						rig.rb.AddForce(mainBoosterForce * 100f * rig.head.forward);
 					}
@@ -727,29 +789,36 @@ namespace unityutilities {
 			}
 
 			// use main brake
-			if (stickBoostBrake && InputMan.PadClick(Side.Right)) {
+			if (stickBoostBrake && InputMan.PadClick(Side.Right))
+			{
 				// add a bunch of drag
 				rig.rb.drag = mainBrakeDrag;
 			}
-			else if (InputMan.PadClickUp(Side.Right)) {
+			else if (InputMan.PadClickUp(Side.Right))
+			{
 				rig.rb.drag = normalDrag;
 				RoundVelToZero();
 			}
 
-			if (handBoosters) {
-				if (InputMan.Button2(Side.Left)) {
+			if (handBoosters)
+			{
+				if (InputMan.Button2(Side.Left))
+				{
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
-					if (Vector3.Dot(rig.rb.velocity, rig.leftHand.forward) < maxHandBoosterSpeed) {
+					if (Vector3.Dot(rig.rb.velocity, rig.leftHand.forward) < maxHandBoosterSpeed)
+					{
 						// add the force
 						rig.rb.AddForce(handBoosterAccel * Time.deltaTime * 100f * rig.leftHand.forward);
 					}
 				}
 
-				if (InputMan.Button2(Side.Right)) {
+				if (InputMan.Button2(Side.Right))
+				{
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
-					if (Vector3.Dot(rig.rb.velocity, rig.rightHand.forward) < maxHandBoosterSpeed) {
+					if (Vector3.Dot(rig.rb.velocity, rig.rightHand.forward) < maxHandBoosterSpeed)
+					{
 						// add the force
 						rig.rb.AddForce(handBoosterAccel * Time.deltaTime * 100f * rig.rightHand.forward);
 					}
@@ -757,105 +826,130 @@ namespace unityutilities {
 			}
 		}
 
-		private void Turn() {
-
+		private void Turn()
+		{
 			// don't turn if currently teleporting
-			if (currentTeleportingSide != Side.None) {
+			if (currentTeleportingSide != Side.None)
+			{
 				return;
 			}
 
 			Vector3 pivot = rig.head.position;
-			if (grabbingSide == Side.Left) {
+			if (grabbingSide == Side.Left)
+			{
 				pivot = rig.leftHand.position;
 			}
-			else if (grabbingSide == Side.Right) {
+			else if (grabbingSide == Side.Right)
+			{
 				pivot = rig.rightHand.position;
 			}
 
-			if (continuousRotation) {
+			if (continuousRotation)
+			{
 				Side turnInputLocal = turnInput;
-				if (roll) {
+				if (roll)
+				{
 					turnInputLocal = Side.Right;
 				}
-				if (yaw && Mathf.Abs(InputMan.ThumbstickX(turnInputLocal)) > turnNullZone) {
+
+				if (yaw && Mathf.Abs(InputMan.ThumbstickX(turnInputLocal)) > turnNullZone)
+				{
 					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up,
 						InputMan.ThumbstickX(turnInputLocal) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
-				else if (pitch && Mathf.Abs(InputMan.ThumbstickY(turnInputLocal)) > turnNullZone) {
+				else if (pitch && Mathf.Abs(InputMan.ThumbstickY(turnInputLocal)) > turnNullZone)
+				{
 					rig.rb.transform.RotateAround(pivot, rig.head.right,
 						InputMan.ThumbstickY(turnInputLocal) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
-				else if (roll && Mathf.Abs(InputMan.ThumbstickX(Side.Left)) > turnNullZone) {
+				else if (roll && Mathf.Abs(InputMan.ThumbstickX(Side.Left)) > turnNullZone)
+				{
 					rig.rb.transform.RotateAround(pivot, rig.head.forward,
 						InputMan.ThumbstickX(Side.Left) * Time.deltaTime * continuousRotationSpeed * 2);
 				}
 			}
-			else {
+			else
+			{
 				Side turnInputLocal = turnInput;
 				string snapTurnDirection = "";
 
-				if (roll) {
+				if (roll)
+				{
 					turnInputLocal = Side.Right;
 				}
-				if (yaw && InputMan.Left(turnInputLocal)) {
+
+				if (yaw && InputMan.Left(turnInputLocal))
+				{
 					snapTurnDirection = "left";
 					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up, -snapRotationAmount);
 				}
-				else if (yaw && InputMan.Right(turnInputLocal)) {
+				else if (yaw && InputMan.Right(turnInputLocal))
+				{
 					snapTurnDirection = "right";
 					rig.rb.transform.RotateAround(pivot, rig.rb.transform.up, snapRotationAmount);
 				}
-				else if (pitch && InputMan.Up(turnInputLocal)) {
+				else if (pitch && InputMan.Up(turnInputLocal))
+				{
 					snapTurnDirection = "up";
 					rig.rb.transform.RotateAround(pivot, rig.head.transform.forward, -snapRotationAmount);
 				}
-				else if (pitch && InputMan.Down(turnInputLocal)) {
+				else if (pitch && InputMan.Down(turnInputLocal))
+				{
 					snapTurnDirection = "down";
 					rig.rb.transform.RotateAround(pivot, rig.head.transform.forward, snapRotationAmount);
 				}
-				else if (roll && InputMan.Left(Side.Left)) {
+				else if (roll && InputMan.Left(Side.Left))
+				{
 					snapTurnDirection = "roll-left";
 					rig.rb.transform.RotateAround(pivot, rig.head.transform.right, -snapRotationAmount);
 				}
-				else if (roll && InputMan.Right(Side.Left)) {
+				else if (roll && InputMan.Right(Side.Left))
+				{
 					snapTurnDirection = "roll-right";
 					rig.rb.transform.RotateAround(pivot, rig.head.transform.right, snapRotationAmount);
 				}
 
-				if (snapTurnDirection != "") {
+				if (snapTurnDirection != "")
+				{
 					Side whichSideWasUsed;
-					if (turnInputLocal == Side.Either) {
+					if (turnInputLocal == Side.Either)
+					{
 						if (InputMan.ThumbstickX(Side.Left) > InputMan.ThumbstickX(Side.Right))
 							whichSideWasUsed = Side.Left;
 						else
 							whichSideWasUsed = Side.Right;
 					}
-					else {
+					else
+					{
 						whichSideWasUsed = turnInputLocal;
 					}
+
 					SnapTurn?.Invoke(whichSideWasUsed, snapTurnDirection);
 
 					cpt.enabled = false;
 					snapTurnedThisFrame = true;
 
-					if (grabbingSide != Side.None) {
+					if (grabbingSide != Side.None)
+					{
 						cpt.positionOffset = rig.rb.position -
-						  (grabbingSide == Side.Left ? rig.leftHand.position : rig.rightHand.position);
+						                     (grabbingSide == Side.Left ? rig.leftHand.position : rig.rightHand.position);
 					}
 				}
 			}
 		}
 
-		public void ResetOrientation() {
+		public void ResetOrientation()
+		{
 			rig.rb.transform.localRotation = Quaternion.identity;
 		}
 
-		private void GrabMove(Side side, Transform parent = null) {
-			
+		private void GrabMove(Side side, Transform parent = null)
+		{
 			// collect inputs
 			bool grabDown = false;
 			bool grab = false;
-			switch (grabInput) {
+			switch (grabInput)
+			{
 				case GrabInput.Trigger:
 					grabDown = InputMan.TriggerDown(side);
 					grab = InputMan.Trigger(side);
@@ -873,11 +967,13 @@ namespace unityutilities {
 			// if we are initializing a new grab
 			// either we just pressed the button or we just touched a new object while already holding
 			if (grabDown || (grab &&
-				((side == Side.Left && leftHandGrabbedObj != null && lastLeftHandGrabbedObj == null) ||
-				(side == Side.Right && rightHandGrabbedObj != null && lastRightHandGrabbedObj == null)))) {
+			                 ((side == Side.Left && leftHandGrabbedObj != null && lastLeftHandGrabbedObj == null) ||
+			                  (side == Side.Right && rightHandGrabbedObj != null && lastRightHandGrabbedObj == null))))
+			{
 				grabbingSide = side;
 
-				if (grabPos[(int)side] != null) {
+				if (grabPos[(int)side] != null)
+				{
 					Destroy(grabPos[(int)side].gameObject);
 				}
 
@@ -894,10 +990,12 @@ namespace unityutilities {
 				// if event has subscribers, execute
 				OnGrab?.Invoke(parent, side);
 			}
-			else if (side == grabbingSide) {
-				if (grab) {
+			else if (side == grabbingSide)
+			{
+				if (grab)
+				{
 					cpt.positionOffset = rig.rb.position - rig.GetHand(side).position;
-					cpt.target.Translate(-rig.transform.TransformVector(InputMan.ControllerVelocity(side)) * Time.deltaTime * Mathf.Clamp(cdRatioGrabbing-1, 0, 100));
+					cpt.target.Translate(-rig.transform.TransformVector(InputMan.ControllerVelocity(side)) * Time.deltaTime * Mathf.Clamp(cdRatioGrabbing - 1, 0, 100));
 					cpt.enabled = !snapTurnedThisFrame;
 				}
 				else
@@ -907,7 +1005,7 @@ namespace unityutilities {
 			}
 		}
 
-		public void Release(Side side)
+		public void Release(Side side, Rigidbody rb = null)
 		{
 			if (side == grabbingSide)
 			{
@@ -918,10 +1016,31 @@ namespace unityutilities {
 			{
 				OnRelease?.Invoke(grabPos[(int)side].transform, side);
 				Destroy(grabPos[(int)side].gameObject);
+
+				// limit velocity based on grabbed obj velocity
+				Vector3 baseVel = Vector3.zero;
+				if (rb != null)
+				{
+					baseVel = rb.velocity;
+
+					Debug.Log("TARGET: " + baseVel);
+				}
+				else
+				{
+					Debug.Log("No target");
+				}
+
 				cpt.SetTarget(null);
+
+				Debug.Log("BEFORE: " + rig.rb.velocity);
+				rig.rb.velocity = Vector3.ClampMagnitude(baseVel + rig.rb.velocity, grabMovementMaxThrowSpeed);
+				Debug.Log("AFTER: " + rig.rb.velocity);
+
 				//rig.rb.velocity = MedianAvg(lastVels);
-				rig.rb.velocity = -rig.transform.TransformVector(InputMan.ControllerVelocity(side)) * cdRatioGrabbing;
+
+				// rig.rb.velocity = -rig.transform.TransformVector(InputMan.ControllerVelocity(side)) * cdRatioGrabbing;
 				RoundVelToZero();
+
 				rig.rb.isKinematic = wasKinematic;
 			}
 		}
@@ -931,26 +1050,20 @@ namespace unityutilities {
 		/// </summary>
 		/// <param name="obj">The object just grabbed.</param>
 		/// <param name="side">Which side's object to modify.</param>
-		public void SetGrabbedObj(Transform obj, Side side) {
-			if (side == Side.Left) {
-				if (obj == null) {
-					leftHandGrabbedObj = null;
-				}
-				else {
-					leftHandGrabbedObj = obj;
-				}
+		public void SetGrabbedObj(Transform obj, Side side)
+		{
+			if (side == Side.Left)
+			{
+				leftHandGrabbedObj = obj;
 			}
-			else if (side == Side.Right) {
-				if (obj == null) {
-					rightHandGrabbedObj = null;
-				}
-				else {
-					rightHandGrabbedObj = obj;
-				}
+			else if (side == Side.Right)
+			{
+				rightHandGrabbedObj = obj;
 			}
 		}
 
-		private Vector3 MedianAvg(Vector3[] inputArray) {
+		private Vector3 MedianAvg(Vector3[] inputArray)
+		{
 			List<Vector3> list = new List<Vector3>(inputArray);
 			list = list.OrderBy(x => x.magnitude).ToList();
 			list.RemoveAt(0);

@@ -22,6 +22,7 @@ namespace unityutilities
 		private void OnEnable()
 		{
 			RefreshSize();
+			progressObjects.gameObject.SetActive(false);
 		}
 
 		public void RefreshSize()

@@ -30,6 +30,7 @@ namespace unityutilities.VRInteraction
 				if (!m) m = h.rig.GetComponentInChildren<Movement>();
 			}
 
+			// if (m) m.Release(h != null ? h.side : Side.None, GetComponent<Rigidbody>());
 			if (m) m.SetGrabbedObj(null, h != null ? h.side : Side.None);
 		}
 

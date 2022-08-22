@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace unityutilities.VRInteraction
@@ -22,6 +23,14 @@ namespace unityutilities.VRInteraction
 		public VRInput distanceGrabInput = VRInput.Trigger;
 
 		public bool vibrateOnGrab = true;
+
+		[Tooltip("Grabs the first thing that is touched after after holding the grab button.")]
+		public bool autograb = true;
+
+		[Tooltip("After holding grab for this long, autograb turns off.")]
+		public float autograbTimeout = 0;
+
+		private float autograbTimer = 0;
 
 		public bool enableRemoteGrabbing = true;
 		public float remoteGrabbingDistance = 5f;
@@ -61,6 +70,11 @@ namespace unityutilities.VRInteraction
 				else if (InputMan.GetUp(grabInput, side))
 				{
 					Release();
+				}
+				// autograb				
+				else if (autograb && (autograbTimeout == 0 || autograbTimer < autograbTimeout) && InputMan.Get(grabInput, side))
+				{
+					Grab();
 				}
 
 				if (InputMan.Get(grabInput, side) && InputMan.GetDown(distanceGrabInput, side))
@@ -153,6 +167,8 @@ namespace unityutilities.VRInteraction
 				lastVels.Enqueue(rig.transform.TransformVector(InputMan.ControllerVelocity(side)));
 				if (lastVels.Count > lastVelsLength) lastVels.Dequeue();
 			}
+
+			autograbTimer += Time.deltaTime;
 		}
 
 		/// <summary>
@@ -200,12 +216,13 @@ namespace unityutilities.VRInteraction
 		/// <param name="grabbable">The object to be grabbed</param>
 		public void Grab(VRGrabbable grabbable)
 		{
+			autograbTimer = 0;
 			grabbable.HandleDeselection();
 			grabbable.HandleGrab(this);
 			grabbedVRGrabbable = grabbable;
 			if (vibrateOnGrab)
 			{
-				InputMan.Vibrate(side, .5f, .1f);
+				InputMan.Vibrate(side, 1f, .5f);
 			}
 
 			GrabEvent?.Invoke(grabbable);
