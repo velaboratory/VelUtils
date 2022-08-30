@@ -579,7 +579,7 @@ namespace unityutilities
 		/// May not actually teleport if goal is not active
 		/// </summary>
 		/// <param name="goal">The target pos</param>
-		private void TeleportTo(Teleporter goal)
+		public void TeleportTo(Teleporter goal)
 		{
 			if (goal.Active)
 			{
