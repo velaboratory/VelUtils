@@ -503,7 +503,7 @@ namespace unityutilities
 					float yVelocity = Vector3.Dot(lastDir, Vector3.up) * velocity;
 
 					lastDir *= velocity;
-					const float maxSegments = 200;
+					const int maxSegments = 200;
 
 
 					// add the point to the line renderer
@@ -551,7 +551,7 @@ namespace unityutilities
 						else
 						{
 							// calculate the next ray
-							lastPos = lastPos + lastDir;
+							lastPos += lastDir;
 							Vector3 newPos = lastPos + xVelocity + Vector3.up * yVelocity;
 							lastDir = newPos - lastPos;
 							yVelocity -= .01f;
@@ -563,9 +563,9 @@ namespace unityutilities
 						// if we reached the end of the arc without hitting something
 						if (i + 1 == maxSegments)
 						{
-							;
 							teleporter.Active = false;
 						}
+						
 					}
 
 

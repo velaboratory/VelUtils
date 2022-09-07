@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using UnityEngine;
 
@@ -59,6 +60,9 @@ namespace unityutilities.VRInteraction
 
 		private void Update()
 		{
+			// TODO maybe do this less often
+			FilterDisabledObjects();
+			
 			if (canGrab)
 			{
 				// Grab ✊
@@ -341,6 +345,11 @@ namespace unityutilities.VRInteraction
 					selectedVRGrabbable = null;
 				}
 			}
+		}
+
+		private void FilterDisabledObjects()
+		{
+			touchedObjs.RemoveAll(g => !g.isActiveAndEnabled);
 		}
 	}
 }
