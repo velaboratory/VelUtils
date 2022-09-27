@@ -128,7 +128,6 @@ namespace unityutilities
 
 
 		// teleporting vars
-		private LineRenderer lineRenderer;
 		[HideInInspector] public Side currentTeleportingSide = Side.None;
 		private RaycastHit teleportHit;
 
@@ -175,6 +174,8 @@ namespace unityutilities
 			[HideInInspector] public MeshRenderer blinkRenderer;
 			[HideInInspector] public MeshFilter blinkMesh;
 			[HideInInspector] public Coroutine blinkCoroutine;
+			[HideInInspector] public LineRenderer lineRenderer;
+			private GameObject lineRendererGameObject;
 
 
 			[HideInInspector] public GameObject teleportMarkerInstance;
@@ -214,6 +215,31 @@ namespace unityutilities
 				{
 					if (active != value)
 					{
+						if (value)
+						{
+							// add a new linerenderer if needed
+							if (lineRenderer == null)
+							{
+								lineRendererGameObject = new GameObject("Line Renderer");
+								lineRenderer = lineRendererGameObject.AddComponent<LineRenderer>();
+								lineRenderer.widthMultiplier = lineRendererWidth;
+								if (lineRendererMaterialOverride != null)
+								{
+									lineRenderer.material = lineRendererMaterialOverride;
+								}
+								else
+								{
+									Material material;
+									(material = lineRenderer.material).shader = Shader.Find("Unlit/Color");
+									material.color = Color.black;
+								}
+							}
+						}
+						else
+						{
+							Destroy(lineRendererGameObject);
+						}
+						
 						if (teleportMarkerInstance != null)
 						{
 							teleportMarkerInstance.SetActive(value);
@@ -460,28 +486,10 @@ namespace unityutilities
 					currentTeleportingSide = Side.None;
 
 					// delete the line renderer
-					Destroy(lineRenderer);
 					teleporter.Active = false;
 				}
 				else
 				{
-					// add a new linerenderer if needed
-					if (lineRenderer == null)
-					{
-						lineRenderer = gameObject.AddComponent<LineRenderer>();
-						lineRenderer.widthMultiplier = teleporter.lineRendererWidth;
-						if (teleporter.lineRendererMaterialOverride != null)
-						{
-							lineRenderer.material = teleporter.lineRendererMaterialOverride;
-						}
-						else
-						{
-							Material material;
-							(material = lineRenderer.material).shader = Shader.Find("Unlit/Color");
-							material.color = Color.black;
-						}
-					}
-
 					// simulate the curved ray
 					Vector3 lastPos;
 					Vector3 lastDir;
@@ -568,9 +576,8 @@ namespace unityutilities
 						
 					}
 
-
-					lineRenderer.positionCount = points.Count;
-					lineRenderer.SetPositions(points.ToArray());
+					teleporter.lineRenderer.positionCount = points.Count;
+					teleporter.lineRenderer.SetPositions(points.ToArray());
 				}
 			}
 		}
