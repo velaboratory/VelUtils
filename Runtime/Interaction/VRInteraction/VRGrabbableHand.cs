@@ -349,7 +349,7 @@ namespace unityutilities.VRInteraction
 
 		private void FilterDisabledObjects()
 		{
-			touchedObjs.RemoveAll(g => !g.isActiveAndEnabled);
+			touchedObjs.RemoveAll(g => g == null || !g.isActiveAndEnabled);
 		}
 	}
 }
