@@ -64,8 +64,12 @@ namespace unityutilities.Interaction.WorldMouse
 
 		private void OnClicked(GameObject obj)
 		{
-			if (obj != null && obj.GetComponent<Selectable>() != null)
+			if (obj != null)
 			{
+				if (obj.GetComponent<Selectable>() != null)
+				{
+					
+				}
 				InputMan.Vibrate(side, vibrateOnClick);
 				if (soundOnClick != null) soundOnClick.Play();
 			}
