@@ -36,10 +36,10 @@ namespace unityutilities.Interaction.WorldMouse
 
 		protected void Enable()
 		{
-			StartCoroutine(AddPointerDelayed(this));
+			StartCoroutine(AddPointerDelayed());
 		}
 
-		private IEnumerator AddPointerDelayed(WorldMouse wm)
+		private IEnumerator AddPointerDelayed()
 		{
 			yield return null;
 
@@ -54,6 +54,7 @@ namespace unityutilities.Interaction.WorldMouse
 		protected void Disable()
 		{
 			WorldMouseInputModule.RemoveWorldMouse(this);
+			Debug.Log("Disabled " + name);
 		}
 
 		public void SetIndex(int index)
@@ -100,6 +101,8 @@ namespace unityutilities.Interaction.WorldMouse
 
 		protected virtual void Update()
 		{
+			if (!gameObject.activeInHierarchy) return;
+			
 			PointerEventData data = WorldMouseInputModule.GetData(pointerIndex);
 
 			currentRayLength = data.pointerCurrentRaycast.distance;

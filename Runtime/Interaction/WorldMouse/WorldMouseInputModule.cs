@@ -290,6 +290,10 @@ namespace unityutilities.Interaction.WorldMouse
 		/// </summary>
 		public static PointerEventData GetData(int index)
 		{
+			if (index >= Instance.eventData.Length)
+			{
+				Debug.Log("HERE");
+			}
 			return Instance.eventData[index];
 		}
 	}

@@ -208,6 +208,8 @@ namespace unityutilities
 			private Vector3 pos;
 			private Vector3 dir;
 
+			public bool Valid { get; set; }
+
 			public bool Active
 			{
 				get => active;
@@ -588,7 +590,7 @@ namespace unityutilities
 		/// <param name="goal">The target pos</param>
 		public void TeleportTo(Teleporter goal)
 		{
-			if (goal.Active)
+			if (goal.Valid)
 			{
 				TeleportTo(goal.Pos, goal.Dir);
 			}
