@@ -36,7 +36,17 @@ namespace unityutilities.Interaction.WorldMouse
 
 		protected void Enable()
 		{
-			StartCoroutine(AddPointerDelayed());
+			// The first enable can be called before the manager Awake is called,
+			// so we need to wait a frame if it hasn't been initialized yet
+			// waiting a frame in other cases causes problems
+			if (WorldMouseInputModule.Instance == null)
+			{
+				StartCoroutine(AddPointerDelayed());
+			}
+			else
+			{
+				WorldMouseInputModule.AddWorldMouse(this);	
+			}
 		}
 
 		private IEnumerator AddPointerDelayed()

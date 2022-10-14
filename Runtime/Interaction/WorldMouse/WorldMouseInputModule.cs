@@ -72,7 +72,7 @@ namespace unityutilities.Interaction.WorldMouse
 		public static bool autoFindCanvases = true;
 		private Camera cam;
 
-		private static WorldMouseInputModule Instance
+		internal static WorldMouseInputModule Instance
 		{
 			get
 			{
