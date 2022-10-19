@@ -455,6 +455,8 @@ namespace unityutilities
 				}
 
 				currentTeleportingSide = Side.Left;
+				
+				teleporter.Active = true;
 			}
 
 			if (InputMan.Up(Side.Right) && teleporter.inputSide.Contains(Side.Right))
@@ -465,6 +467,8 @@ namespace unityutilities
 				}
 
 				currentTeleportingSide = Side.Right;
+				
+				teleporter.Active = true;
 			}
 
 			// if the teleport laser is visible
@@ -546,13 +550,12 @@ namespace unityutilities
 
 								teleporter.Dir = dir;
 
-
-								teleporter.Active = true;
+								teleporter.Valid = true;
 							}
 							else
 							{
 								// if the hit point is close enough to the last valid point
-								teleporter.Active = !(Vector3.Distance(teleporter.Pos, teleportHit.point) > .1f);
+								teleporter.Valid = !(Vector3.Distance(teleporter.Pos, teleportHit.point) > .1f);
 							}
 
 
@@ -573,13 +576,16 @@ namespace unityutilities
 						// if we reached the end of the arc without hitting something
 						if (i + 1 == maxSegments)
 						{
-							teleporter.Active = false;
+							teleporter.Valid = false;
 						}
 						
 					}
 
-					teleporter.lineRenderer.positionCount = points.Count;
-					teleporter.lineRenderer.SetPositions(points.ToArray());
+					if (teleporter.Active)
+					{
+						teleporter.lineRenderer.positionCount = points.Count;
+						teleporter.lineRenderer.SetPositions(points.ToArray());
+					}
 				}
 			}
 		}
