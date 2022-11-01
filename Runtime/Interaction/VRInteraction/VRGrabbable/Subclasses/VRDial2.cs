@@ -9,18 +9,18 @@ namespace unityutilities.VRInteraction
 	/// <summary>
 	/// Spins 🔄
 	/// </summary>
-	[AddComponentMenu("unityutilities/Interaction/VRDial")]
+	[AddComponentMenu("unityutilities/Interaction/VRDial2")]
 	[DisallowMultipleComponent]
-	public class VRDial : VRGrabbable
+	public class VRDial2 : VRGrabbable
 	{
 		public Vector3 dialAxis = Vector3.forward;
 		private Rigidbody rb;
 		private Quaternion lastGrabbedRotation;
 		private Vector3 lastGrabbedPosition;
 		private float lastAngle;
-		public float minAngle = -100;
-		public float maxAngle = 100;
-		public bool useLimits = false;
+		
+		// limits are defined by hinge joint/physics
+		
 		/// <summary>
 		/// float currentAngleDeg, float deltaAngleDeg, bool localInput
 		/// </summary>
@@ -44,8 +44,7 @@ namespace unityutilities.VRInteraction
 			Sum
 		}
 
-		[ReadOnly]
-		public float currentAngle;
+		public float CurrentAngle => Vector3.SignedAngle();
 		[Tooltip("Set this in inspector to change the starting angle\n" +
 			"The object should still be at 0deg")]
 		public float goalAngle;
