@@ -8,6 +8,9 @@ namespace unityutilities.VRInteraction
 {
 	/// <summary>
 	/// Spins 🔄
+	/// In VRDial2, the goal position is entirely virtual,
+	/// and both remote and local dials try to achieve the goal position with physics in some way.
+	/// Limits are defined by hinge joint/physics
 	/// </summary>
 	[AddComponentMenu("unityutilities/Interaction/VRDial2")]
 	[DisallowMultipleComponent]
@@ -19,7 +22,6 @@ namespace unityutilities.VRInteraction
 		private Vector3 lastGrabbedPosition;
 		private float lastAngle;
 		
-		// limits are defined by hinge joint/physics
 		
 		/// <summary>
 		/// float currentAngleDeg, float deltaAngleDeg, bool localInput
@@ -49,6 +51,8 @@ namespace unityutilities.VRInteraction
 			"The object should still be at 0deg")]
 		public float goalAngle;
 
+		public float goalDeadzoneDeg = .01f;
+
 		private float vibrationDelta = 10;
 		private float vibrationDeltaSum = 0;
 
@@ -66,15 +70,10 @@ namespace unityutilities.VRInteraction
 
 		private void Update()
 		{
-
-			if (!locallyOwned)
+			float angleDifference = goalAngle - CurrentAngle;
+			if (Mathf.Abs(angleDifference) > goalDeadzoneDeg)
 			{
-				float angleDifference = goalAngle - currentAngle;
-				if (Mathf.Abs(angleDifference) > 0)
-				{
-					currentAngle += angleDifference / 10f;
-					transform.Rotate(dialAxis, angleDifference / 10f, Space.Self);
-				}
+				transform.Rotate(dialAxis, angleDifference / 10f, Space.Self);
 			}
 
 
@@ -83,12 +82,12 @@ namespace unityutilities.VRInteraction
 				GrabInput();
 
 				// update the last velocities 
-				lastRotationVels.Enqueue(currentAngle - lastAngle);
+				lastRotationVels.Enqueue(CurrentAngle - lastAngle);
 				if (lastRotationVels.Count > lastRotationVelsLength)
 					lastRotationVels.Dequeue();
 			}
 
-			lastAngle = currentAngle;
+			lastAngle = CurrentAngle;
 		}
 
 		protected void GrabInput()
@@ -108,26 +107,8 @@ namespace unityutilities.VRInteraction
 
 			// convert them into a rotation
 			float angleDiff = Vector3.SignedAngle(lastPosDiff, posDiff, localDialAxis);
-			if (Vector3.Angle(Vector3.up, localDialAxis) > 90)
-			{
-				//angleDiff *= -1;
-			}
 
-			if (useLimits)
-			{
-				float nextAngle = currentAngle + angleDiff;
-
-				if (nextAngle > maxAngle)
-				{
-					angleDiff = maxAngle - currentAngle;
-				}
-				else if (nextAngle < minAngle)
-				{
-					angleDiff = minAngle - currentAngle;
-				}
-			}
-
-			float rotationBasedOnHandPosition = currentAngle + angleDiff;
+			float rotationBasedOnHandPosition = goalAngle + angleDiff;
 
 			lastGrabbedPosition = GrabbedBy.transform.position;
 
@@ -145,14 +126,14 @@ namespace unityutilities.VRInteraction
 			// adjust speed
 			angle *= multiplier;
 
-			float rotationBaseOnHandRotation = currentAngle;
+			float rotationBaseOnHandRotation = goalAngle;
 
 			// angle should be > 0 if there is a change
 			if (angle > 0)
 			{
 				if (angle >= 180)
 				{
-					angle = angle - 360;
+					angle -= 360;
 				}
 
 				Vector3 moment = angle * axis;
@@ -160,23 +141,9 @@ namespace unityutilities.VRInteraction
 				//project the moment vector onto the dial axis
 				float newAngle = Vector3.Dot(moment, transform.localToWorldMatrix.MultiplyVector(dialAxis)) / transform.lossyScale.x;
 
-				if (useLimits)
-				{
-					float nextAngle = currentAngle + newAngle;
-
-					if (nextAngle > maxAngle)
-					{
-						newAngle = maxAngle - currentAngle;
-					}
-					else if (nextAngle < minAngle)
-					{
-						newAngle = minAngle - currentAngle;
-					}
-				}
-
 				lastGrabbedRotation = GrabbedBy.transform.rotation;
 
-				rotationBaseOnHandRotation = currentAngle + newAngle;
+				rotationBaseOnHandRotation = goalAngle + newAngle;
 			}
 
 			#endregion
@@ -221,10 +188,10 @@ namespace unityutilities.VRInteraction
 
 			if (localInput)
 			{
-				float angleDifference = updatedAngle - currentAngle;
-				currentAngle = updatedAngle;
+				float angleDifference = updatedAngle - goalAngle;
+				goalAngle = updatedAngle;
 				transform.Rotate(dialAxis, angleDifference, Space.Self);
-				DialTurned?.Invoke(currentAngle, angleDifference, localInput);
+				DialTurned?.Invoke(goalAngle, angleDifference, localInput);
 
 				// vibrate
 				// vibrate only when rotated by a certain amount
@@ -272,7 +239,7 @@ namespace unityutilities.VRInteraction
 
 		public override byte[] PackData()
 		{
-			return BitConverter.GetBytes(currentAngle);
+			return BitConverter.GetBytes(goalAngle);
 		}
 
 		public override void UnpackData(byte[] data)
