@@ -12,28 +12,36 @@ namespace unityutilities.VRInteraction
 	/// and both remote and local dials try to achieve the goal position with physics in some way.
 	/// Limits are defined by hinge joint/physics
 	/// </summary>
-	[AddComponentMenu("unityutilities/Interaction/VRDial2")]
+	[AddComponentMenu("unityutilities/Interaction/VR Hinge Dial")]
 	[DisallowMultipleComponent]
-	public class VRDial2 : VRGrabbable
+	[RequireComponent(typeof(HingeJoint))]
+	public class VRHingeDial : VRGrabbable
 	{
-		public Vector3 dialAxis = Vector3.forward;
 		private Rigidbody rb;
+		private HingeJoint hinge;
 		private Quaternion lastGrabbedRotation;
 		private Vector3 lastGrabbedPosition;
 		private float lastAngle;
-		
-		
+
+		/// <summary>
+		/// whether this dial is being held in position
+		/// </summary>
+		public bool Active => networkGrabbed || GrabbedBy != null;
+
+
 		/// <summary>
 		/// float currentAngleDeg, float deltaAngleDeg, bool localInput
 		/// </summary>
 		public Action<float, float, bool> DialTurned;
+
 		public float multiplier = 1;
 
-		[Tooltip("How much to use position of hand rather than rotation")]
-		[Range(0, 1)]
+		[Tooltip("How much to use position of hand rather than rotation")] [Range(0, 1)]
 		public float positionMix = 1;
+
 		[Tooltip("Whether to vary the position mix with distance to the center of the object")]
 		public bool dynamicPositionMix = false;
+
 		public float dynamicPositionMixDistanceMultiplier = 10f;
 
 		public MixingMethod mixingMethod;
@@ -46,12 +54,15 @@ namespace unityutilities.VRInteraction
 			Sum
 		}
 
-		public float CurrentAngle => Vector3.SignedAngle();
+		public float hingeJointCalibration;
+		public float CurrentAngle => hinge.angle - hingeJointCalibration;
+		public float currentAngle;
+
 		[Tooltip("Set this in inspector to change the starting angle\n" +
-			"The object should still be at 0deg")]
+		         "The object should still be at 0deg")]
 		public float goalAngle;
 
-		public float goalDeadzoneDeg = .01f;
+		public float goalDeadzoneDeg = .1f;
 
 		private float vibrationDelta = 10;
 		private float vibrationDeltaSum = 0;
@@ -60,46 +71,99 @@ namespace unityutilities.VRInteraction
 		private Queue<float> lastRotationVels = new Queue<float>();
 		private int lastRotationVelsLength = 10;
 
+		private bool wasUsingSpring;
+		private bool wasUsingGravity;
+
 
 		// Use this for initialization
 		private void Start()
 		{
 			rb = GetComponent<Rigidbody>();
-			SetData(goalAngle, false);
+			hinge = GetComponent<HingeJoint>();
+			if (hinge.motor.force == 0)
+			{
+				JointMotor m = hinge.motor;
+				m.force = 100;
+				hinge.motor = m;
+			}
+
+			hingeJointCalibration = hinge.angle;
+
+			wasUsingSpring = hinge.useSpring;
 		}
 
 		private void Update()
 		{
-			float angleDifference = goalAngle - CurrentAngle;
-			if (Mathf.Abs(angleDifference) > goalDeadzoneDeg)
-			{
-				transform.Rotate(dialAxis, angleDifference / 10f, Space.Self);
-			}
-
-
+			currentAngle = CurrentAngle;
+			
+			// local input
 			if (GrabbedBy != null)
 			{
 				GrabInput();
 
-				// update the last velocities 
-				lastRotationVels.Enqueue(CurrentAngle - lastAngle);
+				// update the last velocities
+				float angleDelta = CurrentAngle - lastAngle;
+				lastRotationVels.Enqueue(angleDelta);
 				if (lastRotationVels.Count > lastRotationVelsLength)
 					lastRotationVels.Dequeue();
+
+				// vibrate
+				// vibrate only when rotated by a certain amount
+				if (vibrationDeltaSum > vibrationDelta)
+				{
+					InputMan.Vibrate(GrabbedBy.side, 1f, .01f);
+					vibrationDeltaSum = 0;
+				}
+
+				vibrationDeltaSum += Mathf.Abs(angleDelta);
+			}
+
+			hinge.useSpring = wasUsingSpring && !Active;
+			rb.useGravity = wasUsingGravity && !Active;
+
+			
+
+			if (Active)
+			{
+				// actually move the dial to the goal pos
+				float clampedGoalAngle = goalAngle;
+				if (hinge.useLimits)
+				{
+					JointLimits limits = hinge.limits;
+					clampedGoalAngle = Mathf.Clamp(goalAngle, limits.min, limits.max);
+				}
+				float angleDifference = clampedGoalAngle - CurrentAngle;
+				if (Mathf.Abs(angleDifference) > goalDeadzoneDeg)
+				{
+					// JointMotor m = hinge.motor;
+					// // get there in 1/10 of a second
+					// m.targetVelocity = angleDifference * 10;
+					// hinge.motor = m;
+					// hinge.useMotor = true;
+					transform.Rotate(hinge.axis, angleDifference, Space.Self);
+					rb.angularVelocity = Vector3.zero;
+				}
+				else
+				{
+					hinge.useMotor = false;
+				}
 			}
 
 			lastAngle = CurrentAngle;
 		}
 
+		/// <summary>
+		/// Sets the goal angle based on local user input
+		/// </summary>
 		protected void GrabInput()
 		{
-
 			#region Position of the hand
 
 			// the direction vectors to the two hand positions
 			Vector3 posDiff = GrabbedBy.transform.position - transform.position;
 			Vector3 lastPosDiff = lastGrabbedPosition - transform.position;
 
-			Vector3 localDialAxis = transform.TransformDirection(dialAxis);
+			Vector3 localDialAxis = transform.TransformDirection(hinge.axis);
 
 			// remove the rotation-axis component of the vectors
 			posDiff = Vector3.ProjectOnPlane(posDiff, localDialAxis);
@@ -139,7 +203,7 @@ namespace unityutilities.VRInteraction
 				Vector3 moment = angle * axis;
 
 				//project the moment vector onto the dial axis
-				float newAngle = Vector3.Dot(moment, transform.localToWorldMatrix.MultiplyVector(dialAxis)) / transform.lossyScale.x;
+				float newAngle = Vector3.Dot(moment, transform.localToWorldMatrix.MultiplyVector(hinge.axis)) / transform.lossyScale.x;
 
 				lastGrabbedRotation = GrabbedBy.transform.rotation;
 
@@ -154,67 +218,15 @@ namespace unityutilities.VRInteraction
 				positionMix = Mathf.Clamp01(Vector3.Distance(transform.position, GrabbedBy.transform.position) * dynamicPositionMixDistanceMultiplier);
 			}
 
-
-			float finalAngle = 0;
-
-			switch (mixingMethod)
+			goalAngle = mixingMethod switch
 			{
-				case MixingMethod.WeightedAvg:
-					finalAngle = positionMix * rotationBasedOnHandPosition + (1 - positionMix) * rotationBaseOnHandRotation;
-					break;
-				case MixingMethod.Max:
-					finalAngle = Mathf.Abs(rotationBasedOnHandPosition) > Mathf.Abs(rotationBaseOnHandRotation) ?
-						rotationBasedOnHandPosition :
-						rotationBaseOnHandRotation;
-					break;
-				case MixingMethod.Min:
-					finalAngle = Mathf.Abs(rotationBasedOnHandPosition) < Mathf.Abs(rotationBaseOnHandRotation) ?
-						rotationBasedOnHandPosition :
-						rotationBaseOnHandRotation;
-					break;
-				case MixingMethod.Sum:
-					finalAngle = rotationBasedOnHandPosition + rotationBaseOnHandRotation;
-					break;
-			}
-
-
-			SetData(finalAngle, true);
+				MixingMethod.WeightedAvg => positionMix * rotationBasedOnHandPosition + (1 - positionMix) * rotationBaseOnHandRotation,
+				MixingMethod.Max => Mathf.Abs(rotationBasedOnHandPosition) > Mathf.Abs(rotationBaseOnHandRotation) ? rotationBasedOnHandPosition : rotationBaseOnHandRotation,
+				MixingMethod.Min => Mathf.Abs(rotationBasedOnHandPosition) < Mathf.Abs(rotationBaseOnHandRotation) ? rotationBasedOnHandPosition : rotationBaseOnHandRotation,
+				MixingMethod.Sum => rotationBasedOnHandPosition + rotationBaseOnHandRotation,
+				_ => goalAngle
+			};
 		}
-
-		public virtual void SetData(float updatedAngle, bool localInput)
-		{
-
-			locallyOwned = localInput;
-
-			if (localInput)
-			{
-				float angleDifference = updatedAngle - goalAngle;
-				goalAngle = updatedAngle;
-				transform.Rotate(dialAxis, angleDifference, Space.Self);
-				DialTurned?.Invoke(goalAngle, angleDifference, localInput);
-
-				// vibrate
-				// vibrate only when rotated by a certain amount
-				if (vibrationDeltaSum > vibrationDelta)
-				{
-					if (GrabbedBy)
-					{
-						InputMan.Vibrate(GrabbedBy.side, 1f, .01f);
-					}
-					vibrationDeltaSum = 0;
-				}
-
-				vibrationDeltaSum += Mathf.Abs(angleDifference);
-
-			}
-			else
-			{
-				DialTurned?.Invoke(updatedAngle, updatedAngle - goalAngle, false);
-				goalAngle = updatedAngle;
-			}
-
-		}
-
 
 
 		public override void HandleGrab(VRGrabbableHand h)
@@ -223,6 +235,8 @@ namespace unityutilities.VRInteraction
 
 			lastGrabbedRotation = GrabbedBy.transform.rotation;
 			lastGrabbedPosition = GrabbedBy.transform.position;
+
+			goalAngle = hinge.angle;
 		}
 
 		public override void HandleRelease(VRGrabbableHand h = null)
@@ -233,7 +247,7 @@ namespace unityutilities.VRInteraction
 			if (rb && lastRotationVels.Count > 0)
 			{
 				// y not convert to rad?
-				rb.angularVelocity = dialAxis * lastRotationVels.Average();
+				rb.angularVelocity = hinge.axis * lastRotationVels.Average();
 			}
 		}
 
@@ -244,13 +258,9 @@ namespace unityutilities.VRInteraction
 
 		public override void UnpackData(byte[] data)
 		{
-			using (MemoryStream inputStream = new MemoryStream(data))
-			{
-				BinaryReader reader = new BinaryReader(inputStream);
-
-				SetData(reader.ReadSingle(), false);
-
-			}
+			using MemoryStream inputStream = new MemoryStream(data);
+			BinaryReader reader = new BinaryReader(inputStream);
+			goalAngle = reader.ReadSingle();
 		}
 	}
 }

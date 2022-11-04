@@ -11,14 +11,11 @@ namespace unityutilities.VRInteraction
 		[HideInInspector]
 		public List<VRGrabbableHand> listOfGrabbedByHands = new List<VRGrabbableHand>();
 
-		[HideInInspector]
-		// Assumes only one hand can grab this object. Consider using something else.
-		public VRGrabbableHand GrabbedBy {
-			get {
-				if (listOfGrabbedByHands.Count > 0) return listOfGrabbedByHands[0];
-				else return null;
-			}
-		}
+		/// <summary>
+		/// Assumes only one hand can grab this object. Consider using something else.
+		/// Should just be used for detecting if it's being grabbed at all by null checking
+		/// </summary>
+		public VRGrabbableHand GrabbedBy => listOfGrabbedByHands.Count > 0 ? listOfGrabbedByHands[0] : null;
 
 		[NonSerialized]
 		public bool includeInSave = true;
@@ -43,7 +40,6 @@ namespace unityutilities.VRInteraction
 		public Action Released;
 
 		[Tooltip("The meshes will be tinted the highlight color and will be enabled when hovering.")]
-		[FormerlySerializedAs("meshes")]
 		public Renderer[] highlightMeshes = new Renderer[0];
 
 		[Tooltip("The objects will be enabled or disabled when hovering.")]

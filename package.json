@@ -1,7 +1,7 @@
 {
   "name": "com.franzco.unityutilities",
   "displayName": "unityutilities",
-  "version": "2.13.20",
+  "version": "2.13.21",
   "unity": "2019.1",
   "description": "A lightweight collection of flexible utilities for VR projects.",
   "keywords": [
@@ -44,6 +44,11 @@
       "displayName": "InputSystem Support",
       "description": "Compatible with the new InputSystem",
       "path": "Samples~/InputSystem Support"
+    },
+    {
+      "displayName": "VelNet Utilities",
+      "description": "Includes scripts to sync VRGrabbable objects with VelNet",
+      "path": "Samples~/VelNet"
     }
   ],
   "dependencies": {
