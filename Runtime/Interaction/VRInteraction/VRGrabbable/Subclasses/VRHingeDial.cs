@@ -54,8 +54,7 @@ namespace unityutilities.VRInteraction
 			Sum
 		}
 
-		public float hingeJointCalibration;
-		public float CurrentAngle => hinge.angle - hingeJointCalibration;
+		public float CurrentAngle => hinge.angle;
 		public float currentAngle;
 
 		[Tooltip("Set this in inspector to change the starting angle\n" +
@@ -87,15 +86,13 @@ namespace unityutilities.VRInteraction
 				hinge.motor = m;
 			}
 
-			hingeJointCalibration = hinge.angle;
-
 			wasUsingSpring = hinge.useSpring;
 		}
 
 		private void Update()
 		{
 			currentAngle = CurrentAngle;
-			
+
 			// local input
 			if (GrabbedBy != null)
 			{
@@ -121,7 +118,6 @@ namespace unityutilities.VRInteraction
 			hinge.useSpring = wasUsingSpring && !Active;
 			rb.useGravity = wasUsingGravity && !Active;
 
-			
 
 			if (Active)
 			{
@@ -132,6 +128,7 @@ namespace unityutilities.VRInteraction
 					JointLimits limits = hinge.limits;
 					clampedGoalAngle = Mathf.Clamp(goalAngle, limits.min, limits.max);
 				}
+
 				float angleDifference = clampedGoalAngle - CurrentAngle;
 				if (Mathf.Abs(angleDifference) > goalDeadzoneDeg)
 				{
@@ -145,7 +142,7 @@ namespace unityutilities.VRInteraction
 				}
 				else
 				{
-					hinge.useMotor = false;
+					// hinge.useMotor = false;
 				}
 			}
 
@@ -236,7 +233,7 @@ namespace unityutilities.VRInteraction
 			lastGrabbedRotation = GrabbedBy.transform.rotation;
 			lastGrabbedPosition = GrabbedBy.transform.position;
 
-			goalAngle = hinge.angle;
+			goalAngle = CurrentAngle;
 		}
 
 		public override void HandleRelease(VRGrabbableHand h = null)
