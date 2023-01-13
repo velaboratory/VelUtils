@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using UnityEngine;
 
 namespace unityutilities.VRInteraction
@@ -55,8 +53,13 @@ namespace unityutilities.VRInteraction
 		public Queue<Vector3> lastVels = new Queue<Vector3>();
 		private int lastVelsLength = 5;
 
+		[Obsolete("Use OnGrab instead")]
 		public Action<VRGrabbable> GrabEvent;
+		[Obsolete("Use OnRelease instead")]
 		public Action<VRGrabbable> ReleaseEvent;
+
+		public Action<VRGrabbable> OnGrab;
+		public Action<VRGrabbable> OnRelease;
 
 		private void Update()
 		{
@@ -208,6 +211,7 @@ namespace unityutilities.VRInteraction
 			}
 
 			ReleaseEvent?.Invoke(grabbedVRGrabbable);
+			OnRelease?.Invoke(grabbedVRGrabbable);
 
 			grabbedVRGrabbable = null;
 		}
@@ -230,6 +234,7 @@ namespace unityutilities.VRInteraction
 			}
 
 			GrabEvent?.Invoke(grabbable);
+			OnGrab?.Invoke(grabbable);
 		}
 
 		/// <summary>

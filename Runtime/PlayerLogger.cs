@@ -159,12 +159,13 @@ namespace unityutilities
 			Logger.LogRow(movementFileName, movement);
 		}
 
-		void TeleportEnd(Side side, Vector3 translation)
+		void TeleportEnd(Side side, float time, Vector3 translation)
 		{
 			List<string> movement = new List<string>
 			{
 				"teleport-end",
 				side.ToString(),
+				time.ToString(),
 				translation.x.ToString(),
 				translation.y.ToString(),
 				translation.z.ToString()

@@ -68,7 +68,7 @@ namespace unityutilities
 		public float continuousRotationSpeed = 100f;
 		public float snapRotationAmount = 30f;
 		public float turnNullZone = .3f;
-		private bool snapTurnedThisFrame;
+		public bool snapTurnedThisFrame;
 
 		[Tooltip("Enable thumbstick turning for left/right.")]
 		public bool yaw = true;
@@ -110,13 +110,36 @@ namespace unityutilities
 		private float normalDrag;
 
 		public Action<Transform, Side> OnGrab;
-		public Action<Transform, Side> OnRelease;
+		/// <summary>
+		/// Transform: held GameObject
+		/// Side: which hand
+		/// float: duration held
+		/// </summary>
+		public Action<Transform, Side, float> OnGrabCancel;
+		/// <summary>
+		/// Transform: held GameObject
+		/// Side: which hand
+		/// Vector3: local grab displacement
+		/// Vector3: world grab displacement
+		/// Vector3: release velocity
+		/// float: duration held
+		/// </summary>
+		public Action<Transform, Side, Vector3, Vector3, Vector3, float> OnRelease;
 
 		[HideInInspector] public Transform leftHandGrabbedObj;
 		[HideInInspector] public Transform rightHandGrabbedObj;
 		private Transform lastLeftHandGrabbedObj;
 		private Transform lastRightHandGrabbedObj;
 		private GameObject[] grabPos = new GameObject[2];
+		private float[] grabHoldTime = {0,0};
+		/// <summary>
+		/// For logging
+		/// </summary>
+		private Vector3[] grabInitialLocalPos = {Vector3.zero, Vector3.zero};
+		/// <summary>
+		/// For logging
+		/// </summary>
+		private Vector3[] grabInitialWorldPos = {Vector3.zero, Vector3.zero};
 
 		private Queue<Vector3> lastVels = new Queue<Vector3>();
 		private int lastVelsLength = 5;
@@ -138,9 +161,10 @@ namespace unityutilities
 
 		/// <summary>
 		/// Called when the teleport happens.
-		/// Contains the translation offset vector. 
+		/// Contains the translation offset vector.
+		/// Side: which hand, float: time the teleporter was held, Vector3: displacement vector of the teleport  
 		/// </summary>
-		public Action<Side, Vector3> TeleportEnd;
+		public Action<Side, float, Vector3> TeleportEnd;
 
 		/// <summary>
 		/// Contains the direction of the snap turn.
@@ -177,8 +201,9 @@ namespace unityutilities
 			[HideInInspector] public LineRenderer lineRenderer;
 			private GameObject lineRendererGameObject;
 
-
 			[HideInInspector] public GameObject teleportMarkerInstance;
+
+			[HideInInspector] public float teleporterHoldTime = 0;
 
 
 			public Teleporter()
@@ -451,6 +476,7 @@ namespace unityutilities
 			{
 				if (currentTeleportingSide == Side.None)
 				{
+					teleporter.teleporterHoldTime = 0;
 					TeleportStart?.Invoke(Side.Left);
 				}
 
@@ -463,6 +489,7 @@ namespace unityutilities
 			{
 				if (currentTeleportingSide == Side.None)
 				{
+					teleporter.teleporterHoldTime = 0;
 					TeleportStart?.Invoke(Side.Right);
 				}
 
@@ -482,7 +509,7 @@ namespace unityutilities
 					TeleportTo(teleporter);
 					try
 					{
-						TeleportEnd?.Invoke(currentTeleportingSide, teleporter.Pos + rig.head.transform.position - transform.position);
+						TeleportEnd?.Invoke(currentTeleportingSide, teleporter.teleporterHoldTime, teleporter.Pos + rig.head.transform.position - transform.position);
 					}
 					catch (Exception e)
 					{
@@ -586,6 +613,8 @@ namespace unityutilities
 						teleporter.lineRenderer.positionCount = points.Count;
 						teleporter.lineRenderer.SetPositions(points.ToArray());
 					}
+
+					teleporter.teleporterHoldTime += Time.deltaTime;
 				}
 			}
 		}
@@ -989,6 +1018,7 @@ namespace unityutilities
 
 				if (grabPos[(int)side] != null)
 				{
+					Debug.LogError("Shouldn't get here.");
 					Destroy(grabPos[(int)side].gameObject);
 				}
 
@@ -1002,17 +1032,25 @@ namespace unityutilities
 
 				InputMan.Vibrate(side, 1);
 
+				teleporter.teleporterHoldTime = 0;
+				grabInitialLocalPos[(int)side] = rig.GetHand(side).position; 
+				grabInitialLocalPos[(int)side] = rig.GetHand(side).localPosition; 
+
 				// if event has subscribers, execute
 				OnGrab?.Invoke(parent, side);
 			}
 			else if (side == grabbingSide)
 			{
+				// if still holding
 				if (grab)
 				{
 					cpt.positionOffset = rig.rb.position - rig.GetHand(side).position;
 					cpt.target.Translate(-rig.transform.TransformVector(InputMan.ControllerVelocity(side)) * Time.deltaTime * Mathf.Clamp(cdRatioGrabbing - 1, 0, 100));
 					cpt.enabled = !snapTurnedThisFrame;
+					
+					teleporter.teleporterHoldTime += Time.deltaTime;
 				}
+				// if no longer holding
 				else
 				{
 					Release(side);
@@ -1022,14 +1060,11 @@ namespace unityutilities
 
 		public void Release(Side side, Rigidbody rb = null)
 		{
-			if (side == grabbingSide)
-			{
-				grabbingSide = Side.None;
-			}
-
+			Debug.Assert(side == grabbingSide, "Shouldn't be able to get here");
+			grabbingSide = Side.None;
+			
 			if (grabPos[(int)side] != null)
 			{
-				OnRelease?.Invoke(grabPos[(int)side].transform, side);
 				Destroy(grabPos[(int)side].gameObject);
 
 				// limit velocity based on grabbed obj velocity
@@ -1037,19 +1072,11 @@ namespace unityutilities
 				if (rb != null)
 				{
 					baseVel = rb.velocity;
-
-					Debug.Log("TARGET: " + baseVel);
-				}
-				else
-				{
-					Debug.Log("No target");
 				}
 
 				cpt.SetTarget(null);
 
-				Debug.Log("BEFORE: " + rig.rb.velocity);
 				rig.rb.velocity = Vector3.ClampMagnitude(baseVel + rig.rb.velocity, grabMovementMaxThrowSpeed);
-				Debug.Log("AFTER: " + rig.rb.velocity);
 
 				//rig.rb.velocity = MedianAvg(lastVels);
 
@@ -1057,6 +1084,10 @@ namespace unityutilities
 				RoundVelToZero();
 
 				rig.rb.isKinematic = wasKinematic;
+				
+				Vector3 localOffset = grabInitialLocalPos[(int)side] - rig.GetHand(side).position; 
+				Vector3 globalOffset = grabInitialLocalPos[(int)side] - rig.GetHand(side).localPosition;
+				OnRelease?.Invoke(grabPos[(int)side].transform, side, localOffset, globalOffset, rig.rb.velocity, grabHoldTime[(int)side]);
 			}
 		}
 

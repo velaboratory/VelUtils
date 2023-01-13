@@ -612,4 +612,76 @@ namespace unityutilities
 
 	}
 
+	public class StringList
+	{
+		public readonly List<string> List;
+
+		public StringList()
+		{
+			List = new List<string>();
+		}
+	
+		public StringList(List<dynamic> l)
+		{
+			List = new List<string>();
+			foreach (object o in l)
+			{
+				switch (o)
+				{
+					case string s:
+						Add(s);
+						break;
+					case float f:
+						Add(f);
+						break;
+					case Vector3 v:
+						Add(v);
+						break;
+					case Quaternion q:
+						Add(q);
+						break;
+					case Enum e:
+						Add(e);
+						break;
+					case bool b:
+						Add(b);
+						break;
+				}
+			}
+		}
+		public void Add(string s)
+		{
+			List.Add(s);
+		}
+
+		public void Add(float f)
+		{
+			List.Add(f.ToString());
+		}
+
+		public void Add(Vector3 v)
+		{
+			List.Add(v.x.ToString());
+			List.Add(v.y.ToString());
+			List.Add(v.z.ToString());
+		}
+
+		public void Add(Quaternion q)
+		{
+			List.Add(q.x.ToString());
+			List.Add(q.y.ToString());
+			List.Add(q.z.ToString());
+			List.Add(q.w.ToString());
+		}
+
+		public void Add(bool b)
+		{
+			List.Add(b.ToString());
+		}
+
+		public void Add(Enum v)
+		{
+			List.Add(v.ToString());
+		}
+	}
 }
