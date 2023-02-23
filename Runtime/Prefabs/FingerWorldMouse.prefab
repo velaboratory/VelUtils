@@ -46,10 +46,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 638a4f6cc7837f74fb510cfd7978bbe3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rayDistance: 0
-  worldRayDistance: 0
-  minDistance: 0
-  maxDistance: 0.1
+  raycastLength: 0.05
+  currentRayLength: 0
+  UILayer:
+    serializedVersion: 2
+    m_Bits: 0
+  autoEnable: 1
+  ClickDown:
+    m_PersistentCalls:
+      m_Calls: []
+  ClickUp:
+    m_PersistentCalls:
+      m_Calls: []
+  HoverStart:
+    m_PersistentCalls:
+      m_Calls: []
+  HoverStop:
+    m_PersistentCalls:
+      m_Calls: []
   side: 0
   vibrateOnClick: 0.5
   soundOnClick: {fileID: 7439889134737292555}
