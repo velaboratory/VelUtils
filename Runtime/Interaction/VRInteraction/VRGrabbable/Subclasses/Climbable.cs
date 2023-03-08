@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace unityutilities.VRInteraction
 {
@@ -36,7 +37,7 @@ namespace unityutilities.VRInteraction
 
 		public override byte[] PackData()
 		{
-			return new byte[0];
+			return Array.Empty<byte>();
 		}
 
 		public override void UnpackData(byte[] data)

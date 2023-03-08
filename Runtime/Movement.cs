@@ -821,12 +821,20 @@ namespace unityutilities
 				if (mainBoosterBudget - mainBoosterCost > 0)
 				{
 					// TODO speed can be faster by spherical Pythagorus
+
+					float beforeSpeed = Vector3.Dot(rig.rb.velocity, rig.head.forward);
+					
+					// add the force
+					rig.rb.AddForce(mainBoosterForce * 100f * rig.head.forward);
+					
 					// limit max speed
-					if (Vector3.Dot(rig.rb.velocity, rig.head.forward) < mainBoosterMaxSpeed)
+					float afterSpeed = Vector3.Dot(rig.rb.velocity, rig.head.forward);
+					if (afterSpeed > mainBoosterMaxSpeed)
 					{
-						// add the force
-						rig.rb.AddForce(mainBoosterForce * 100f * rig.head.forward);
+						// subtract out the gained velocity from the moving direction
+						rig.rb.velocity -= rig.rb.velocity.normalized * (afterSpeed - beforeSpeed);
 					}
+					
 
 					mainBoosterBudget -= mainBoosterCost;
 				}
@@ -849,11 +857,16 @@ namespace unityutilities
 				if (InputMan.Button2(Side.Left))
 				{
 					// TODO speed can be faster by spherical Pythagorus
+					float beforeSpeed = Vector3.Dot(rig.rb.velocity, rig.leftHand.forward);
+					
+					// add the force
+					rig.rb.AddForce(handBoosterAccel * Time.deltaTime * 100f * rig.leftHand.forward);
+					
+					float afterSpeed = Vector3.Dot(rig.rb.velocity, rig.leftHand.forward);
 					// limit max speed
-					if (Vector3.Dot(rig.rb.velocity, rig.leftHand.forward) < maxHandBoosterSpeed)
+					if (afterSpeed < maxHandBoosterSpeed)
 					{
-						// add the force
-						rig.rb.AddForce(handBoosterAccel * Time.deltaTime * 100f * rig.leftHand.forward);
+						rig.rb.velocity -= rig.rb.velocity.normalized * (afterSpeed - beforeSpeed);
 					}
 				}
 
@@ -1078,7 +1091,7 @@ namespace unityutilities
 
 				rig.rb.velocity = Vector3.ClampMagnitude(baseVel + rig.rb.velocity, grabMovementMaxThrowSpeed);
 
-				//rig.rb.velocity = MedianAvg(lastVels);
+				rig.rb.velocity = MedianAvg(lastVels.ToArray());
 
 				// rig.rb.velocity = -rig.transform.TransformVector(InputMan.ControllerVelocity(side)) * cdRatioGrabbing;
 				RoundVelToZero();

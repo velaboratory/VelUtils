@@ -158,7 +158,7 @@ namespace unityutilities.VRInteraction
 				if (h != null)
 				{
 					// get the average
-					//rb.velocity = h.lastVels.Aggregate(new Vector3(0, 0, 0), (s, v) => s + v) / h.lastVels.Count;
+					rb.velocity = h.lastVels.Aggregate(new Vector3(0, 0, 0), (s, v) => s + v) / h.lastVels.Count;
 
 					// get the median
 					//rb.velocity = h.lastVels.OrderBy(e => e.sqrMagnitude).ToList()[h.lastVels.Count / 2];
