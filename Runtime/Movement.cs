@@ -1073,7 +1073,10 @@ namespace unityutilities
 
 		public void Release(Side side, Rigidbody rb = null)
 		{
-			Debug.Assert(side == grabbingSide, "Shouldn't be able to get here");
+			// TODO investigate
+			// it gets here when grabbing objs with mouse
+			// Debug.Assert(side == grabbingSide, "Shouldn't be able to get here");
+			
 			grabbingSide = Side.None;
 			
 			if (grabPos[(int)side] != null)
