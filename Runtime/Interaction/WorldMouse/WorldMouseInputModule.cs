@@ -134,6 +134,7 @@ namespace unityutilities.Interaction.WorldMouse
 		public static void FindCanvases()
 		{
 			if (!autoFindCanvases) return;
+			if (!instance) return;
 
 			Canvas[] canvases = FindObjectsOfType<Canvas>();
 			foreach (Canvas canvas in canvases)

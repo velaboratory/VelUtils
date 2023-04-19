@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using UnityEngine.Networking;
 using System.Collections;
+using System.Globalization;
 using ICSharpCode.SharpZipLib.Zip;
 using System.Threading;
 
@@ -656,22 +657,22 @@ namespace unityutilities
 
 		public void Add(float f)
 		{
-			List.Add(f.ToString());
+			List.Add(f.ToString(CultureInfo.InvariantCulture));
 		}
 
 		public void Add(Vector3 v)
 		{
-			List.Add(v.x.ToString());
-			List.Add(v.y.ToString());
-			List.Add(v.z.ToString());
+			List.Add(v.x.ToString(CultureInfo.InvariantCulture));
+			List.Add(v.y.ToString(CultureInfo.InvariantCulture));
+			List.Add(v.z.ToString(CultureInfo.InvariantCulture));
 		}
 
 		public void Add(Quaternion q)
 		{
-			List.Add(q.x.ToString());
-			List.Add(q.y.ToString());
-			List.Add(q.z.ToString());
-			List.Add(q.w.ToString());
+			List.Add(q.x.ToString(CultureInfo.InvariantCulture));
+			List.Add(q.y.ToString(CultureInfo.InvariantCulture));
+			List.Add(q.z.ToString(CultureInfo.InvariantCulture));
+			List.Add(q.w.ToString(CultureInfo.InvariantCulture));
 		}
 
 		public void Add(bool b)
