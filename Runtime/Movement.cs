@@ -1035,19 +1035,21 @@ namespace unityutilities
 					Destroy(grabPos[(int)side].gameObject);
 				}
 
+				Transform hand = rig.GetHand(side);
 				grabPos[(int)side] = new GameObject(side + " Hand Grab Pos");
-				grabPos[(int)side].transform.position = rig.GetHand(side).position;
+				grabPos[(int)side].transform.position = hand.position;
 				grabPos[(int)side].transform.SetParent(parent);
 				cpt.SetTarget(grabPos[(int)side].transform, false);
-				cpt.positionOffset = rig.rb.position - rig.GetHand(side).position;
+				cpt.positionOffset = rig.rb.position - hand.position;
 				cpt.snapIfDistanceGreaterThan = 1f;
 				rig.rb.isKinematic = false;
+				
 
 				InputMan.Vibrate(side, 1);
 
 				teleporter.teleporterHoldTime = 0;
-				grabInitialLocalPos[(int)side] = rig.GetHand(side).position; 
-				grabInitialLocalPos[(int)side] = rig.GetHand(side).localPosition; 
+				grabInitialLocalPos[(int)side] = hand.position; 
+				grabInitialLocalPos[(int)side] = hand.localPosition; 
 
 				// if event has subscribers, execute
 				OnGrab?.Invoke(parent, side);
@@ -1077,10 +1079,9 @@ namespace unityutilities
 			// it gets here when grabbing objs with mouse
 			// Debug.Assert(side == grabbingSide, "Shouldn't be able to get here");
 			
-			grabbingSide = Side.None;
-			
 			if (grabPos[(int)side] != null)
 			{
+				grabbingSide = Side.None;
 				Destroy(grabPos[(int)side].gameObject);
 
 				// limit velocity based on grabbed obj velocity

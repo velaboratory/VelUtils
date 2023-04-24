@@ -14,6 +14,10 @@ namespace unityutilities.VRInteraction
 
 		[Tooltip("Turning this to false prevents this hand from grabbing objects itself.")]
 		public bool canGrab = true;
+		/// <summary>
+		/// Various movement techniques can add their locks to prevent this hand from grabbing
+		/// </summary>
+		public HashSet<string> grabLocks = new HashSet<string>();
 
 		[Tooltip("Can be set to none to use external input sources by using actions.")]
 		public VRInput grabInput = VRInput.Grip;
@@ -66,7 +70,7 @@ namespace unityutilities.VRInteraction
 			// TODO maybe do this less often
 			FilterDisabledObjects();
 			
-			if (canGrab)
+			if (canGrab && grabLocks.Count == 0)
 			{
 				// Grab ✊
 				if (InputMan.GetDown(grabInput, side))
@@ -248,7 +252,11 @@ namespace unityutilities.VRInteraction
 			remoteTouchedObjs.RemoveAll(item => item == null);
 
 			// Cancel if not allowed to grab
-			if (!canGrab) return null;
+			if (!canGrab || grabLocks.Count > 0)
+			{
+				Debug.Log("Grab prevented");
+				return null;
+			}
 
 			// Cancel if not touching anything
 			if (includeRemote)
