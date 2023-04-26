@@ -254,7 +254,6 @@ namespace unityutilities.VRInteraction
 			// Cancel if not allowed to grab
 			if (!canGrab || grabLocks.Count > 0)
 			{
-				Debug.Log("Grab prevented");
 				return null;
 			}
 
