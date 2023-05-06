@@ -31,6 +31,26 @@ namespace unityutilities
 
 		public bool grabAirRight;
 
+		/// <summary>
+		/// Something is temporarily preventing this hand from starting a grab of the air
+		/// </summary>
+		public HashSet<string> grabAirLeftLocks = new HashSet<string>();
+
+		public HashSet<string> grabAirRightLocks = new HashSet<string>();
+
+		private bool GrabAirLocked(Side side)
+		{
+			return side switch
+			{
+				Side.Left => grabAirLeftLocks.Count > 0,
+				Side.Right => grabAirRightLocks.Count > 0,
+				Side.Both => grabAirRightLocks.Count > 0 && grabAirLeftLocks.Count > 0,
+				Side.Either => grabAirRightLocks.Count > 0 || grabAirLeftLocks.Count > 0,
+				Side.None => false,
+				_ => throw new ArgumentOutOfRangeException(nameof(side), side, null)
+			};
+		}
+
 		[Tooltip("Control-display ratio for grabbing movement. Basically a speed multiplier.")] [Range(0, 16)]
 		public float cdRatioGrabbing = 1;
 
@@ -110,12 +130,14 @@ namespace unityutilities
 		private float normalDrag;
 
 		public Action<Transform, Side> OnGrab;
+
 		/// <summary>
 		/// Transform: held GameObject
 		/// Side: which hand
 		/// float: duration held
 		/// </summary>
 		public Action<Transform, Side, float> OnGrabCancel;
+
 		/// <summary>
 		/// Transform: held GameObject
 		/// Side: which hand
@@ -131,15 +153,17 @@ namespace unityutilities
 		private Transform lastLeftHandGrabbedObj;
 		private Transform lastRightHandGrabbedObj;
 		private GameObject[] grabPos = new GameObject[2];
-		private float[] grabHoldTime = {0,0};
+		private float[] grabHoldTime = { 0, 0 };
+
 		/// <summary>
 		/// For logging
 		/// </summary>
-		private Vector3[] grabInitialLocalPos = {Vector3.zero, Vector3.zero};
+		private Vector3[] grabInitialLocalPos = { Vector3.zero, Vector3.zero };
+
 		/// <summary>
 		/// For logging
 		/// </summary>
-		private Vector3[] grabInitialWorldPos = {Vector3.zero, Vector3.zero};
+		private Vector3[] grabInitialWorldPos = { Vector3.zero, Vector3.zero };
 
 		private Queue<Vector3> lastVels = new Queue<Vector3>();
 		private int lastVelsLength = 5;
@@ -266,7 +290,7 @@ namespace unityutilities
 						{
 							Destroy(lineRendererGameObject);
 						}
-						
+
 						if (teleportMarkerInstance != null)
 						{
 							teleportMarkerInstance.SetActive(value);
@@ -327,8 +351,6 @@ namespace unityutilities
 			{
 				Time.fixedDeltaTime = 1 / XRDevice.refreshRate;
 			}
-			
-			
 		}
 
 		private void SetupTeleporter()
@@ -481,7 +503,7 @@ namespace unityutilities
 				}
 
 				currentTeleportingSide = Side.Left;
-				
+
 				teleporter.Active = true;
 			}
 
@@ -494,7 +516,7 @@ namespace unityutilities
 				}
 
 				currentTeleportingSide = Side.Right;
-				
+
 				teleporter.Active = true;
 			}
 
@@ -605,7 +627,6 @@ namespace unityutilities
 						{
 							teleporter.Valid = false;
 						}
-						
 					}
 
 					if (teleporter.Active)
@@ -1023,10 +1044,12 @@ namespace unityutilities
 
 			// if we are initializing a new grab
 			// either we just pressed the button or we just touched a new object while already holding
-			if (grabDown || (grab &&
-			                 ((side == Side.Left && leftHandGrabbedObj != null && lastLeftHandGrabbedObj == null) ||
-			                  (side == Side.Right && rightHandGrabbedObj != null && lastRightHandGrabbedObj == null))))
+			if ((grabDown && !GrabAirLocked(side)) ||
+			    (grab &&
+			     ((side == Side.Left && leftHandGrabbedObj != null && lastLeftHandGrabbedObj == null) ||
+			      (side == Side.Right && rightHandGrabbedObj != null && lastRightHandGrabbedObj == null && grabAirRightLocks.Count == 0))))
 			{
+				Debug.Log("NEW GRAB");
 				grabbingSide = side;
 
 				if (grabPos[(int)side] != null)
@@ -1043,13 +1066,13 @@ namespace unityutilities
 				cpt.positionOffset = rig.rb.position - hand.position;
 				cpt.snapIfDistanceGreaterThan = 1f;
 				rig.rb.isKinematic = false;
-				
+
 
 				InputMan.Vibrate(side, 1);
 
 				teleporter.teleporterHoldTime = 0;
-				grabInitialLocalPos[(int)side] = hand.position; 
-				grabInitialLocalPos[(int)side] = hand.localPosition; 
+				grabInitialLocalPos[(int)side] = hand.position;
+				grabInitialLocalPos[(int)side] = hand.localPosition;
 
 				// if event has subscribers, execute
 				OnGrab?.Invoke(parent, side);
@@ -1062,7 +1085,7 @@ namespace unityutilities
 					cpt.positionOffset = rig.rb.position - rig.GetHand(side).position;
 					cpt.target.Translate(-rig.transform.TransformVector(InputMan.ControllerVelocity(side)) * Time.deltaTime * Mathf.Clamp(cdRatioGrabbing - 1, 0, 100));
 					cpt.enabled = !snapTurnedThisFrame;
-					
+
 					teleporter.teleporterHoldTime += Time.deltaTime;
 				}
 				// if no longer holding
@@ -1078,7 +1101,7 @@ namespace unityutilities
 			// TODO investigate
 			// it gets here when grabbing objs with mouse
 			// Debug.Assert(side == grabbingSide, "Shouldn't be able to get here");
-			
+
 			if (grabPos[(int)side] != null)
 			{
 				grabbingSide = Side.None;
@@ -1101,8 +1124,8 @@ namespace unityutilities
 				RoundVelToZero();
 
 				rig.rb.isKinematic = wasKinematic;
-				
-				Vector3 localOffset = grabInitialLocalPos[(int)side] - rig.GetHand(side).position; 
+
+				Vector3 localOffset = grabInitialLocalPos[(int)side] - rig.GetHand(side).position;
 				Vector3 globalOffset = grabInitialLocalPos[(int)side] - rig.GetHand(side).localPosition;
 				OnRelease?.Invoke(grabPos[(int)side].transform, side, localOffset, globalOffset, rig.rb.velocity, grabHoldTime[(int)side]);
 			}
