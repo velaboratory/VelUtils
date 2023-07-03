@@ -203,6 +203,7 @@ namespace unityutilities
 		{
 			// inspector values
 			public Side inputSide = Side.Either;
+			public float teleporterYoffset = 0.0f;
 			public bool rotateOnTeleport;
 			public float maxTeleportableSlope = 45f;
 			public float lineRendererWidth = .01f;
@@ -682,6 +683,8 @@ namespace unityutilities
 
 		private IEnumerator DoSmoothTeleport(Vector3 position, Quaternion rotation, float time, bool noBlinkOverride = false)
 		{
+
+			position = position + new Vector3(0, teleporter.teleporterYoffset, 0);
 			float distance = Vector3.Distance(transform.position, position);
 
 			transform.rotation = rotation;
