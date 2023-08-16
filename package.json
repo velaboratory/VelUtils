@@ -1,6 +1,6 @@
 {
-  "name": "com.franzco.unityutilities",
-  "displayName": "unityutilities",
+  "name": "edu.uga.engr.vel.velutils",
+  "displayName": "VelUtils",
   "version": "2.13.28",
   "unity": "2019.1",
   "description": "A lightweight collection of flexible utilities for VR projects.",
@@ -10,9 +10,9 @@
     "utilities"
   ],
   "author": {
-    "name": "Anton Franzluebbers",
-    "email": "anton@uga.edu",
-    "url": "https://cobweb.cs.uga.edu/~anton"
+    "name": "Virtual Experiences Laboratory",
+    "email": "vel@velaboratory.com",
+    "url": "https://vel.engr.uga.edu/"
   },
   "samples": [
     {
