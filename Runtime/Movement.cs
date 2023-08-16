@@ -1052,7 +1052,6 @@ namespace unityutilities
 			     ((side == Side.Left && leftHandGrabbedObj != null && lastLeftHandGrabbedObj == null) ||
 			      (side == Side.Right && rightHandGrabbedObj != null && lastRightHandGrabbedObj == null && grabAirRightLocks.Count == 0))))
 			{
-				Debug.Log("NEW GRAB");
 				grabbingSide = side;
 
 				if (grabPos[(int)side] != null)
