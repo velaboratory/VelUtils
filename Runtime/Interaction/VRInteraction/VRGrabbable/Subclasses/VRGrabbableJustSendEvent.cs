@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.Events;
-namespace unityutilities.VRInteraction
+namespace VelUtils.VRInteraction
 {
 	public class VRGrabbableJustSendEvent : VRGrabbable
 	{

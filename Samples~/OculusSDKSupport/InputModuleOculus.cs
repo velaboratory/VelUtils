@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
 	public class InputModuleOculus : InputModule
 	{

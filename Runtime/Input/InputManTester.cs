@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
-	[AddComponentMenu("unityutilities/InputManTester")]
+	[AddComponentMenu("VelUtils/InputManTester")]
 	public class InputManTester : MonoBehaviour
 	{
 		[Header("Trigger")] 

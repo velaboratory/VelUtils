@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace unityutilities.VRInteraction
+namespace VelUtils.VRInteraction
 {
 	public abstract class VRGrabbable : MonoBehaviour, INetworkPack
 	{

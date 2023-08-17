@@ -3,11 +3,11 @@ using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
 
-namespace unityutilities {
+namespace VelUtils {
 	[SelectionBase]
 	[DisallowMultipleComponent]
 	[RequireComponent(typeof(Rigidbody))]
-	[AddComponentMenu("unityutilities/Interaction/Point Force Interactable")]
+	[AddComponentMenu("VelUtils/Interaction/Point Force Interactable")]
 	public class PointForceGrabbable : XRBaseInteractable {
 
 		const float k_VelocityPredictionFactor = 0.6f;

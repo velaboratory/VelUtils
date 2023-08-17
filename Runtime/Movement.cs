@@ -5,13 +5,13 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.XR;
 
-namespace unityutilities
+namespace VelUtils
 {
 	/// <summary>
 	/// Adds several movement techniques while maintaining compatibility with many rig setups.
 	/// </summary>
 	[RequireComponent(typeof(Rigidbody))]
-	[AddComponentMenu("unityutilities/Movement")]
+	[AddComponentMenu("VelUtils/Movement")]
 	public class Movement : MonoBehaviour
 	{
 		public Rig rig;

@@ -1,16 +1,13 @@
 {
-    "name": "FranzCo.unityutilities.Editor",
+    "name": "VelUtils",
+    "rootNamespace": "VelUtils",
     "references": [
         "Unity.XR.Interaction.Toolkit",
-        "FranzCo.unityutilities",
+        "Unity.TextMeshPro",
         "UnityEditor.UI",
-        "UnityEngine.UI",
-        "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEngine.UI"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

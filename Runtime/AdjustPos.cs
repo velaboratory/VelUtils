@@ -1,11 +1,11 @@
 using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
 	/// <summary>
 	/// Nudges an object with assignable keyboard shortcuts.
 	/// </summary>
-	[AddComponentMenu("unityutilities/Adjust Pos")]
+	[AddComponentMenu("VelUtils/Adjust Pos")]
 	public class AdjustPos : MonoBehaviour
 	{
 

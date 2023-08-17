@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
 	/// <summary>
 	/// One of the four primary directions.

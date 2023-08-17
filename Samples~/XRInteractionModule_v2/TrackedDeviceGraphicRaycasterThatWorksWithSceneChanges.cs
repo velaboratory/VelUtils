@@ -2,9 +2,9 @@
 using UnityEngine.SceneManagement;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 
-namespace unityutilities {
+namespace VelUtils {
 
-	[AddComponentMenu("unityutilities/Interaction/Interactable Canvas")]
+	[AddComponentMenu("VelUtils/Interaction/Interactable Canvas")]
 	public class TrackedDeviceGraphicRaycasterThatWorksWithSceneChanges : TrackedDeviceGraphicRaycaster {
 		private Canvas canvas;
 		public bool isDontDestroyOnLoad;

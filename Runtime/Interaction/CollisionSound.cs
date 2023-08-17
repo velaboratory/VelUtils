@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace unityutilities.Interaction
+namespace VelUtils.Interaction
 {
 	public class CollisionSound : MonoBehaviour
 	{

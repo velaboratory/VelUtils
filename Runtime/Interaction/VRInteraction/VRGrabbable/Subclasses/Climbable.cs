@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-namespace unityutilities.VRInteraction
+namespace VelUtils.VRInteraction
 {
-	[AddComponentMenu("unityutilities/Interaction/Climbable")]
+	[AddComponentMenu("VelUtils/Interaction/Climbable")]
 	[DisallowMultipleComponent]
 	public class Climbable : VRGrabbable
 	{

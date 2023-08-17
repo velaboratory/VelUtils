@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
-namespace unityutilities.VRInteraction
+namespace VelUtils.VRInteraction
 {
 	/// <summary>
 	/// Spins 🔄
@@ -12,7 +12,7 @@ namespace unityutilities.VRInteraction
 	/// and both remote and local dials try to achieve the goal position with physics in some way.
 	/// Limits are defined by hinge joint/physics
 	/// </summary>
-	[AddComponentMenu("unityutilities/Interaction/VR Hinge Dial")]
+	[AddComponentMenu("VelUtils/Interaction/VR Hinge Dial")]
 	[DisallowMultipleComponent]
 	[RequireComponent(typeof(HingeJoint))]
 	public class VRHingeDial : VRGrabbable

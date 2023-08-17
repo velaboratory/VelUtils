@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
-namespace unityutilities
+namespace VelUtils
 {
 	/// <summary>
 	/// Interactable Visual component that tints on hover or selection
 	/// </summary>
-	[AddComponentMenu("unityutilities/Interaction/Interactable Highlight")]
+	[AddComponentMenu("VelUtils/Interaction/Interactable Highlight")]
 	[DisallowMultipleComponent]
 	public class HighlightInteractable : MonoBehaviour
 	{

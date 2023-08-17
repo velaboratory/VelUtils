@@ -2,12 +2,12 @@
 using System.IO;
 using UnityEngine;
 
-namespace unityutilities.VRInteraction
+namespace VelUtils.VRInteraction
 {
 	/// <summary>
 	/// ↕ Sliders, like legs of tripod, height-adjustable table, etc.
 	/// </summary>
-	[AddComponentMenu("unityutilities/Interaction/VRSlider")]
+	[AddComponentMenu("VelUtils/Interaction/VRSlider")]
 	public class VRSlider : VRGrabbable
 	{
 		private Rigidbody rb;

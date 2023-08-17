@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.XR.Interaction.Toolkit;
 
-namespace unityutilities {
+namespace VelUtils {
 
 	/// <summary>
 	/// Interactor used for directly interacting with interactables that are touching.  This is handled via trigger volumes
@@ -12,7 +12,7 @@ namespace unityutilities {
 	/// set to be a trigger to work.
 	/// </summary>
 	[DisallowMultipleComponent]
-	[AddComponentMenu("unityutilities/Interaction/Direct and Ray Interactor")]
+	[AddComponentMenu("VelUtils/Interaction/Direct and Ray Interactor")]
 	public class DirectAndRayInteractor : XRRayInteractor {
 		protected override List<XRBaseInteractable> ValidTargets { get { return m_ValidTargetsDirect; } }
 

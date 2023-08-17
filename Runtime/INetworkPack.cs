@@ -1,4 +1,4 @@
-﻿namespace unityutilities
+﻿namespace VelUtils
 {
 	/// <summary>
 	/// Denotes classes that can be packed to and from a byte array

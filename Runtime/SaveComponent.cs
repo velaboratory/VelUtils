@@ -6,12 +6,12 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace unityutilities
+namespace VelUtils
 {
 	/// <summary>
 	/// Saves a variety of components of an object to PlayerPrefsJson. Local or global coordinates. Requires a unique object name.
 	/// </summary>
-	[AddComponentMenu("unityutilities/SaveComponent")]
+	[AddComponentMenu("VelUtils/SaveComponent")]
 	public class SaveComponent : MonoBehaviour
 	{
 		public Component target;

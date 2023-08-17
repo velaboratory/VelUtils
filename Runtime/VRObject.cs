@@ -2,8 +2,8 @@
 
 using UnityEngine;
 
-namespace unityutilities {
-	[AddComponentMenu("unityutilities/VR Object")]
+namespace VelUtils {
+	[AddComponentMenu("VelUtils/VR Object")]
 	public class VRObject : MonoBehaviour {
 #if OCULUS_UTILITIES_AVAILABLE
 		private void Update() {

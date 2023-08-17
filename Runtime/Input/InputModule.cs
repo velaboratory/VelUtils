@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
 	public abstract class InputModule : MonoBehaviour
 	{

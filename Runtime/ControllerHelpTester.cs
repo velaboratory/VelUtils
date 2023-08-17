@@ -1,12 +1,12 @@
 ﻿using System;
 using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
 	/// <summary>
 	/// Provides an example for how to use the controller help texts
 	/// </summary>
-	[AddComponentMenu("unityutilities/Controller Help Tester")]
+	[AddComponentMenu("VelUtils/Controller Help Tester")]
 	public class ControllerHelpTester : MonoBehaviour
 	{
 		// Use this for initialization

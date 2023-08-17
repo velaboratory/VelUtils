@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
-namespace unityutilities.VRInteraction
+namespace VelUtils.VRInteraction
 {
 	/// <summary>
 	/// Spins 🔄
 	/// </summary>
-	[AddComponentMenu("unityutilities/Interaction/VRDial")]
+	[AddComponentMenu("VelUtils/Interaction/VRDial")]
 	[DisallowMultipleComponent]
 	public class VRDial : VRGrabbable
 	{

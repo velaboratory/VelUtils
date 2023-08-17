@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.XR;
 
-namespace unityutilities
+namespace VelUtils
 {
 	public enum HeadsetSystem
 	{
@@ -252,7 +252,7 @@ namespace unityutilities
 	/// Makes input from VR devices accessible from a unified set of methods. Can treat axes as button down.
 	/// </summary>
 	[DefaultExecutionOrder(-100)]
-	[AddComponentMenu("unityutilities/InputMan")]
+	[AddComponentMenu("VelUtils/InputMan")]
 	public class InputMan : MonoBehaviour
 	{
 		public InputModule inputModule;

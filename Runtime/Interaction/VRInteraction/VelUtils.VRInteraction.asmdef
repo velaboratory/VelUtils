@@ -1,6 +1,6 @@
 {
-    "name": "FranzCo.unityutilities.VRInteraction",
-    "rootNamespace": "unityutilities.VRInteraction",
+    "name": "VelUtils.VRInteraction",
+    "rootNamespace": "VelUtils.VRInteraction",
     "references": [
         "GUID:d33a3000215420f4cb2ac97834661416",
         "GUID:343deaaf83e0cee4ca978e7df0b80d21",

@@ -3,9 +3,9 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace unityutilities
+namespace VelUtils
 {
-	[AddComponentMenu("unityutilities/Controller Help")]
+	[AddComponentMenu("VelUtils/Controller Help")]
 	public class ControllerHelp : MonoBehaviour
 	{
 		public Rig rig;

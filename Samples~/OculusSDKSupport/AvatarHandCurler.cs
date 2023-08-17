@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using unityutilities.VRInteraction;
+using VelUtils.VRInteraction;
 
 public class AvatarHandCurler : MonoBehaviour
 {

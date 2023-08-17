@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
-using unityutilities;
-using unityutilities.Interaction.WorldMouse;
+using VelUtils;
+using VelUtils.Interaction.WorldMouse;
 
 [RequireComponent(typeof(WorldMouse))]
 public class WorldMouseVibrations : MonoBehaviour

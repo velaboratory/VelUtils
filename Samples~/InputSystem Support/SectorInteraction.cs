@@ -12,7 +12,7 @@ using UnityEngine.InputSystem.Editor;
 #endif
 using UnityEngine.Scripting;
 
-namespace unityutilities
+namespace VelUtils
 {
 	/// <summary>
 	/// Interaction that performs the action if the control is pushed into a slice of a circle along cardinal directions,

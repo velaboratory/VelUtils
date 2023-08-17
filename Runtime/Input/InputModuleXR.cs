@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
-using static unityutilities.InputMan;
+using static VelUtils.InputMan;
 
-namespace unityutilities
+namespace VelUtils
 {
 	public class InputModuleXR : InputModule
 	{

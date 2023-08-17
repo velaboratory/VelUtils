@@ -9,13 +9,13 @@ using System.Globalization;
 using ICSharpCode.SharpZipLib.Zip;
 using System.Threading;
 
-namespace unityutilities
+namespace VelUtils
 {
 
 	/// <summary>
 	/// Logs any data to a file.
 	/// </summary>
-	[AddComponentMenu("unityutilities/Logger")]
+	[AddComponentMenu("VelUtils/Logger")]
 	public class Logger : MonoBehaviour
 	{
 

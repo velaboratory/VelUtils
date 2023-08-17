@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
-	[AddComponentMenu("unityutilities/Rig")]
+	[AddComponentMenu("VelUtils/Rig")]
 	public class Rig : MonoBehaviour
 	{
 		public Rigidbody rb;

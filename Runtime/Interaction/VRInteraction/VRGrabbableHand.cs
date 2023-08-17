@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace unityutilities.VRInteraction
+namespace VelUtils.VRInteraction
 {
 	/// <summary>
 	/// ✋ Handles grab and release of VRGrabbable objects. Needs to be able to receive OnTriggerEnter events.

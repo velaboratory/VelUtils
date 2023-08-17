@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace unityutilities.VRInteraction
+namespace VelUtils.VRInteraction
 {
 	public class MouseControlsVRGrabbableHand : MonoBehaviour
 	{

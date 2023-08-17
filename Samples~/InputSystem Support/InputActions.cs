@@ -15,7 +15,7 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 
-namespace unityutilities
+namespace VelUtils
 {
     public partial class @InputActions : IInputActionCollection2, IDisposable
     {

@@ -2,7 +2,7 @@
 using System;
 using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
 	public class InputModuleInputSystem : InputModule
 	{

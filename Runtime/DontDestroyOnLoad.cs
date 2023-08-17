@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
-	[AddComponentMenu("unityutilities/Don't Destroy On Load")]
+	[AddComponentMenu("VelUtils/Don't Destroy On Load")]
 	public class DontDestroyOnLoad : MonoBehaviour {
 		private void Awake() {
 			try {

@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 
-namespace unityutilities.Interaction.WorldMouse
+namespace VelUtils.Interaction.WorldMouse
 {
 	public class WorldMouse : MonoBehaviour
 	{

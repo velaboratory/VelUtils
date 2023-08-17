@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine.UI;
 using System.IO;
 
-namespace unityutilities
+namespace VelUtils
 {
 	public class UploadLogsUI : MonoBehaviour
 	{

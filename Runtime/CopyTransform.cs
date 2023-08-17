@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
 	public enum Axis3D
 	{
@@ -14,7 +14,7 @@ namespace unityutilities
 	/// <summary>
 	/// One object copies the position and/or rotation of another using a variety of techniques. Global or local offsets can be set.
 	/// </summary>
-	[AddComponentMenu("unityutilities/Copy Transform")]
+	[AddComponentMenu("VelUtils/Copy Transform")]
 	public class CopyTransform : MonoBehaviour
 	{
 		public enum FollowType

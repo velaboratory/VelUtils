@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
-namespace unityutilities.Editor {
+namespace VelUtils.Editor {
 	[CustomEditor(typeof(GrabInteractableWithPositionOffset))]
 	class GrabInteractableWithPositionOffsetEditor : UnityEditor.Editor {
 		SerializedProperty distanceOffsetForRemoteGrab;

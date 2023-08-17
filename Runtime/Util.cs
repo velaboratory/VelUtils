@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-namespace unityutilities
+namespace VelUtils
 {
 	[AttributeUsage(AttributeTargets.Field, Inherited = true)]
 	public class ReadOnlyAttribute : PropertyAttribute { }

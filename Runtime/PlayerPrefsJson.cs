@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
 	public class PlayerPrefsJson : MonoBehaviour
 	{

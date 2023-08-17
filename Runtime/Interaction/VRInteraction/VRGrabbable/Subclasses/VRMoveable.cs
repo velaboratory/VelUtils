@@ -4,9 +4,9 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace unityutilities.VRInteraction
+namespace VelUtils.VRInteraction
 {
-	[AddComponentMenu("unityutilities/Interaction/VRMoveable")]
+	[AddComponentMenu("VelUtils/Interaction/VRMoveable")]
 	[DisallowMultipleComponent]
 	public class VRMoveable : VRGrabbable
 	{

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
 	/// <summary>
 	/// Logs position data from a VR rig using Logger.cs every frame

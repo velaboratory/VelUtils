@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-namespace unityutilities.VRInteraction
+namespace VelUtils.VRInteraction
 {
-	[AddComponentMenu("unityutilities/Interaction/VRDialAdjuster")]
+	[AddComponentMenu("VelUtils/Interaction/VRDialAdjuster")]
 	[RequireComponent(typeof(Rigidbody))]
 	public class VRDialAdjuster : VRDial
 	{

@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace unityutilities.Editor
+namespace VelUtils.Editor
 {
 	public enum AxisType
 	{

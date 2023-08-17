@@ -2,7 +2,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace unityutilities.VRInteraction
+namespace VelUtils.VRInteraction
 {
 	[RequireComponent(typeof(Rigidbody))]
 	public class VRPointForceGrabbable : VRGrabbable

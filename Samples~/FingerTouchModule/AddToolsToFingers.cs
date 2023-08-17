@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
 
 	[Serializable]

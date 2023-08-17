@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using unityutilities;
+using VelUtils;
 
 public class TouchMenuFingerCollider : MonoBehaviour
 {

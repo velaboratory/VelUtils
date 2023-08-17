@@ -5,13 +5,13 @@ using UnityEngine.EventSystems;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 
-namespace unityutilities {
+namespace VelUtils {
 /*
     /// <summary>
     /// Interactor used for interacting with interactables by touching UI. 
     /// </summary>
     [DisallowMultipleComponent]
-    [AddComponentMenu("unityutilities/Interaction/Finger Touch Interactor")]
+    [AddComponentMenu("VelUtils/Interaction/Finger Touch Interactor")]
     public class FingerTouchInteractor : XRBaseControllerInteractor, IUIInteractable {
 
 

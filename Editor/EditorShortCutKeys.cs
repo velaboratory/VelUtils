@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 
-namespace unityutilities.Editor {
+namespace VelUtils.Editor {
 	/// <summary>
 	/// Adds `F5` shortcut to enter play mode.
 	/// </summary>

@@ -2,13 +2,13 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace unityutilities
+namespace VelUtils
 {
 
 	/// <summary>
 	/// Saves the location and rotation of an object to PlayerPrefsJson. Local or global coordinates. Requires a unique object name.
 	/// </summary>
-	[AddComponentMenu("unityutilities/SaveLoc")]
+	[AddComponentMenu("VelUtils/SaveLoc")]
 	public class SaveLoc : MonoBehaviour
 	{
 

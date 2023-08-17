@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace unityutilities.Interaction.WorldMouse
+namespace VelUtils.Interaction.WorldMouse
 {
 #if UNITY_EDITOR
 	[CustomEditor(typeof(WorldMouseInputModule))]

@@ -2,7 +2,7 @@
 using UnityEngine;
 using static UnityEngine.UI.Button;
 
-namespace unityutilities.VRInteraction
+namespace VelUtils.VRInteraction
 {
 	public class VRPhysicalButton : MonoBehaviour
 	{

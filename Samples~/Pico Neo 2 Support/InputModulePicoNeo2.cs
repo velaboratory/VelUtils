@@ -1,9 +1,9 @@
 using UnityEngine;
 using Pvr_UnitySDKAPI;
 using System.Collections.Generic;
-using static unityutilities.InputMan;
+using static VelUtils.InputMan;
 
-namespace unityutilities
+namespace VelUtils
 {
 	public class InputModulePicoNeo2 : InputModule
 	{

@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
-namespace unityutilities.Editor
+namespace VelUtils.Editor
 {
 	[InitializeOnLoad]
 	public class IncrementApplicationVersion
@@ -30,7 +30,7 @@ namespace unityutilities.Editor
 			return true;
 		}
 
-		[PostProcessBuildAttribute(1)]
+		[PostProcessBuild(1)]
 		public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
 		{
 			Debug.Log("Build v" + PlayerSettings.bundleVersion);

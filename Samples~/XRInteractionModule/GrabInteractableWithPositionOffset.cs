@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
-namespace unityutilities {
+namespace VelUtils {
 
-	[AddComponentMenu("unityutilities/Interaction/Grab Interactable with Position Offset")]
+	[AddComponentMenu("VelUtils/Interaction/Grab Interactable with Position Offset")]
 	public class GrabInteractableWithPositionOffset : XRGrabInteractable {
 		private bool initialAttachTransformSet;
 		private Transform initialAttachTransform;
