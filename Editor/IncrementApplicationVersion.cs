@@ -47,6 +47,8 @@ namespace VelUtils.Editor
 			pieces[^1] = (int.Parse(pieces[^1]) + 1).ToString();
 
 			PlayerSettings.bundleVersion = string.Join('.', pieces);
+
+			PlayerSettings.Android.bundleVersionCode += 1;
 		}
 	}
 }
