@@ -32,6 +32,9 @@ namespace VelUtils.VRInteraction
 		public bool useFixedRotationOffset;
 		public Quaternion fixedRotationOffset = Quaternion.identity;
 
+		private Vector3 initialPos;
+		private Quaternion initialRot;
+
 		//public bool allowMultiHandGrabbing = false;	// TODO
 
 		// Use this for initialization
@@ -46,6 +49,9 @@ namespace VelUtils.VRInteraction
 			}
 
 			copyTransform = GetComponent<CopyTransform>();
+
+			initialPos = transform.position;
+			initialRot = transform.rotation;
 		}
 
 		private void Update()
@@ -77,7 +83,8 @@ namespace VelUtils.VRInteraction
 			    Mathf.Abs(transform.position.z) > 10000)
 			{
 				Debug.Log("Had to reset the position of an object.", this);
-				transform.position = Vector3.zero;
+				transform.position = initialPos;
+				transform.rotation = initialRot;
 				rb.velocity = Vector3.zero;
 				rb.angularVelocity = Vector3.zero;
 			}
