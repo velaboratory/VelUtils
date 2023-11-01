@@ -38,7 +38,7 @@ namespace VelUtils
 		public string appName;
 		public static List<string> subFolders = new List<string>();
 		public static bool uploading;
-		public static float uploadProgress { get; private set; }
+		private static float uploadProgress = 0;
 
 		[Header("Log destinations")]
 		[Tooltip("Enables constant logging to the local filesystem. This is required for uploading zips at the end.")]
@@ -111,10 +111,7 @@ namespace VelUtils
 		public bool uploadWithF7;
 		public bool uploadAllWithF8;
 
-        public static bool lastUploadSucceeded { get; private set; }
-        public static UnityWebRequest uploadWWW { get; private set; }
-
-        private void Awake()
+		private void Awake()
 		{
 			if (instance == null) instance = this;
 
@@ -374,7 +371,6 @@ namespace VelUtils
 
 		IEnumerator Upload(string name, string data, string appName)
 		{
-			lastUploadSucceeded = false;
 			if (string.IsNullOrEmpty(data)) yield break;
 			
 			WWWForm form = new WWWForm();
@@ -385,15 +381,12 @@ namespace VelUtils
 			form.AddField("version", Application.version);
 			using (UnityWebRequest www = UnityWebRequest.Post(webLogURL, form))
 			{
-				uploadWWW = www;
-                yield return www.SendWebRequest();
-				uploadWWW = null;
+				yield return www.SendWebRequest();
 				if (www.result != UnityWebRequest.Result.Success)
 				{
 					Debug.Log(www.error);
 				}
 			}
-			lastUploadSucceeded = true;
 		}
 
 		public static void UploadZip(bool uploadAll = false)
@@ -430,9 +423,7 @@ namespace VelUtils
 			form.AddBinaryData("upload", data, $"{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss-ff}_{SystemInfo.deviceUniqueIdentifier}.zip");
 			using (UnityWebRequest www = UnityWebRequest.Post(webLogURL, form))
 			{
-				uploadWWW = www;
 				yield return www.SendWebRequest();
-				uploadWWW = null;
 				if (www.result != UnityWebRequest.Result.Success)
 				{
 					Debug.Log(www.error);
@@ -443,7 +434,7 @@ namespace VelUtils
 					Debug.Log(www.downloadHandler.text);
 				}
 			}
-			lastUploadSucceeded = true;
+
 			uploading = false;
 		}
 
