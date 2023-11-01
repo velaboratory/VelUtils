@@ -1,0 +1,53 @@
+site_name: VelUtils Docs
+site_url: https://docs.velutils.ugavel.com
+repo_url: https://github.com/velaboratory/VelUtils
+repo_name: velaboratory/VelUtils
+edit_uri: edit/main/DocsWebsite~/docs
+
+theme:
+  name: material
+  features:
+    - content.action.edit
+    - navigation.instant
+    # - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.indexes
+    - toc.follow
+    - toc.integrate
+
+  palette:
+    scheme: slate
+    primary: custom
+    accent: red
+    # background: custom
+  font: false
+    # text: Oswald
+    # text: Merriweather
+    # text: Merriweather Sans
+  logo: assets/3dvel.png
+  favicon: assets/3dvel.png
+
+plugins:
+  - search:
+  # - social:
+  #     cards_layout_options:
+  #       font_family: Oswald
+  - git-revision-date-localized:
+      enable_creation_date: true
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+extra_css:
+  - stylesheets/extra.css

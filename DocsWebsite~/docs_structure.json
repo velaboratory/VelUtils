@@ -1,0 +1,748 @@
+[
+    {
+        "path": [
+            "Editor"
+        ],
+        "fileName": "CreateUtilities.cs",
+        "classes": [
+            {
+                "className": "CreateUtilities",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Editor"
+        ],
+        "fileName": "EditorShortCutKeys.cs",
+        "classes": [
+            {
+                "className": "EditorShortCutKeys",
+                "summary": "Adds `F5` shortcut to enter play mode."
+            },
+            {
+                "className": "ReadOnlyAttribute",
+                "summary": ""
+            },
+            {
+                "className": "ReadOnly",
+                "summary": ""
+            },
+            {
+                "className": "ReadOnlyPlayModeAttribute",
+                "summary": ""
+            },
+            {
+                "className": "ReadOnlyPlayMode",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Editor"
+        ],
+        "fileName": "IncrementApplicationVersion.cs",
+        "classes": [
+            {
+                "className": "IncrementApplicationVersion",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Editor"
+        ],
+        "fileName": "SetupVRInput.cs",
+        "classes": [
+            {
+                "className": "InputAxis",
+                "summary": ""
+            },
+            {
+                "className": "SetupVRInput",
+                "summary": "Adds a dropdown menu option for automatically populating the Input system for use with the InputMan script for use with a VR device."
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "AdjustPos.cs",
+        "classes": [
+            {
+                "className": "AdjustPos",
+                "summary": "Nudges an object with assignable keyboard shortcuts."
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "ControllerHelp.cs",
+        "classes": [
+            {
+                "className": "ControllerHelp",
+                "summary": ""
+            },
+            {
+                "className": "ControllerLabel",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "ControllerHelpTester.cs",
+        "classes": [
+            {
+                "className": "ControllerHelpTester",
+                "summary": "Provides an example for how to use the controller help texts"
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "CopyTransform.cs",
+        "classes": [
+            {
+                "className": "CopyTransform",
+                "summary": "One object copies the position and/or rotation of another using a variety of techniques. Global or local offsets can be set."
+            },
+            {
+                "className": "CopyTransformEditor",
+                "summary": "Sets up the interface for the CopyTransform script."
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "DisableOnPlatforms.cs",
+        "classes": [
+            {
+                "className": "DisableOnPlatforms",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "DontDestroyOnLoad.cs",
+        "classes": [
+            {
+                "className": "DontDestroyOnLoad",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "IDictionaryPackable.cs",
+        "classes": []
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "INetworkPack.cs",
+        "classes": []
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "Logger.cs",
+        "classes": [
+            {
+                "className": "Logger",
+                "summary": "Logs any data to a file."
+            },
+            {
+                "className": "StringList",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "LoggerConstantFields.cs",
+        "classes": []
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "Movement.cs",
+        "classes": [
+            {
+                "className": "Movement",
+                "summary": "Adds several movement techniques while maintaining compatibility with many rig setups."
+            },
+            {
+                "className": "Teleporter",
+                "summary": "The current chosen spot to teleport to"
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "PlayerLogger.cs",
+        "classes": [
+            {
+                "className": "PlayerLogger",
+                "summary": "Logs position data from a VR rig using Logger.cs every frame"
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "PlayerPrefsJson.cs",
+        "classes": [
+            {
+                "className": "PlayerPrefsJson",
+                "summary": ""
+            },
+            {
+                "className": "PlayerPrefsJsonEditor",
+                "summary": "Allows for loading from playerprefsjson in the Editor."
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "Rig.cs",
+        "classes": [
+            {
+                "className": "Rig",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "SaveComponent.cs",
+        "classes": [
+            {
+                "className": "SaveComponent",
+                "summary": "Saves a variety of components of an object to PlayerPrefsJson. Local or global coordinates. Requires a unique object name."
+            },
+            {
+                "className": "SaveComponentEditor",
+                "summary": "Allows for loading from playerprefsjson in the Editor."
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "SaveLoc.cs",
+        "classes": [
+            {
+                "className": "SaveLoc",
+                "summary": "Saves the location and rotation of an object to PlayerPrefsJson. Local or global coordinates. Requires a unique object name."
+            },
+            {
+                "className": "SaveLocEditor",
+                "summary": "Allows for loading from playerprefs in the Editor."
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "UploadLogsUI.cs",
+        "classes": [
+            {
+                "className": "UploadLogsUI",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "Util.cs",
+        "classes": [
+            {
+                "className": "ReadOnlyAttribute",
+                "summary": ""
+            },
+            {
+                "className": "ReadOnlyAttributeDrawer",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "VRObject.cs",
+        "classes": [
+            {
+                "className": "VRObject",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime"
+        ],
+        "fileName": "XRSetFloorHeight.cs",
+        "classes": [
+            {
+                "className": "XRSetFloorHeight",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Input"
+        ],
+        "fileName": "InputMan.cs",
+        "classes": [
+            {
+                "className": "InputMan",
+                "summary": "Makes input from VR devices accessible from a unified set of methods. Can treat axes as button down."
+            },
+            {
+                "className": "InputManEditor",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Input"
+        ],
+        "fileName": "InputManTester.cs",
+        "classes": [
+            {
+                "className": "InputManTester",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Input"
+        ],
+        "fileName": "InputModule.cs",
+        "classes": []
+    },
+    {
+        "path": [
+            "Runtime",
+            "Input"
+        ],
+        "fileName": "InputModuleUnity.cs",
+        "classes": [
+            {
+                "className": "InputModuleUnity",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Input"
+        ],
+        "fileName": "InputModuleXR.cs",
+        "classes": [
+            {
+                "className": "InputModuleXR",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction"
+        ],
+        "fileName": "CollisionSound.cs",
+        "classes": [
+            {
+                "className": "CollisionSound",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction"
+        ],
+        "fileName": "MouseControlsVRGrabbableHand.cs",
+        "classes": [
+            {
+                "className": "MouseControlsVRGrabbableHand",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction"
+        ],
+        "fileName": "VRGrabbableHand.cs",
+        "classes": [
+            {
+                "className": "VRGrabbableHand",
+                "summary": "\u270b Handles grab and release of VRGrabbable objects. Needs to be able to receive OnTriggerEnter events."
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction"
+        ],
+        "fileName": "VRPhysicalButton.cs",
+        "classes": [
+            {
+                "className": "VRPhysicalButton",
+                "summary": ""
+            },
+            {
+                "className": "VRPhysicalButtonEditor",
+                "summary": "Sets up the interface for the CopyTransform script."
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction",
+            "VRGrabbable"
+        ],
+        "fileName": "VRGrabbable.cs",
+        "classes": []
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction",
+            "VRGrabbable",
+            "Subclasses"
+        ],
+        "fileName": "Climbable.cs",
+        "classes": [
+            {
+                "className": "Climbable",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction",
+            "VRGrabbable",
+            "Subclasses"
+        ],
+        "fileName": "VRDial.cs",
+        "classes": [
+            {
+                "className": "VRDial",
+                "summary": "Spins \ud83d\udd04"
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction",
+            "VRGrabbable",
+            "Subclasses"
+        ],
+        "fileName": "VRDialAdjuster.cs",
+        "classes": [
+            {
+                "className": "VRDialAdjuster",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction",
+            "VRGrabbable",
+            "Subclasses"
+        ],
+        "fileName": "VRGrabbableJustSendEvent.cs",
+        "classes": [
+            {
+                "className": "VRGrabbableJustSendEvent",
+                "summary": ""
+            },
+            {
+                "className": "GrabEvent",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction",
+            "VRGrabbable",
+            "Subclasses"
+        ],
+        "fileName": "VRHingeDial.cs",
+        "classes": [
+            {
+                "className": "VRHingeDial",
+                "summary": "Spins \ud83d\udd04\n\t In VRDial2, the goal position is entirely virtual,\n\t and both remote and local dials try to achieve the goal position with physics in some way.\n\t Limits are defined by hinge joint/physics"
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction",
+            "VRGrabbable",
+            "Subclasses"
+        ],
+        "fileName": "VRLocalConstrainedMoveable.cs",
+        "classes": [
+            {
+                "className": "VRLocalConstrainedMoveable",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction",
+            "VRGrabbable",
+            "Subclasses"
+        ],
+        "fileName": "VRMoveable.cs",
+        "classes": [
+            {
+                "className": "VRMoveable",
+                "summary": ""
+            },
+            {
+                "className": "VRMoveableEditor",
+                "summary": "Sets up the interface for the VRMoveable script."
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction",
+            "VRGrabbable",
+            "Subclasses"
+        ],
+        "fileName": "VRMoveableButOnceItsStuckInTheGroundItsADial.cs",
+        "classes": [
+            {
+                "className": "VRMoveableButOnceItsStuckInTheGroundItsADial",
+                "summary": "Like the Prism in ENGREDUVR"
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction",
+            "VRGrabbable",
+            "Subclasses"
+        ],
+        "fileName": "VRPointForceGrabbable.cs",
+        "classes": [
+            {
+                "className": "VRPointForceGrabbable",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "VRInteraction",
+            "VRGrabbable",
+            "Subclasses"
+        ],
+        "fileName": "VRSlider.cs",
+        "classes": [
+            {
+                "className": "VRSlider",
+                "summary": "\u2195 Sliders, like legs of tripod, height-adjustable table, etc."
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "WorldMouse"
+        ],
+        "fileName": "ColliderWorldMouse.cs",
+        "classes": [
+            {
+                "className": "ColliderWorldMouse",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "WorldMouse"
+        ],
+        "fileName": "CursorWorldMouse.cs",
+        "classes": [
+            {
+                "className": "CursorWorldMouse",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "WorldMouse"
+        ],
+        "fileName": "FingerWorldMouse.cs",
+        "classes": [
+            {
+                "className": "FingerWorldMouse",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "WorldMouse"
+        ],
+        "fileName": "WorldMouse.cs",
+        "classes": [
+            {
+                "className": "WorldMouse",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "WorldMouse"
+        ],
+        "fileName": "WorldMouseFindCanvasesOnEnable.cs",
+        "classes": [
+            {
+                "className": "WorldMouseFindCanvasesOnEnable",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "WorldMouse"
+        ],
+        "fileName": "WorldMouseInputModule.cs",
+        "classes": [
+            {
+                "className": "WorldMouseInputModuleEditor",
+                "summary": ""
+            },
+            {
+                "className": "WorldMouseInputModule",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "WorldMouse"
+        ],
+        "fileName": "WorldMouseVibrations.cs",
+        "classes": [
+            {
+                "className": "WorldMouseVibrations",
+                "summary": ""
+            }
+        ]
+    },
+    {
+        "path": [
+            "Runtime",
+            "Interaction",
+            "WorldMouse"
+        ],
+        "fileName": "WorldMouseWithLaser.cs",
+        "classes": [
+            {
+                "className": "WorldMouseWithLaserEditor",
+                "summary": ""
+            },
+            {
+                "className": "WorldMouseWithLaser",
+                "summary": ""
+            }
+        ]
+    }
+]
