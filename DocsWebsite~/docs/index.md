@@ -8,7 +8,7 @@ Install the UPM package in Unity:
 
 === "**Option 1:** Add the VEL package registry"
 
-    ![Scoped registry example](/assets/screenshots/scoped_registry.png){ align=right }
+    ![Scoped registry example](assets/screenshots/scoped_registry.png){ align=right }
 
     Using the scoped registry allows you to easily install a specific version of the package by using the Version History tab.
 
@@ -42,4 +42,10 @@ Install the UPM package in Unity:
 
     To update the package, use `git pull` in the VelUtils folder.
 
-Then check out the [samples](/guide/samples), or follow the [quick start](/guide/quick-start).
+!!! danger "Note"
+
+    If you are encountering this error: `Library\PackageCache\edu.uga.engr.vel.velutils@3.0.2\Runtime\Input\InputModuleXR.cs(168,9): error CS0656: Missing compiler required member 'Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create'`, go to Project Settings->Player->Other Settings and change Api Compatibility Level from ".NET Standard 2.1" to ".NET Framework".
+
+
+
+Then check out the [samples](guide/samples.md), or follow the [quick start](guide/quick-start.md).
