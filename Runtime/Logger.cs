@@ -6,43 +6,44 @@ using System.Text;
 using UnityEngine.Networking;
 using System.Collections;
 using System.Globalization;
+using System.Linq;
+using System.Security.Cryptography;
 using ICSharpCode.SharpZipLib.Zip;
 using System.Threading;
 
 namespace VelUtils
 {
-
 	/// <summary>
 	/// Logs any data to a file.
 	/// </summary>
 	[AddComponentMenu("VelUtils/Logger")]
 	public class Logger : MonoBehaviour
 	{
-
 		private static Logger instance;
 
 		/// <summary>
 		/// The local folder within which to save log files
 		/// </summary>
 		private static string logFolder = "Log";
+
 		private const string fileExtension = ".tsv";
 		private const string dateFormat = "yyyy/MM/dd HH:mm:ss.fff";
 		private const string Y_M_D = "yyyy_MM_dd";
 		private const string fileTimeFormat = "yyyy-MM-dd_HH-mm-ss-ff";
 		private const string delimiter = "\t";
 		private const string newLineChar = "\n";
+		private static readonly Dictionary<string, string[]> fileHeaders = new Dictionary<string, string[]>();
 
-		[Header("Web Server Information")]
-		public string webLogURL = "http://";
+		[Header("Web Server Information")] public string webLogURL = "http://";
 		public string webLogPassword;
 		public string appName;
 		public static List<string> subFolders = new List<string>();
 		public static bool uploading;
 		private static float uploadProgress = 0;
 
-		[Header("Log destinations")]
-		[Tooltip("Enables constant logging to the local filesystem. This is required for uploading zips at the end.")]
+		[Header("Log destinations")] [Tooltip("Enables constant logging to the local filesystem. This is required for uploading zips at the end.")]
 		public bool enableLoggingLocal = true;
+
 		[Tooltip("Enables constant uploading to the web server. Leave this off for only uploading zips at the end.")]
 		public bool enableLoggingRemote = true;
 
@@ -50,12 +51,13 @@ namespace VelUtils
 		/// Splits log files into new folders for each day (UTC) 
 		/// This is overriden by separateFoldersPerLaunch if that is true.
 		/// </summary>
-		[Space]
-		public bool separateFoldersPerDay;
+		[Space] public bool separateFoldersPerDay;
+
 		/// <summary>
 		/// Splits log files into new folders based on the application version number
 		/// </summary>
 		public bool separateFoldersPerVersion = true;
+
 		/// <summary>
 		/// Splits log files into new folders based on the launch time of the application
 		/// </summary>
@@ -67,28 +69,32 @@ namespace VelUtils
 		/// <summary>
 		/// How many lines to wait before actually logging
 		/// </summary>
-		[Header("Log Interval")]
-		[Tooltip("How many lines to put in a cache before actually uploading/saving them.")]
+		[Header("Log Interval")] [Tooltip("How many lines to put in a cache before actually uploading/saving them.")]
 		public int lineLogInterval = 50;
+
 		[Tooltip("How long two wait (in seconds) putting lines in a cache before actually uploading/saving them.")]
 		public float timeLogInterval = 5;
+
 		private static int numLinesLogged;
 		private float lastLogTime;
 		public TimeOrLines useTimeOrLineInterval = TimeOrLines.WhicheverLast;
+
 		public enum TimeOrLines
 		{
-			Time, Lines, WhicheverFirst, WhicheverLast
+			Time,
+			Lines,
+			WhicheverFirst,
+			WhicheverLast
 		}
 
-		[Header("Debug.Log Logging")]
-		[Tooltip("Whether to log debug output to file and web. Can't change during runtime.")]
+		[Header("Debug.Log Logging")] [Tooltip("Whether to log debug output to file and web. Can't change during runtime.")]
 		public bool enableDebugLogLogging = true;
+
 		public bool fullStackTraceForErrors = true;
 		public bool fullStackTraceForOtherMessages = true;
 		private static string debugLogFileName = "debug_log";
 
-		[Header("Extra Info")]
-		public bool logSystemInfoOnStart;
+		[Header("Extra Info")] public bool logSystemInfoOnStart;
 
 
 		[Space]
@@ -100,14 +106,14 @@ namespace VelUtils
 		/// Dictionary of filename and list of lines that haven't been logged yet
 		/// </summary>
 		private static Dictionary<string, List<string>> dataToLog = new Dictionary<string, List<string>>();
+
 		/// <summary>
 		/// Dictionary of filename and stream writers
 		/// </summary>
 		private static Dictionary<string, StreamWriter> streamWriters = new Dictionary<string, StreamWriter>();
 
 
-		[Header("Debug")]
-		public bool testMessageWithF6;
+		[Header("Debug")] public bool testMessageWithF6;
 		public bool uploadWithF7;
 		public bool uploadAllWithF8;
 
@@ -119,8 +125,29 @@ namespace VelUtils
 
 			if (logSystemInfoOnStart)
 			{
+				SetHeaders("system_info",
+					"deviceUniqueIdentifier",
+					"deviceModel",
+					"deviceName",
+					"deviceType",
+					"operatingSystem",
+					"operatingSystemFamily",
+					"graphicsDeviceName",
+					"graphicsDeviceVendor",
+					"graphicsDeviceType",
+					"graphicsDeviceVersion",
+					"graphicsMemorySize",
+					"graphicsMultiThreaded",
+					"processorType",
+					"processorCount",
+					"processorFrequency",
+					"systemMemorySize",
+					"batteryLevel",
+					"batteryStatus"
+				);
 				LogRow(
 					"system_info",
+					SystemInfo.deviceUniqueIdentifier,
 					SystemInfo.deviceModel,
 					SystemInfo.deviceName,
 					SystemInfo.deviceType.ToString(),
@@ -144,10 +171,44 @@ namespace VelUtils
 					SystemInfo.systemMemorySize.ToString(),
 
 					// battery
-					SystemInfo.batteryLevel.ToString(),
+					SystemInfo.batteryLevel.ToString(CultureInfo.InvariantCulture),
 					SystemInfo.batteryStatus.ToString()
 				);
 			}
+		}
+
+		public static void SetHeaders(string fileName, params string[] headers)
+		{
+			fileHeaders[fileName] = headers;
+		}
+
+		private static bool TryGetHeaders(string fileName, out string headerLine)
+		{
+			if (fileHeaders.TryGetValue(fileName, out string[] headers))
+			{
+				StringBuilder sb = new StringBuilder();
+				sb.Append("timestamp");
+				sb.Append(delimiter);
+				sb.Append("hw_id");
+				sb.Append(delimiter);
+				sb.Append("os");
+				sb.Append(delimiter);
+				if (instance.constantFields != null)
+				{
+					foreach (string elem in instance.constantFields.GetConstantFieldHeaders())
+					{
+						sb.Append(elem);
+						sb.Append(delimiter);
+					}
+				}
+
+				sb.Append(string.Join(delimiter, headers));
+				headerLine = sb.ToString();
+				return true;
+			}
+
+			headerLine = "";
+			return false;
 		}
 
 		/// <summary>
@@ -162,6 +223,7 @@ namespace VelUtils
 				Debug.LogError("LogRow() called, but no Logger.cs is in the scene.");
 				return;
 			}
+
 			if (!instance.enableLoggingLocal && !instance.enableLoggingRemote)
 			{
 				return;
@@ -175,7 +237,7 @@ namespace VelUtils
 				// add global constant fields
 				strBuilder.Append(DateTime.UtcNow.ToString(dateFormat));
 				strBuilder.Append(delimiter);
-				strBuilder.Append(SystemInfo.deviceUniqueIdentifier);
+				strBuilder.Append(CreateDeviceId());
 				strBuilder.Append(delimiter);
 				if (Application.isEditor)
 				{
@@ -185,6 +247,7 @@ namespace VelUtils
 				{
 					strBuilder.Append(SystemInfo.operatingSystem);
 				}
+
 				strBuilder.Append(delimiter);
 
 				// add custom constant fields
@@ -216,8 +279,12 @@ namespace VelUtils
 							}
 							else
 							{
-								throw new Exception("Data contains delimiter: " + elem1);	
+								throw new Exception("Data contains delimiter: " + elem1);
 							}
+						}
+						if (elem1.Contains("\n"))
+						{
+							elem1 = elem1.Replace("\n", "\\n");
 						}
 
 						strBuilder.Append(elem1);
@@ -230,6 +297,7 @@ namespace VelUtils
 				{
 					dataToLog.Add(fileName, new List<string>());
 				}
+
 				dataToLog[fileName].Add(strBuilder.ToString());
 			}
 			catch (Exception e)
@@ -271,7 +339,6 @@ namespace VelUtils
 
 			foreach (string fileName in dataToLog.Keys)
 			{
-
 				if (enableLoggingLocal)
 				{
 					string directoryPath = GetCurrentLogFolder();
@@ -282,6 +349,15 @@ namespace VelUtils
 					if (!streamWriters.ContainsKey(fileName))
 					{
 						streamWriters.Add(fileName, new StreamWriter(filePath, true));
+
+						if (TryGetHeaders(fileName, out string headers))
+						{
+							streamWriters[fileName].WriteLine(headers);
+						}
+						else
+						{
+							Debug.LogError("Tried to upload log file with no headers.");
+						}
 					}
 				}
 
@@ -296,6 +372,7 @@ namespace VelUtils
 						{
 							streamWriters[fileName].WriteLine(row);
 						}
+
 						if (enableLoggingRemote)
 						{
 							allOutputData.Append(row);
@@ -307,11 +384,20 @@ namespace VelUtils
 					{
 						writer.Flush();
 					}
+
 					dataToLog[fileName].Clear();
 
 					if (enableLoggingRemote)
 					{
-						StartCoroutine(Upload(fileName, allOutputData.ToString(), appName));
+						if (TryGetHeaders(fileName, out string headers))
+						{
+							StartCoroutine(Upload(fileName, allOutputData.ToString(), appName, headers));
+						}
+						else
+						{
+							Debug.LogError("Tried to upload log file with no headers.");
+							StartCoroutine(Upload(fileName, allOutputData.ToString(), appName, ""));
+						}
 					}
 				}
 				catch (Exception e)
@@ -350,6 +436,7 @@ namespace VelUtils
 			{
 				Directory.CreateDirectory(directoryPath);
 			}
+
 			if (parentLogFolder) return directoryPath;
 
 
@@ -366,17 +453,19 @@ namespace VelUtils
 			{
 				Directory.CreateDirectory(directoryPath);
 			}
+
 			return directoryPath;
 		}
 
-		IEnumerator Upload(string name, string data, string appName)
+		IEnumerator Upload(string name, string data, string appName, string headers)
 		{
 			if (string.IsNullOrEmpty(data)) yield break;
-			
+
 			WWWForm form = new WWWForm();
 			form.AddField("password", webLogPassword);
 			form.AddField("appendfile", name);
 			form.AddField("appenddata", data);
+			form.AddField("headers", headers);
 			form.AddField("app", appName);
 			form.AddField("version", Application.version);
 			using (UnityWebRequest www = UnityWebRequest.Post(webLogURL, form))
@@ -396,6 +485,7 @@ namespace VelUtils
 				Debug.LogError("UploadZip() called, but no Logger.cs is in the scene.");
 				return;
 			}
+
 			instance.StartCoroutine(instance.UploadZipCo(uploadAll));
 		}
 
@@ -502,24 +592,28 @@ namespace VelUtils
 					{
 						WriteOutLogCache();
 					}
+
 					break;
 				case TimeOrLines.Lines:
 					if (numLinesLogged > lineLogInterval)
 					{
 						WriteOutLogCache();
 					}
+
 					break;
 				case TimeOrLines.WhicheverFirst:
 					if (Time.time - lastLogTime > timeLogInterval || numLinesLogged > lineLogInterval)
 					{
 						WriteOutLogCache();
 					}
+
 					break;
 				case TimeOrLines.WhicheverLast:
 					if (Time.time - lastLogTime > timeLogInterval && numLinesLogged > lineLogInterval)
 					{
 						WriteOutLogCache();
 					}
+
 					break;
 			}
 
@@ -551,6 +645,24 @@ namespace VelUtils
 			if (enableDebugLogLogging)
 				Application.logMessageReceived -= LogCallback;
 		}
+		
+		/// <summary>
+		/// Computes 15-char device id compatibly with pocketbase
+		/// This should be kept compatible with the VEL-Connect Unity package
+		/// </summary>
+		private static string CreateDeviceId()
+		{
+			MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+			StringBuilder sb = new StringBuilder(SystemInfo.deviceUniqueIdentifier);
+			sb.Append(Application.productName);
+#if UNITY_EDITOR
+			// allows running multiple builds on the same computer
+			sb.Append(Application.dataPath);
+			sb.Append("EDITOR");
+#endif
+			string id = Convert.ToBase64String(md5.ComputeHash(Encoding.UTF8.GetBytes(sb.ToString())));
+			return id[..15];
+		}
 
 		private void LogCallback(string condition, string stackTrace, LogType logType)
 		{
@@ -563,6 +675,7 @@ namespace VelUtils
 			{
 				cols.Add(ToLiteral2(stackTrace));
 			}
+
 			LogRow(debugLogFileName, cols);
 		}
 
@@ -592,6 +705,7 @@ namespace VelUtils
 					if (nextChar == '"')
 						sb.Append("\"");
 				}
+
 				sb.Append("\"");
 				return sb.ToString();
 			}
@@ -602,7 +716,6 @@ namespace VelUtils
 		//close writers
 		private void OnApplicationQuit()
 		{
-
 			WriteOutLogCache();
 
 			foreach (KeyValuePair<string, StreamWriter> writer in streamWriters)
@@ -610,7 +723,6 @@ namespace VelUtils
 				writer.Value.Close();
 			}
 		}
-
 	}
 
 	public class StringList
@@ -621,7 +733,7 @@ namespace VelUtils
 		{
 			List = new List<string>();
 		}
-	
+
 		public StringList(List<dynamic> l)
 		{
 			List = new List<string>();
@@ -650,6 +762,7 @@ namespace VelUtils
 				}
 			}
 		}
+
 		public void Add(string s)
 		{
 			List.Add(s);

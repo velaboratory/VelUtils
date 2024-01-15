@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace VelUtils
 {
-	public abstract class LoggerConstantFields: MonoBehaviour
+	public abstract class LoggerConstantFields : MonoBehaviour
 	{
-		public abstract string[] GetConstantFields();
+		public abstract IEnumerable<string> GetConstantFields();
+		public abstract IEnumerable<string> GetConstantFieldHeaders();
 	}
 }
