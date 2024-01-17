@@ -4,24 +4,20 @@ using UnityEngine;
 
 namespace VelUtils
 {
-
 	/// <summary>
 	/// Saves the location and rotation of an object to PlayerPrefsJson. Local or global coordinates. Requires a unique object name.
 	/// </summary>
 	[AddComponentMenu("VelUtils/SaveLoc")]
+	[Obsolete("Use SaveComponent instead")]
 	public class SaveLoc : MonoBehaviour
 	{
-
 		public bool save = true;
 		public bool load = true;
-		[Space]
-		public Space coordinateSystem = Space.Self;
+		[Space] public Space coordinateSystem = Space.Self;
 
-		[Space]
-		public Component customType;
+		[Space] public Component customType;
 
-		[Space]
-		public string id;
+		[ReadOnly] public string id;
 
 		private void Start()
 		{
@@ -31,22 +27,23 @@ namespace VelUtils
 			}
 		}
 
-        private void OnApplicationFocus(bool focus)
-        {
+		private void OnApplicationFocus(bool focus)
+		{
 			if (!focus)
 			{
-                Save();
-            }
-        }
-
-        private void OnApplicationPause(bool pause)
-        {
-			if (pause) { 
 				Save();
 			}
-        }
+		}
 
-        private void OnApplicationQuit()
+		private void OnApplicationPause(bool pause)
+		{
+			if (pause)
+			{
+				Save();
+			}
+		}
+
+		private void OnApplicationQuit()
 		{
 			if (save)
 			{
@@ -108,39 +105,43 @@ namespace VelUtils
 			}
 		}
 
-		public string FieldToKey(string fieldName)
+		private string FieldToKey(string fieldName)
 		{
-			return string.Format("{0}_{1}_{2}", name, id, fieldName);
+			return $"{name}_{id}_{fieldName}";
 		}
 
-        public void GenerateID()
-        {
+		public void GenerateID()
+		{
 			id = Guid.NewGuid().ToString();
-        }
-    }
+		}
+	}
 
-	
 
 #if UNITY_EDITOR
-    /// <summary>
-    /// Allows for loading from playerprefs in the Editor.
-    /// </summary>
-    [CustomEditor(typeof(SaveLoc))]
+	/// <summary>
+	/// Allows for loading from playerprefs in the Editor.
+	/// </summary>
+	[CustomEditor(typeof(SaveLoc))]
 	public class SaveLocEditor : Editor
 	{
 		public override void OnInspectorGUI()
 		{
 			DrawDefaultInspector();
-			var sl = target as SaveLoc;
+			SaveLoc sl = target as SaveLoc;
+			if (sl == null) return;
 
-			if (sl.id == null || sl.id == "") sl.GenerateID();
+			if (string.IsNullOrEmpty(sl.id)) sl.GenerateID();
+
+			if (GUILayout.Button("Regenerate"))
+			{
+				sl.GenerateID();
+			}
 
 			EditorGUILayout.Space();
 			EditorGUILayout.Space();
 
 			if (!GUILayout.Button("Load from PlayerPrefs")) return;
 			if (sl != null) sl.Load();
-
 		}
 	}
 #endif
