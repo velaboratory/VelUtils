@@ -56,6 +56,13 @@ namespace VelUtils
 			}
 		}
 
+		private void OnApplicationFocus(bool hasFocus)
+		{
+			if (hasFocus) return;
+			SaveComponent.SaveAll();
+			Save();
+		}
+
 		private void OnApplicationQuit()
 		{
 			SaveComponent.SaveAll();
@@ -141,14 +148,13 @@ namespace VelUtils
 
 		#endregion
 
-
 		#region Get Data
 
 		public static float GetFloat(string id, float defaultValue = 0, string path = "default")
 		{
 			InitIfNot();
 			if (HasKey(id, path))
-				return (float) instance.data[path][id];
+				return (float)instance.data[path][id];
 			SetFloat(id, defaultValue, path);
 			return defaultValue;
 		}
@@ -157,7 +163,7 @@ namespace VelUtils
 		{
 			InitIfNot();
 			if (HasKey(id, path))
-				return (int) (long) instance.data[path][id];
+				return (int)(long)instance.data[path][id];
 			SetInt(id, defaultValue, path);
 			return defaultValue;
 		}
@@ -166,7 +172,7 @@ namespace VelUtils
 		{
 			InitIfNot();
 			if (HasKey(id, path))
-				return ((Dictionary<string, object>) instance.data[path][id]).ToVector3();
+				return ((Dictionary<string, object>)instance.data[path][id]).ToVector3();
 
 			SetVector3(id, defaultValue, path);
 			return defaultValue;
@@ -191,7 +197,7 @@ namespace VelUtils
 		{
 			InitIfNot();
 			if (HasKey(id, path))
-				return ((Dictionary<string, object>) instance.data[path][id]).ToQuaternion();
+				return ((Dictionary<string, object>)instance.data[path][id]).ToQuaternion();
 
 			SetQuaternion(id, defaultValue, path);
 			return defaultValue;
@@ -201,7 +207,7 @@ namespace VelUtils
 		{
 			InitIfNot();
 			if (HasKey(id, path))
-				return (string) instance.data[path][id];
+				return (string)instance.data[path][id];
 
 			SetString(id, defaultValue, path);
 			return defaultValue;
@@ -211,7 +217,7 @@ namespace VelUtils
 		{
 			InitIfNot();
 			if (HasKey(id, path))
-				return (bool) instance.data[path][id];
+				return (bool)instance.data[path][id];
 
 			SetBool(id, defaultValue, path);
 			return defaultValue;
@@ -232,7 +238,7 @@ namespace VelUtils
 				}
 
 				// return ((JObject) instance.data[path][id]);
-				return (Dictionary<string, object>) instance.data[path][id];
+				return (Dictionary<string, object>)instance.data[path][id];
 			}
 
 			SetDictionary(id, defaultValue, path);
@@ -273,7 +279,7 @@ namespace VelUtils
 			InitIfNot();
 			if (!instance.data.ContainsKey(path)) instance.Load(path);
 			return instance.data.ContainsKey(path) && instance.data[path].ContainsKey(id) &&
-			       ((Dictionary<string, object>) instance.data[path][id]).ContainsKey(subkey);
+			       ((Dictionary<string, object>)instance.data[path][id]).ContainsKey(subkey);
 		}
 
 		#endregion
@@ -362,7 +368,7 @@ namespace VelUtils
 
 		public static Quaternion ToQuaternion(this Dictionary<string, object> val)
 		{
-			return new Quaternion((float) val["x"], (float) val["y"], (float) val["z"], (float) val["w"]);
+			return new Quaternion((float)val["x"], (float)val["y"], (float)val["z"], (float)val["w"]);
 		}
 
 		public static Vector3 ToVector3(this object val)
@@ -370,7 +376,7 @@ namespace VelUtils
 			switch (val)
 			{
 				case System.Numerics.Vector3 vec:
-					return new Vector3(vec.X,vec.Y,vec.Z);
+					return new Vector3(vec.X, vec.Y, vec.Z);
 				case Vector3 vec:
 					return vec;
 				case Dictionary<string, object> dict:
@@ -394,7 +400,7 @@ namespace VelUtils
 			switch (val)
 			{
 				case System.Numerics.Quaternion q:
-					return new Quaternion(q.X, q.Y,q.Z,q.W);
+					return new Quaternion(q.X, q.Y, q.Z, q.W);
 				case Quaternion q:
 					return q;
 				case Dictionary<string, object> dict:
@@ -410,9 +416,9 @@ namespace VelUtils
 		{
 			return new Dictionary<string, object>
 			{
-				{"x", val.x},
-				{"y", val.y},
-				{"z", val.z},
+				{ "x", val.x },
+				{ "y", val.y },
+				{ "z", val.z },
 			};
 		}
 
@@ -420,10 +426,10 @@ namespace VelUtils
 		{
 			return new Dictionary<string, object>
 			{
-				{"x", val.x},
-				{"y", val.y},
-				{"z", val.z},
-				{"w", val.w},
+				{ "x", val.x },
+				{ "y", val.y },
+				{ "z", val.z },
+				{ "w", val.w },
 			};
 		}
 	}
