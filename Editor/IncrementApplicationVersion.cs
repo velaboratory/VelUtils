@@ -1,10 +1,12 @@
-﻿using System.Linq;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
 namespace VelUtils.Editor
 {
+	/// <summary>
+	/// Increments the bundleVersion and player version either using a menu item or automatically on build.
+	/// </summary>
 	[InitializeOnLoad]
 	public class IncrementApplicationVersion
 	{

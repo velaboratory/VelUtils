@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 namespace VelUtils
 {
+	/// <summary>
+	/// System for creating help labels on a VR controller. Labels can be custom or indicate specific buttons to press.
+	/// </summary>
 	[AddComponentMenu("VelUtils/Controller Help")]
 	public class ControllerHelp : MonoBehaviour
 	{
@@ -91,7 +94,8 @@ namespace VelUtils
 			/// <param name="side">Which controller</param>
 			/// <param name="type">Type of input</param>
 			/// <param name="offset">Position and direction of label offset</param>
-			public ControllerLabel(Side side, ButtonHintType type, Transform parent, Transform controller, GameObject labelPrefab, Vector3[] offset, Mesh mesh = null, Material meshMaterial = null, bool onlyHighlight = false)
+			public ControllerLabel(Side side, ButtonHintType type, Transform parent, Transform controller, GameObject labelPrefab, Vector3[] offset, Mesh mesh = null,
+				Material meshMaterial = null, bool onlyHighlight = false)
 			{
 				labelObj = Instantiate(labelPrefab, parent);
 				canvasObj = labelObj.GetComponentInChildren<Canvas>().GetComponent<RectTransform>();
@@ -129,7 +133,7 @@ namespace VelUtils
 			{
 				// if this is highlight-only
 				if (offset == null) return;
-				
+
 				Vector3 pos = controller.TransformPoint(offset[0] * scale);
 				Vector3 dir = controller.TransformPoint(offset[1] * scale);
 				labelObj.transform.position = dir;
@@ -257,7 +261,8 @@ namespace VelUtils
 				ControllerLabel label;
 				if (buttonMeshesDict[Side.Left].ContainsKey(hintType))
 				{
-					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.leftHand, instance.labelPrefab, offsets[hintType], buttonMeshesDict[Side.Left][hintType], instance.highlightMaterial, onlyHighlight: text == "");
+					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.leftHand, instance.labelPrefab, offsets[hintType],
+						buttonMeshesDict[Side.Left][hintType], instance.highlightMaterial, onlyHighlight: text == "");
 				}
 				else
 				{
@@ -277,7 +282,8 @@ namespace VelUtils
 				ControllerLabel label;
 				if (buttonMeshesDict[Side.Right].ContainsKey(hintType))
 				{
-					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.rightHand, instance.labelPrefab, flippedOffsets, buttonMeshesDict[Side.Right][hintType], instance.highlightMaterial, onlyHighlight: text == "");
+					label = new ControllerLabel(side, hintType, instance.rig.transform, instance.rig.rightHand, instance.labelPrefab, flippedOffsets,
+						buttonMeshesDict[Side.Right][hintType], instance.highlightMaterial, onlyHighlight: text == "");
 				}
 				else
 				{

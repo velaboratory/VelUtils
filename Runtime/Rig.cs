@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace VelUtils
 {
+	/// <summary>
+	/// Data structure for VR rigs
+	/// </summary>
 	[AddComponentMenu("VelUtils/Rig")]
 	public class Rig : MonoBehaviour
 	{

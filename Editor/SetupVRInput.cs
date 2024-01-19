@@ -12,6 +12,9 @@ namespace VelUtils.Editor
 		JoystickAxis = 2
 	};
 
+	/// <summary>
+	/// Utility class for defining an input in the Input Manager
+	/// </summary>
 	public class InputAxis
 	{
 		public string name;
@@ -36,7 +39,8 @@ namespace VelUtils.Editor
 	}
 
 	/// <summary>
-	/// Adds a dropdown menu option for automatically populating the Input system for use with the InputMan script for use with a VR device.
+	/// Automatically populates the Input system for use with the InputMan script for use with a VR device.
+	/// Also adds a dropdown menu option for populating the list manually.
 	/// </summary>
 	public class SetupVRInput : EditorWindow
 	{
@@ -354,7 +358,7 @@ namespace VelUtils.Editor
 			GetChildProperty(axisProperty, "sensitivity").floatValue = axis.sensitivity;
 			GetChildProperty(axisProperty, "snap").boolValue = InputAxis.snap;
 			GetChildProperty(axisProperty, "invert").boolValue = InputAxis.invert;
-			GetChildProperty(axisProperty, "type").intValue = (int) axis.type;
+			GetChildProperty(axisProperty, "type").intValue = (int)axis.type;
 			GetChildProperty(axisProperty, "axis").intValue = axis.axis - 1;
 			GetChildProperty(axisProperty, "joyNum").intValue = axis.joyNum;
 

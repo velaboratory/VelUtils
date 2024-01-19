@@ -1,18 +1,21 @@
 using UnityEngine;
 
-public class DisableOnPlatforms : MonoBehaviour
+namespace VelUtils
 {
-	[Header("This object is enabled on:")] 
-	public bool android = true;
-	public bool desktop = true;
-	public bool webgl = true;
-	public bool editor = true;
-
-	// Start is called before the first frame update
-	private void Start()
+	/// <summary>
+	/// Sets the object as enabled on the specified platforms on Awake() using preprocessor statements
+	/// </summary>
+	public class DisableOnPlatforms : MonoBehaviour
 	{
+		[Header("This object is enabled on:")] public bool android = true;
+		public bool desktop = true;
+		public bool webgl = true;
+		public bool editor = true;
+
+		private void Awake()
+		{
 #if UNITY_EDITOR
-		gameObject.SetActive(editor);
+			gameObject.SetActive(editor);
 #elif UNITY_ANDROID
 		gameObject.SetActive(android);
 #elif UNITY_WEBGL
@@ -20,5 +23,6 @@ public class DisableOnPlatforms : MonoBehaviour
 #else
         gameObject.SetActive(desktop);
 #endif
+		}
 	}
 }

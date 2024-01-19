@@ -3,18 +3,6 @@
         "path": [
             "Editor"
         ],
-        "fileName": "CreateUtilities.cs",
-        "classes": [
-            {
-                "className": "CreateUtilities",
-                "summary": ""
-            }
-        ]
-    },
-    {
-        "path": [
-            "Editor"
-        ],
         "fileName": "EditorShortCutKeys.cs",
         "classes": [
             {
@@ -22,12 +10,8 @@
                 "summary": "Adds `F5` shortcut to enter play mode."
             },
             {
-                "className": "ReadOnlyAttribute",
-                "summary": ""
-            },
-            {
                 "className": "ReadOnly",
-                "summary": ""
+                "summary": "Adds the [ReadOnly] inspector attribute.\n\t Add [ReadOnly] to any serialized variable, and it will show up in the inspector, but not be editable."
             },
             {
                 "className": "ReadOnlyPlayModeAttribute",
@@ -47,7 +31,7 @@
         "classes": [
             {
                 "className": "IncrementApplicationVersion",
-                "summary": ""
+                "summary": "Increments the bundleVersion and player version either using a menu item or automatically on build."
             }
         ]
     },
@@ -59,11 +43,11 @@
         "classes": [
             {
                 "className": "InputAxis",
-                "summary": ""
+                "summary": "Utility class for defining an input in the Input Manager"
             },
             {
                 "className": "SetupVRInput",
-                "summary": "Adds a dropdown menu option for automatically populating the Input system for use with the InputMan script for use with a VR device."
+                "summary": "Automatically populates the Input system for use with the InputMan script for use with a VR device.\n\t Also adds a dropdown menu option for populating the list manually."
             }
         ]
     },
@@ -87,7 +71,7 @@
         "classes": [
             {
                 "className": "ControllerHelp",
-                "summary": ""
+                "summary": "System for creating help labels on a VR controller. Labels can be custom or indicate specific buttons to press."
             },
             {
                 "className": "ControllerLabel",
@@ -131,7 +115,7 @@
         "classes": [
             {
                 "className": "DisableOnPlatforms",
-                "summary": ""
+                "summary": "Sets the object as enabled on the specified platforms on Awake() using preprocessor statements"
             }
         ]
     },
@@ -152,14 +136,24 @@
             "Runtime"
         ],
         "fileName": "IDictionaryPackable.cs",
-        "classes": []
+        "classes": [
+            {
+                "className": "IDictionaryPackable",
+                "summary": "Denotes classes that can be packed to and from a Dictionary of string,object"
+            }
+        ]
     },
     {
         "path": [
             "Runtime"
         ],
         "fileName": "INetworkPack.cs",
-        "classes": []
+        "classes": [
+            {
+                "className": "INetworkPack",
+                "summary": "Denotes classes that can be packed to and from a byte array"
+            }
+        ]
     },
     {
         "path": [
@@ -169,11 +163,11 @@
         "classes": [
             {
                 "className": "Logger",
-                "summary": "Logs any data to a file."
+                "summary": "Logs any data to a file. An instance of this class must be in the scene."
             },
             {
                 "className": "StringList",
-                "summary": ""
+                "summary": "Utility class to make logging different datatypes easier.\n\t Inputs can be floats, Vectors, bools, etc, and the output defines consistent serialization for all of them at once."
             }
         ]
     },

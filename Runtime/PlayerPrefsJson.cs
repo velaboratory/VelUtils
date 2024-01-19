@@ -11,6 +11,9 @@ using UnityEngine;
 
 namespace VelUtils
 {
+	/// <summary>
+	/// Built to be compatible with PlayerPrefs, but saves to a .json file on the filesystem instead of the registry.
+	/// </summary>
 	public class PlayerPrefsJson : MonoBehaviour
 	{
 		public static PlayerPrefsJson instance;

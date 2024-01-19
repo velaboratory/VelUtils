@@ -6,16 +6,14 @@ using System.Text;
 using UnityEngine.Networking;
 using System.Collections;
 using System.Globalization;
-using System.Linq;
 using System.Security.Cryptography;
 using ICSharpCode.SharpZipLib.Zip;
 using System.Threading;
-using NUnit.Framework;
 
 namespace VelUtils
 {
 	/// <summary>
-	/// Logs any data to a file.
+	/// Logs any data to a file. An instance of this class must be in the scene.
 	/// </summary>
 	[AddComponentMenu("VelUtils/Logger")]
 	public class Logger : MonoBehaviour
@@ -728,6 +726,10 @@ namespace VelUtils
 		}
 	}
 
+	/// <summary>
+	/// Utility class to make logging different datatypes easier.
+	/// Inputs can be floats, Vectors, bools, etc, and the output defines consistent serialization for all of them at once.
+	/// </summary>
 	public class StringList
 	{
 		public readonly List<string> List;

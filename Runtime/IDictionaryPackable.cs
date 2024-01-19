@@ -14,7 +14,7 @@ namespace VelUtils
 		Dictionary<string, object> PackData();
 
 		/// <summary>
-		/// Receives the dictioary of data about the object.
+		/// Receives the dictionary of data about the object.
 		/// </summary>
 		/// <param name="data">The dictionary with all the data.</param>
 		void UnpackData(Dictionary<string, object> data);

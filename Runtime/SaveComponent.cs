@@ -9,7 +9,7 @@ using UnityEngine.UI;
 namespace VelUtils
 {
 	/// <summary>
-	/// Saves a variety of components of an object to PlayerPrefsJson. Local or global coordinates. Requires a unique object name.
+	/// Saves a variety of components of an object to PlayerPrefsJson. Local or global coordinates.
 	/// </summary>
 	[AddComponentMenu("VelUtils/SaveComponent")]
 	public class SaveComponent : MonoBehaviour
