@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using ICSharpCode.SharpZipLib.Zip;
 using System.Threading;
+using NUnit.Framework;
 
 namespace VelUtils
 {
@@ -32,9 +33,18 @@ namespace VelUtils
 		private const string fileTimeFormat = "yyyy-MM-dd_HH-mm-ss-ff";
 		private const string delimiter = "\t";
 		private const string newLineChar = "\n";
-		private static readonly Dictionary<string, string[]> fileHeaders = new Dictionary<string, string[]>();
 
-		[Header("Web Server Information")] public string webLogURL = "http://";
+		private static readonly string[] baseHeaders =
+		{
+			"timestamp",
+			"hw_id",
+			"os",
+		};
+
+		private static readonly Dictionary<string, string[]> fileColumns = new Dictionary<string, string[]>();
+		// private static readonly Dictionary<string, LogDataSchema> fileSchemas = new Dictionary<string, LogDataSchema>();
+
+		[Header("Web Server Information")] public string webLogURL = "https://";
 		public string webLogPassword;
 		public string appName;
 		public static List<string> subFolders = new List<string>();
@@ -117,10 +127,10 @@ namespace VelUtils
 		public bool uploadWithF7;
 		public bool uploadAllWithF8;
 
-        public static bool lastUploadSucceeded { get; private set; }
-        public static UnityWebRequest uploadWWW { get; private set; }
+		public static bool lastUploadSucceeded { get; private set; }
+		public static UnityWebRequest uploadWWW { get; private set; }
 
-        private void Awake()
+		private void Awake()
 		{
 			if (instance == null) instance = this;
 
@@ -182,36 +192,29 @@ namespace VelUtils
 
 		public static void SetHeaders(string fileName, params string[] headers)
 		{
-			fileHeaders[fileName] = headers;
+			fileColumns[fileName] = headers;
 		}
 
-		private static bool TryGetHeaders(string fileName, out string headerLine)
+		private static List<string> GetHeaders(string fileName)
 		{
-			if (fileHeaders.TryGetValue(fileName, out string[] headers))
+			List<string> headersList = new List<string>();
+			headersList.AddRange(baseHeaders);
+			if (instance.constantFields != null)
 			{
-				StringBuilder sb = new StringBuilder();
-				sb.Append("timestamp");
-				sb.Append(delimiter);
-				sb.Append("hw_id");
-				sb.Append(delimiter);
-				sb.Append("os");
-				sb.Append(delimiter);
-				if (instance.constantFields != null)
-				{
-					foreach (string elem in instance.constantFields.GetConstantFieldHeaders())
-					{
-						sb.Append(elem);
-						sb.Append(delimiter);
-					}
-				}
-
-				sb.Append(string.Join(delimiter, headers));
-				headerLine = sb.ToString();
-				return true;
+				headersList.AddRange(instance.constantFields.GetConstantFieldHeaders());
 			}
 
-			headerLine = "";
-			return false;
+			if (fileColumns.TryGetValue(fileName, out string[] dataColumns))
+			{
+				headersList.AddRange(dataColumns);
+			}
+
+			return headersList;
+		}
+
+		private static string GetHeaderLine(string fileName)
+		{
+			return string.Join(delimiter, GetHeaders(fileName));
 		}
 
 		/// <summary>
@@ -219,7 +222,7 @@ namespace VelUtils
 		/// </summary>
 		/// <param name="fileName">e.g. "movement"</param>
 		/// <param name="data">List of columns to log</param>
-		public static void LogRow(string fileName, IEnumerable<string> data)
+		public static void LogRow(string fileName, params object[] data)
 		{
 			if (instance == null)
 			{
@@ -231,6 +234,9 @@ namespace VelUtils
 			{
 				return;
 			}
+
+			List<string> columns = GetHeaders(fileName);
+			int colCount = 0;
 
 			// add the data to the dictionary
 			try
@@ -251,6 +257,8 @@ namespace VelUtils
 					strBuilder.Append(SystemInfo.operatingSystem);
 				}
 
+				colCount += 3;
+
 				strBuilder.Append(delimiter);
 
 				// add custom constant fields
@@ -260,6 +268,7 @@ namespace VelUtils
 					{
 						strBuilder.Append(elem);
 						strBuilder.Append(delimiter);
+						colCount++;
 					}
 				}
 
@@ -285,6 +294,7 @@ namespace VelUtils
 								throw new Exception("Data contains delimiter: " + elem1);
 							}
 						}
+
 						if (elem1.Contains("\n"))
 						{
 							elem1 = elem1.Replace("\n", "\\n");
@@ -293,6 +303,13 @@ namespace VelUtils
 						strBuilder.Append(elem1);
 						strBuilder.Append(delimiter);
 					}
+
+					colCount++;
+				}
+
+				if (colCount != columns.Count)
+				{
+					Debug.LogError("Column count does not match the number of headers specified for this file!", instance);
 				}
 
 				// add this data to the cache
@@ -312,22 +329,7 @@ namespace VelUtils
 		}
 
 		/// <summary>
-		/// Just references the LogRow overload above
-		/// </summary>
-		/// <param name="fileName"></param>
-		/// <param name="elements"></param>
-		public static void LogRow(string fileName, params string[] elements)
-		{
-			if (elements is null)
-			{
-				return;
-			}
-
-			LogRow(fileName, new List<string>(elements));
-		}
-
-		/// <summary>
-		/// Actuallys logs the data to disk or remote because the conditions were met (time or lines)
+		/// Actually logs the data to disk or remote because the conditions were met (time or lines)
 		/// </summary>
 		private void WriteOutLogCache()
 		{
@@ -353,13 +355,10 @@ namespace VelUtils
 					{
 						streamWriters.Add(fileName, new StreamWriter(filePath, true));
 
-						if (TryGetHeaders(fileName, out string headers))
+						if (!File.Exists(filePath))
 						{
+							string headers = GetHeaderLine(fileName);
 							streamWriters[fileName].WriteLine(headers);
-						}
-						else
-						{
-							Debug.LogError("Tried to upload log file with no headers.");
 						}
 					}
 				}
@@ -392,15 +391,8 @@ namespace VelUtils
 
 					if (enableLoggingRemote)
 					{
-						if (TryGetHeaders(fileName, out string headers))
-						{
-							StartCoroutine(Upload(fileName, allOutputData.ToString(), appName, headers));
-						}
-						else
-						{
-							Debug.LogError("Tried to upload log file with no headers.");
-							StartCoroutine(Upload(fileName, allOutputData.ToString(), appName, ""));
-						}
+						string headers = GetHeaderLine(fileName);
+						StartCoroutine(Upload(fileName, allOutputData.ToString(), appName, headers));
 					}
 				}
 				catch (Exception e)
@@ -475,13 +467,14 @@ namespace VelUtils
 			using (UnityWebRequest www = UnityWebRequest.Post(webLogURL, form))
 			{
 				uploadWWW = www;
-                yield return www.SendWebRequest();
+				yield return www.SendWebRequest();
 				uploadWWW = null;
 				if (www.result != UnityWebRequest.Result.Success)
 				{
 					Debug.Log(www.error);
 				}
 			}
+
 			lastUploadSucceeded = true;
 		}
 
@@ -533,6 +526,7 @@ namespace VelUtils
 					Debug.Log(www.downloadHandler.text);
 				}
 			}
+
 			lastUploadSucceeded = true;
 			uploading = false;
 		}
@@ -654,7 +648,7 @@ namespace VelUtils
 			if (enableDebugLogLogging)
 				Application.logMessageReceived -= LogCallback;
 		}
-		
+
 		/// <summary>
 		/// Computes 15-char device id compatibly with pocketbase
 		/// This should be kept compatible with the VEL-Connect Unity package
