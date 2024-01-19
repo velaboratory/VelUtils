@@ -3,5 +3,5 @@
 
 ## Rig
 
-
+Data structure for VR rigs
 

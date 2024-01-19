@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine.Networking;
 using System.Collections;
 using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
 using ICSharpCode.SharpZipLib.Zip;
 using System.Threading;
@@ -220,7 +221,7 @@ namespace VelUtils
 		/// </summary>
 		/// <param name="fileName">e.g. "movement"</param>
 		/// <param name="data">List of columns to log</param>
-		public static void LogRow(string fileName, params object[] data)
+		public static void LogRow(string fileName, params string[] data)
 		{
 			if (instance == null)
 			{
@@ -307,7 +308,19 @@ namespace VelUtils
 
 				if (colCount != columns.Count)
 				{
-					Debug.LogError("Column count does not match the number of headers specified for this file!", instance);
+					// map headers to data:
+					string map = "";
+					string[] dataList = strBuilder.ToString().Split(delimiter);
+					for (int i = 0; i < columns.Count; i++)
+					{
+						string d = dataList.Length > i ? dataList[i] : "NONE";
+						map += $"{columns[i]}:{d}{delimiter}";
+					}
+
+					Debug.LogError($"Column count does not match the number of headers specified for this file: " +
+					               $"actual:{colCount} != headers:{columns.Count} for file:{fileName}\n" +
+					               $"{map}",
+						instance);
 				}
 
 				// add this data to the cache
@@ -324,6 +337,11 @@ namespace VelUtils
 			}
 
 			numLinesLogged++;
+		}
+
+		public static void LogRow(string fileName, List<string> data)
+		{
+			LogRow(fileName, data.ToArray());
 		}
 
 		/// <summary>
@@ -351,9 +369,9 @@ namespace VelUtils
 					// create writer if it doesn't exist
 					if (!streamWriters.ContainsKey(fileName))
 					{
+						bool exists = File.Exists(filePath);
 						streamWriters.Add(fileName, new StreamWriter(filePath, true));
-
-						if (!File.Exists(filePath))
+						if (!exists)
 						{
 							string headers = GetHeaderLine(fileName);
 							streamWriters[fileName].WriteLine(headers);
@@ -638,13 +656,18 @@ namespace VelUtils
 		private void OnEnable()
 		{
 			if (enableDebugLogLogging)
+			{
+				SetHeaders(debugLogFileName, "log_type", "condition", "stack_trace");
 				Application.logMessageReceived += LogCallback;
+			}
 		}
 
 		private void OnDisable()
 		{
 			if (enableDebugLogLogging)
+			{
 				Application.logMessageReceived -= LogCallback;
+			}
 		}
 
 		/// <summary>
@@ -675,6 +698,11 @@ namespace VelUtils
 			else if (logType != LogType.Error && fullStackTraceForOtherMessages)
 			{
 				cols.Add(ToLiteral2(stackTrace));
+			}
+			else
+			{
+				// keeps the csv from being ragged
+				cols.Add("");
 			}
 
 			LogRow(debugLogFileName, cols);
@@ -734,6 +762,11 @@ namespace VelUtils
 	{
 		public readonly List<string> List;
 
+		public string[] ToArray()
+		{
+			return List.ToArray();
+		}
+
 		public StringList()
 		{
 			List = new List<string>();
@@ -763,6 +796,9 @@ namespace VelUtils
 						break;
 					case bool b:
 						Add(b);
+						break;
+					default:
+						Add(o?.ToString() ?? "null");
 						break;
 				}
 			}

@@ -232,16 +232,11 @@ namespace VelUtils
 			InitIfNot();
 			if (HasKey(id, path))
 			{
-				switch (instance.data[path][id])
+				return instance.data[path][id] switch
 				{
-					case Dictionary<string, object> dict:
-						return dict;
-					default:
-						throw new Exception("What type?");
-				}
-
-				// return ((JObject) instance.data[path][id]);
-				return (Dictionary<string, object>)instance.data[path][id];
+					Dictionary<string, object> dict => dict,
+					_ => throw new Exception("What type?")
+				};
 			}
 
 			SetDictionary(id, defaultValue, path);

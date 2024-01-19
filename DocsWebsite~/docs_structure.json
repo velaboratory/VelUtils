@@ -214,7 +214,7 @@
         "classes": [
             {
                 "className": "PlayerPrefsJson",
-                "summary": ""
+                "summary": "Built to be compatible with PlayerPrefs, but saves to a .json file on the filesystem instead of the registry."
             },
             {
                 "className": "PlayerPrefsJsonEditor",
@@ -230,7 +230,7 @@
         "classes": [
             {
                 "className": "Rig",
-                "summary": ""
+                "summary": "Data structure for VR rigs"
             }
         ]
     },
@@ -242,7 +242,7 @@
         "classes": [
             {
                 "className": "SaveComponent",
-                "summary": "Saves a variety of components of an object to PlayerPrefsJson. Local or global coordinates. Requires a unique object name."
+                "summary": "Saves a variety of components of an object to PlayerPrefsJson. Local or global coordinates."
             },
             {
                 "className": "SaveComponentEditor",
@@ -258,7 +258,7 @@
         "classes": [
             {
                 "className": "SaveLoc",
-                "summary": "Saves the location and rotation of an object to PlayerPrefsJson. Local or global coordinates. Requires a unique object name."
+                "summary": "Saves the location and rotation of an object to PlayerPrefsJson. Local or global coordinates. This is deprecated. Use SaveComponent instead."
             },
             {
                 "className": "SaveLocEditor",

@@ -122,6 +122,7 @@ namespace VelUtils
 	/// Allows for loading from playerprefs in the Editor.
 	/// </summary>
 	[CustomEditor(typeof(SaveLoc))]
+	[Obsolete]
 	public class SaveLocEditor : Editor
 	{
 		public override void OnInspectorGUI()

@@ -3,7 +3,7 @@
 
 ## PlayerPrefsJson
 
-
+Built to be compatible with PlayerPrefs, but saves to a .json file on the filesystem instead of the registry.
 
 ## PlayerPrefsJsonEditor
 

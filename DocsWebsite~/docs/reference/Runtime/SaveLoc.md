@@ -3,7 +3,7 @@
 
 ## SaveLoc
 
-Saves the location and rotation of an object to PlayerPrefsJson. Local or global coordinates. Requires a unique object name.
+Saves the location and rotation of an object to PlayerPrefsJson. Local or global coordinates. This is deprecated. Use SaveComponent instead.
 
 ## SaveLocEditor
 

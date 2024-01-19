@@ -25,8 +25,8 @@ theme:
     # text: Oswald
     # text: Merriweather
     # text: Merriweather Sans
-  logo: assets/3dvel.png
-  favicon: assets/3dvel.png
+  logo: assets/vel_logo_3d.png
+  favicon: assets/vel_logo_3d_square.png
 
 plugins:
   - search:

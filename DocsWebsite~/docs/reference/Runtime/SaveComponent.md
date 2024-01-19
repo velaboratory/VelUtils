@@ -3,7 +3,7 @@
 
 ## SaveComponent
 
-Saves a variety of components of an object to PlayerPrefsJson. Local or global coordinates. Requires a unique object name.
+Saves a variety of components of an object to PlayerPrefsJson. Local or global coordinates.
 
 ## SaveComponentEditor
 
