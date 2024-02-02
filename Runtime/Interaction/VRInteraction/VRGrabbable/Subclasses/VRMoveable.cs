@@ -78,13 +78,15 @@ namespace VelUtils.VRInteraction
 
 
 			// this is to prevent objects from going near infinity
-			if (Mathf.Abs(transform.position.x) > 10000 ||
-			    Mathf.Abs(transform.position.y) > 10000 ||
-			    Mathf.Abs(transform.position.z) > 10000)
+			Transform t = transform;
+			Vector3 pos = t.position;
+			if (Mathf.Abs(pos.x) > 10000 ||
+			    Mathf.Abs(pos.y) > 10000 ||
+			    Mathf.Abs(pos.z) > 10000)
 			{
 				Debug.Log("Had to reset the position of an object.", this);
-				transform.position = initialPos;
-				transform.rotation = initialRot;
+				pos = initialPos;
+				t.rotation = initialRot;
 				rb.velocity = Vector3.zero;
 				rb.angularVelocity = Vector3.zero;
 			}

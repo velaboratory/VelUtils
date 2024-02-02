@@ -129,6 +129,20 @@ namespace VelUtils
 		public static bool lastUploadSucceeded { get; private set; }
 		public static UnityWebRequest uploadWWW { get; private set; }
 
+		// Cache the device id
+		public static string DeviceId {
+			get { 
+				if (deviceId != null) {
+					return deviceId;
+				} else {
+					deviceId = CreateDeviceId();
+					return deviceId;
+				} 
+			}
+		}
+
+		private static string deviceId;
+
 		private void Awake()
 		{
 			if (instance == null) instance = this;
@@ -245,7 +259,7 @@ namespace VelUtils
 				// add global constant fields
 				strBuilder.Append(DateTime.UtcNow.ToString(dateFormat));
 				strBuilder.Append(delimiter);
-				strBuilder.Append(CreateDeviceId());
+				strBuilder.Append(DeviceId);
 				strBuilder.Append(delimiter);
 				if (Application.isEditor)
 				{
