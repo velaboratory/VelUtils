@@ -249,7 +249,10 @@ namespace VelUtils.VRInteraction
 
 		}
 
-
+		public float GetValue01()
+		{
+			return (currentAngle - minAngle) / (maxAngle - minAngle);
+		}
 
 		public override void HandleGrab(VRGrabbableHand h)
 		{
