@@ -1,3 +1,9 @@
+---
+title: VR Quick Start
+---
+
+This sets up movement in VR (teleporting, grab-move)
+
 1. Install the package. Instructions for this can be found on the [homepage](../index.md)
  - Add the InputMan component to any GameObject in your scene (like your game manager object)
  - Click the button on InputMan to add the default input module.
