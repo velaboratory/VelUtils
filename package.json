@@ -52,7 +52,7 @@
     }
   ],
   "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "2.0.0-preview",
+    "com.unity.nuget.newtonsoft-json": "3.0.2",
     "com.unity.xr.legacyinputhelpers": "2.1.7"
   }
 }
