@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 
 namespace GorillaLocomotion
@@ -68,10 +69,10 @@ namespace GorillaLocomotion
 		/// </summary>
 		public Action<bool, Vector3, Vector3> HandTouchExit;
 
-
 		public bool disableMovement = false;
 
-		private void Awake()
+
+		private void OnEnable()
 		{
 			if (_instance != null && _instance != this)
 			{
@@ -84,28 +85,35 @@ namespace GorillaLocomotion
 
 			InitializeValues();
 
-			HandTouchEnter += (isRight, position, velocity) =>
-			{
-				// Debug.Log(velocity.magnitude);
-
-				if (isRight)
-				{
-					if (rightHandTouchSource != null)
-					{
-						rightHandTouchSource.Play();
-					}
-				}
-				else
-				{
-					if (leftHandTouchSource != null)
-					{
-						leftHandTouchSource.Play();
-					}
-				}
-			};
+			HandTouchEnter += OnHandTouchEnter;
 		}
 
-		public void InitializeValues()
+		private void OnDisable()
+		{
+			HandTouchEnter -= OnHandTouchEnter;
+		}
+
+		private void OnHandTouchEnter(bool isRight, Vector3 position, Vector3 velocity)
+		{
+			// Debug.Log(velocity.magnitude);
+
+			if (isRight)
+			{
+				if (rightHandTouchSource != null)
+				{
+					rightHandTouchSource.Play();
+				}
+			}
+			else
+			{
+				if (leftHandTouchSource != null)
+				{
+					leftHandTouchSource.Play();
+				}
+			}
+		}
+
+		private void InitializeValues()
 		{
 			playerRigidBody = GetComponent<Rigidbody>();
 			velocityHistory = new Vector3[velocityHistorySize];
@@ -114,6 +122,12 @@ namespace GorillaLocomotion
 			lastHeadPosition = headCollider.transform.position;
 			velocityIndex = 0;
 			lastPosition = transform.position;
+			currentVelocity = Vector3.zero;
+			denormalizedVelocityAverage = Vector3.zero;
+			wasLeftHandTouching = false;
+			wasRightHandTouching = false;
+			leftHandLastTouchTime = 0;
+			rightHandLastTouchTime = 0;
 		}
 
 		private Vector3 CurrentLeftHandPosition()
@@ -451,6 +465,7 @@ namespace GorillaLocomotion
 			Vector3 oldestVelocity = velocityHistory[velocityIndex];
 			currentVelocity = (transform.position - lastPosition) / Time.deltaTime;
 			denormalizedVelocityAverage += (currentVelocity - oldestVelocity) / (float)velocityHistorySize;
+			Debug.Log($"{string.Join(", ", velocityHistory.Select(v => v.magnitude))}", this);
 			velocityHistory[velocityIndex] = currentVelocity;
 			lastPosition = transform.position;
 		}
