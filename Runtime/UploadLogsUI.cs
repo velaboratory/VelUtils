@@ -1,9 +1,10 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.IO;
+using System.Linq;
 
 namespace VelUtils
 {
@@ -12,17 +13,29 @@ namespace VelUtils
 		public Transform optionsObjects;
 		public Transform progressObjects;
 
-		[Space]
-
-		public TMP_Text fileSizeLabel;
+		[Space] public TMP_Text fileSizeLabel;
 		public Toggle uploadAllToggle;
 		public TMP_Text progressText;
+		private bool wasUploading = false;
 
 
 		private void OnEnable()
 		{
 			RefreshSize();
-			progressObjects.gameObject.SetActive(false);
+			if (wasUploading && !Logger.uploading)
+			{
+				HideWhenDone();
+				wasUploading = false;
+			}
+		}
+
+		private void Update()
+		{
+			if (wasUploading && !Logger.uploading)
+			{
+				StartCoroutine(HideAfterDelay());
+				wasUploading = false;
+			}
 		}
 
 		public void RefreshSize()
@@ -43,47 +56,38 @@ namespace VelUtils
 		/// <returns>The file size in bytes</returns>
 		public static long DirSize(DirectoryInfo d)
 		{
-			long size = 0;
 			// Add file sizes.
 			FileInfo[] fis = d.GetFiles();
-			foreach (FileInfo fi in fis)
-			{
-				size += fi.Length;
-			}
+			long size = fis.Sum(fi => fi.Length);
 			// Add subdirectory sizes.
 			DirectoryInfo[] dis = d.GetDirectories();
-			foreach (DirectoryInfo di in dis)
-			{
-				size += DirSize(di);
-			}
+			size += dis.Sum(DirSize);
 			return size;
 		}
 
 		public void Upload()
 		{
 			Logger.UploadZip(uploadAllToggle.isOn);
-			StartCoroutine(UploadCo());
-		}
-
-		private IEnumerator UploadCo()
-		{
+			wasUploading = true;
 			progressObjects.gameObject.SetActive(true);
 			optionsObjects.gameObject.SetActive(false);
 			progressText.text = "Uploading...";
-			while (Logger.uploading)
-			{
-				yield return null;
-			}
+		}
 
+		private IEnumerator HideAfterDelay()
+		{
 			progressText.text = "Done";
 
 			yield return new WaitForSeconds(1);
 
+			HideWhenDone();
+		}
+
+		private void HideWhenDone()
+		{
 			gameObject.SetActive(false);
 			progressObjects.gameObject.SetActive(false);
 			optionsObjects.gameObject.SetActive(true);
 		}
-
-
 	}
 }
