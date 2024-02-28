@@ -224,6 +224,7 @@ namespace VelUtils.VRInteraction
 			{
 				float angleDifference = updatedAngle - currentAngle;
 				currentAngle = updatedAngle;
+				goalAngle = updatedAngle;
 				transform.Rotate(dialAxis, angleDifference, Space.Self);
 				DialTurned?.Invoke(currentAngle, angleDifference, localInput);
 
