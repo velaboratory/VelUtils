@@ -22,6 +22,8 @@ namespace VelUtils.Interaction.WorldMouse
 		public Action<GameObject> OnClickDown;
 		public Action OnClickUp;
 		public Action<GameObject> OnHoverStart;
+		public Action<PointerEventData> OnHoverStartWithData;
+		public Action<PointerEventData> OnHoverStay;
 		public Action OnHoverStop;
 
 		// Internal variables
@@ -118,7 +120,7 @@ namespace VelUtils.Interaction.WorldMouse
 			currentRayLength = data.pointerCurrentRaycast.distance;
 			if (currentRayLength > raycastLength) currentRayLength = 0;
 
-			if (currentRayLength != 0 && !hover)
+			if (currentRayLength != 0 && !hover) // Started Hovering
 			{
 				// Fire the Unity event
 				HoverStart?.Invoke();
@@ -126,6 +128,7 @@ namespace VelUtils.Interaction.WorldMouse
 				hover = true;
 
 				OnHoverStart?.Invoke(data.pointerCurrentRaycast.gameObject);
+				OnHoverStartWithData?.Invoke(data);
 			}
 			else if (currentRayLength == 0 && hover)
 			{
@@ -135,6 +138,9 @@ namespace VelUtils.Interaction.WorldMouse
 				hover = false;
 
 				OnHoverStop?.Invoke();
+			} else if (currentRayLength != 0 && hover)
+			{
+				OnHoverStay?.Invoke(data);
 			}
 		}
 	}
