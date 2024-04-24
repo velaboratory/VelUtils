@@ -399,6 +399,26 @@ namespace VelUtils
 			}
 		}
 
+		public static float GetRawValue(InputStrings key, Side side)
+		{
+			return instance.inputModule.GetRawValue(key, side);
+		}
+		
+		public static bool GetRaw(InputStrings key, Side side)
+		{
+			return instance.inputModule.GetRaw(key, side);
+		}
+		
+		public static bool GetRawDown(InputStrings key, Side side)
+		{
+			return instance.inputModule.GetRawDown(key, side);
+		}
+		
+		public static bool GetRawUp(InputStrings key, Side side)
+		{
+			return instance.inputModule.GetRawUp(key, side);
+		}
+
 		#endregion
 
 		#region Trigger

@@ -38,7 +38,7 @@ namespace VelUtils
 
 		public HashSet<string> grabAirRightLocks = new HashSet<string>();
 
-		private bool GrabAirLocked(Side side)
+		public bool GrabAirLocked(Side side)
 		{
 			return side switch
 			{

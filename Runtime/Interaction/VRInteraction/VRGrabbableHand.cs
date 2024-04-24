@@ -234,7 +234,7 @@ namespace VelUtils.VRInteraction
 			grabbedVRGrabbable = grabbable;
 			if (vibrateOnGrab)
 			{
-				InputMan.Vibrate(side, 1f, .5f);
+				InputMan.Vibrate(side, 1f, .2f);
 			}
 
 			GrabEvent?.Invoke(grabbable);
