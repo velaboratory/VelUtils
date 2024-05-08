@@ -1,17 +1,17 @@
-name: Publish to Verdaccio
+name: Publish to npm.ugavel.com (Verdaccio)
 on:
   push:
     branches:
     - main
 jobs:
   publish-npm:
-    name: set up npm
+    name: npm publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
           registry-url: http://npm.ugavel.com/
       - name: actually publish
         run: npm publish

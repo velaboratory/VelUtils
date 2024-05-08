@@ -1,6 +1,7 @@
 env:
   SUBFOLDER: DocsWebsite~
 
+name: Publish Docs to docs.velutils.ugavel.com (Cloudflare Pages)
 on:
   push:
     paths:
