@@ -128,7 +128,7 @@ namespace VelUtils.Interaction.WorldMouse
 
 			FindCanvases();
 
-			FindObjectsOfType<WorldMouse>().ToList().ForEach(AddWorldMouse);
+			FindObjectsByType<WorldMouse>(FindObjectsSortMode.None).ToList().ForEach(AddWorldMouse);
 		}
 
 		public static void FindCanvases()
@@ -136,7 +136,7 @@ namespace VelUtils.Interaction.WorldMouse
 			if (!autoFindCanvases) return;
 			if (!instance) return;
 
-			Canvas[] canvases = FindObjectsOfType<Canvas>();
+			Canvas[] canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
 			foreach (Canvas canvas in canvases)
 			{
 				canvas.worldCamera = instance.cam;

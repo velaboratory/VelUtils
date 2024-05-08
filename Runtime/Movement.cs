@@ -1162,5 +1162,30 @@ namespace VelUtils
 				list.Average(x => x.z));
 			return result;
 		}
+
+		/// <summary>
+		/// This disables all ability to move the player object, either from external forces or from the player's input.
+		/// </summary>
+		public void LockRigTransform(bool useLock)
+		{
+			if (useLock)
+			{
+				grabAirLeftLocks.Add("globalLock");
+				grabAirRightLocks.Add("globalLock");
+				teleportingMovement = false;
+				scootBackMovement = false;
+				turnInput = Side.None;
+				rig.rb.isKinematic = true;
+			}
+			else
+			{
+				grabAirLeftLocks.Remove("globalLock");
+				grabAirRightLocks.Remove("globalLock");
+				teleportingMovement = true;
+				scootBackMovement = true;
+				turnInput = Side.Either;
+				rig.rb.isKinematic = false;
+			}
+		}
 	}
 }
