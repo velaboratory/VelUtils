@@ -14,6 +14,7 @@ namespace VelUtils.Ar
 	{
 		/// <summary>
 		/// This transform should be a static object in the scene. We will move our camera rig so that this point aligns with point 1 in the real world. The forward vector will point at point 2.
+		/// If there is no origin in the scene, alignment cannot happen. 
 		/// </summary>
 		private ArAlignmentOrigin alignmentOrigin;
 
@@ -41,6 +42,17 @@ namespace VelUtils.Ar
 		/// Point 1 and 2 are in world space
 		/// </summary>
 		public Action<Vector3, Vector3> OnManualAlignmentComplete;
+
+		public Action<GameObject> PointSpawned;
+		/// <summary>
+		/// Shouldn't be called every frame
+		/// </summary>
+		public Action<GameObject> PointMoved;
+
+		/// <summary>
+		/// Called right before destroying a point
+		/// </summary>
+		public Action<GameObject> PointDestroyed;
 
 		public bool debugLogs = true;
 
@@ -124,14 +136,26 @@ namespace VelUtils.Ar
 
 		public void SpawnPoint(int index, Vector3? position)
 		{
-			Log("Spawning point " + index);
-			if (pointObjects[index] != null)
+			// TODO this is bad for perf. Should check on loading scene if we are in a scene with an origin
+			if (alignmentOrigin == null)
 			{
-				Destroy(pointObjects[index]);
+				alignmentOrigin = FindObjectOfType<ArAlignmentOrigin>();
 			}
 
+			if (alignmentOrigin == null)
+			{
+				Debug.LogError("Couldn't find an alignment anchor in this scene.");
+				return;
+			}
+
+			Log("Spawning point " + index);
 			Vector3 pos = position ?? transform.position;
-			pointObjects[index] = Instantiate(pointPrefab, pos, Quaternion.identity, parent: cameraRig);
+			if (pointObjects[index] == null)
+			{
+				pointObjects[index] = Instantiate(pointPrefab, pos, Quaternion.identity, parent: cameraRig);
+				PointSpawned?.Invoke(pointObjects[index]);
+			}
+
 			VRGrabbable grabbable = pointObjects[index].GetComponent<VRGrabbable>();
 			Renderer rend = pointObjects[index].GetComponent<Renderer>();
 			rend.material.color = pointObjectColors[index];
@@ -143,11 +167,17 @@ namespace VelUtils.Ar
 			if (InputMan.ThumbstickPress(Side.Left))
 			{
 				SpawnPoint(0, rig.leftHand.position + rig.leftHand.forward * .2f);
+				TryAlign();
 			}
 
 			if (InputMan.ThumbstickPress(Side.Right))
 			{
 				SpawnPoint(1, rig.rightHand.position + rig.rightHand.forward * .2f);
+				TryAlign();
+			}
+
+			if (InputMan.ThumbstickPressUp(Side.Left))
+			{
 			}
 
 			if (Input.GetKeyDown(KeyCode.F1) || (InputMan.Button1(Side.Left) && InputMan.Button1Down(Side.Right)))
