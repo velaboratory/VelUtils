@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using VelUtils.Ar;
@@ -13,9 +10,8 @@ namespace VelUtils
 
 		private void Start()
 		{
-			// SceneManager.sceneLoaded += (_, _) => { StartCoroutine(LoadCo()); };
+			SceneManager.sceneLoaded += (_, _) => { Load(); };
 			arAlignment.OnManualAlignmentComplete += HandleManualAlignmentComplete;
-			Load();
 		}
 
 		private void Update()

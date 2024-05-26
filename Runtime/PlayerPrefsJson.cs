@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,7 +20,7 @@ namespace VelUtils
 		private readonly Dictionary<string, Dictionary<string, object>> data =
 			new Dictionary<string, Dictionary<string, object>>();
 
-		private const string filename = "PlayerPrefsJson.json";
+		private const string filename = "PlayerPrefs.json";
 		private static string defaultPath;
 		private bool dirty;
 		private static bool init;
@@ -475,7 +474,7 @@ namespace VelUtils
 			EditorGUILayout.Space();
 			EditorGUILayout.Space();
 
-			if (GUILayout.Button("Show PlayerPrefsJson.json in Explorer"))
+			if (GUILayout.Button("Show PlayerPrefs.json in Explorer"))
 			{
 				EditorUtility.RevealInFinder(Path.Combine(Application.persistentDataPath, "PlayerPrefsJson.json"));
 			}

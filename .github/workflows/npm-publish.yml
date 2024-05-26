@@ -2,7 +2,7 @@ name: Publish to npm.ugavel.com (Verdaccio)
 on:
   push:
     branches:
-    - main
+      - main
 jobs:
   publish-npm:
     name: npm publish

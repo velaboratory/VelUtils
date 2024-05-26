@@ -3,10 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 namespace VelUtils
 {
 	[AttributeUsage(AttributeTargets.Field, Inherited = true)]
-	public class ReadOnlyAttribute : PropertyAttribute { }
+	public class ReadOnlyAttribute : PropertyAttribute
+	{
+	}
 #if UNITY_EDITOR
 	[UnityEditor.CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
 	public class ReadOnlyAttributeDrawer : UnityEditor.PropertyDrawer
@@ -24,6 +30,7 @@ namespace VelUtils
 	public static class Extensions
 	{
 		#region Binary writer extensions
+
 		public static void Write(this BinaryWriter writer, Vector2 vec2)
 		{
 			writer.Write(vec2.x);
@@ -44,9 +51,11 @@ namespace VelUtils
 			writer.Write(quat.z);
 			writer.Write(quat.w);
 		}
+
 		#endregion
 
 		#region Binary reader extensions
+
 		public static Vector2 ReadVector2(this BinaryReader reader)
 		{
 			return new Vector2
@@ -76,14 +85,14 @@ namespace VelUtils
 				w = reader.ReadSingle(),
 			};
 		}
+
 		#endregion
-	
-		
+
+
 		public static Quaternion MirrorX(this Quaternion input)
 		{
 			return new Quaternion(-input.x, input.y, input.z, -input.w);
 		}
-	
 	}
 
 	public static class TransformDeepChildExtension
@@ -101,7 +110,17 @@ namespace VelUtils
 				foreach (Transform t in c)
 					queue.Enqueue(t);
 			}
+
 			return null;
+		}
+	}
+
+	public static class GameObjectExtensions
+	{
+		public static T GetOrAddComponent<T>(this GameObject obj) where T : Component
+		{
+			T component = obj.GetComponent<T>();
+			return component != null ? component : obj.AddComponent<T>();
 		}
 	}
 
@@ -138,9 +157,11 @@ namespace VelUtils
 		/// <param name="maxRadius"></param>
 		/// <param name="maxDistance"></param>
 		/// <returns>Hit or no?</returns>
-		public static bool ConeCast(Vector3 origin, Vector3 direction, out RaycastHit hitInfo, float maxRadius, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
+		public static bool ConeCast(Vector3 origin, Vector3 direction, out RaycastHit hitInfo, float maxRadius,
+			float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
 		{
-			RaycastHit[] hits = Physics.SphereCastAll(origin - Vector3.forward * maxRadius, maxRadius, direction, maxDistance, layerMask, queryTriggerInteraction);
+			RaycastHit[] hits = Physics.SphereCastAll(origin - Vector3.forward * maxRadius, maxRadius, direction,
+				maxDistance, layerMask, queryTriggerInteraction);
 			List<AngleAndHit> coneCastHitList = new List<AngleAndHit>();
 			foreach (var hit in hits)
 			{
@@ -171,9 +192,11 @@ namespace VelUtils
 		/// <param name="maxRadius"></param>
 		/// <param name="maxDistance"></param>
 		/// <returns>Hit or no?</returns>
-		public static bool ConeCast(Vector3 origin, Vector3 direction, out RaycastHit hitInfo, float maxRadius, float maxDistance)
+		public static bool ConeCast(Vector3 origin, Vector3 direction, out RaycastHit hitInfo, float maxRadius,
+			float maxDistance)
 		{
-			return ConeCast(origin, direction, out hitInfo, maxRadius, maxDistance, ~0, QueryTriggerInteraction.UseGlobal);
+			return ConeCast(origin, direction, out hitInfo, maxRadius, maxDistance, ~0,
+				QueryTriggerInteraction.UseGlobal);
 		}
 
 		/// <summary>
@@ -186,7 +209,8 @@ namespace VelUtils
 		/// <returns>Hit or no?</returns>
 		public static RaycastHit[] ConeCastAll2(Vector3 origin, Vector3 direction, float maxRadius, float maxDistance)
 		{
-			RaycastHit[] hits = Physics.SphereCastAll(origin - Vector3.forward * maxRadius, maxRadius, direction, maxDistance);
+			RaycastHit[] hits =
+				Physics.SphereCastAll(origin - Vector3.forward * maxRadius, maxRadius, direction, maxDistance);
 			List<RaycastHit> coneCastHitList = new List<RaycastHit>();
 
 			float angle = Mathf.Atan(maxRadius / maxDistance) * Mathf.Rad2Deg;
@@ -212,10 +236,12 @@ namespace VelUtils
 		/// <param name="maxRadius"></param>
 		/// <param name="maxDistance"></param>
 		/// <returns>Hit or no?</returns>
-		public static RaycastHit[] ConeCastAll(Vector3 origin, Vector3 direction, float maxRadius, float maxDistance, int layerMask=~0)
+		public static RaycastHit[] ConeCastAll(Vector3 origin, Vector3 direction, float maxRadius, float maxDistance,
+			int layerMask = ~0)
 		{
 			// get hits
-			RaycastHit[] hits = Physics.SphereCastAll(origin - direction * maxRadius, maxRadius, direction, maxDistance, layerMask);
+			RaycastHit[] hits = Physics.SphereCastAll(origin - direction * maxRadius, maxRadius, direction, maxDistance,
+				layerMask);
 			List<RaycastHit> coneCastHitList = new List<RaycastHit>();
 
 			float angle = Mathf.Atan(maxRadius / maxDistance) * Mathf.Rad2Deg;
@@ -232,5 +258,31 @@ namespace VelUtils
 
 			return coneCastHitList.ToArray();
 		}
+
+		#region Static
+
+		public static bool isQuitting;
+
+#if UNITY_EDITOR
+		[InitializeOnEnterPlayMode]
+		private static void EnterPlayMode(EnterPlayModeOptions options)
+		{
+			isQuitting = false;
+		}
+#endif
+
+		[RuntimeInitializeOnLoadMethod]
+		private static void RunOnStart()
+		{
+			isQuitting = false;
+			Application.quitting += Quit;
+		}
+
+		private static void Quit()
+		{
+			isQuitting = true;
+		}
+
+		#endregion
 	}
 }

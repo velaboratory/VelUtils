@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 using VelUtils.VRInteraction;
 
 namespace VelUtils.Ar
@@ -24,15 +21,6 @@ namespace VelUtils.Ar
 		[Tooltip("Used for getting hand positions for spawning points. This may be the same as cameraRig")]
 		public Rig rig;
 
-		public InputStrings spawnPointInput = InputStrings.VR_Thumbstick_Press;
-
-		// /// <summary>
-		// /// 
-		// /// </summary>
-		// public Transform head;
-		// public SaveArAlignment alignmentSaver;
-		// private Vector3?[] points = new Vector3?[2];
-
 		/// <summary>
 		/// Technically we would only need one point to perform alignment, but saving both gives the user the ability to adjust after the fact easily.
 		/// </summary>
@@ -43,16 +31,17 @@ namespace VelUtils.Ar
 		/// </summary>
 		public Action<Vector3, Vector3> OnManualAlignmentComplete;
 
-		public Action<GameObject> PointSpawned;
+		public Action<int, GameObject> PointSpawned;
+
 		/// <summary>
-		/// Shouldn't be called every frame
+		/// Called every frame that the point is moved
 		/// </summary>
-		public Action<GameObject> PointMoved;
+		public Action<int, GameObject> PointMoved;
 
 		/// <summary>
 		/// Called right before destroying a point
 		/// </summary>
-		public Action<GameObject> PointDestroyed;
+		public Action<int, GameObject> PointDestroyed;
 
 		public bool debugLogs = true;
 
@@ -81,22 +70,11 @@ namespace VelUtils.Ar
 			if (instance == this) instance = null;
 		}
 
-		public void ClearPoints()
-		{
-			// points = new Vector3?[2];
-		}
-
-		// public void SetPoint(int index, Vector3 point)
-		// {
-		// 	// points[index] = point;
-		// 	TryAlign();
-		// }
-
-		public void TryAlign()
+		public void TryAlign(bool manualAlignment = true)
 		{
 			if (pointObjects[0] != null && pointObjects[1] != null)
 			{
-				Align(pointObjects[0].transform.position, pointObjects[1].transform.position);
+				Align(pointObjects[0].transform.position, pointObjects[1].transform.position, manualAlignment);
 			}
 		}
 
@@ -148,18 +126,24 @@ namespace VelUtils.Ar
 				return;
 			}
 
-			Log("Spawning point " + index);
 			Vector3 pos = position ?? transform.position;
 			if (pointObjects[index] == null)
 			{
+				Log("Spawning new point " + index);
 				pointObjects[index] = Instantiate(pointPrefab, pos, Quaternion.identity, parent: cameraRig);
-				PointSpawned?.Invoke(pointObjects[index]);
+				PointSpawned?.Invoke(index, pointObjects[index]);
+			}
+			else
+			{
+				pointObjects[index].transform.SetPositionAndRotation(pos, Quaternion.identity);
+				Log("Moving point " + index);
 			}
 
 			VRGrabbable grabbable = pointObjects[index].GetComponent<VRGrabbable>();
 			Renderer rend = pointObjects[index].GetComponent<Renderer>();
 			rend.material.color = pointObjectColors[index];
-			grabbable.Released += TryAlign;
+			PointMoved?.Invoke(index, pointObjects[index]);
+			grabbable.Released += () => TryAlign();
 		}
 
 		private void Update()
@@ -167,17 +151,23 @@ namespace VelUtils.Ar
 			if (InputMan.ThumbstickPress(Side.Left))
 			{
 				SpawnPoint(0, rig.leftHand.position + rig.leftHand.forward * .2f);
-				TryAlign();
+				TryAlign(false);
 			}
 
 			if (InputMan.ThumbstickPress(Side.Right))
 			{
 				SpawnPoint(1, rig.rightHand.position + rig.rightHand.forward * .2f);
-				TryAlign();
+				TryAlign(false);
 			}
 
 			if (InputMan.ThumbstickPressUp(Side.Left))
 			{
+				TryAlign();
+			}
+
+			if (InputMan.ThumbstickPressUp(Side.Right))
+			{
+				TryAlign();
 			}
 
 			if (Input.GetKeyDown(KeyCode.F1) || (InputMan.Button1(Side.Left) && InputMan.Button1Down(Side.Right)))
