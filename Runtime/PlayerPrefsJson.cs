@@ -156,7 +156,17 @@ namespace VelUtils
 		{
 			InitIfNot();
 			if (HasKey(id, path))
-				return (float)instance.data[path][id];
+			{
+				try
+				{
+					return (float)instance.data[path][id];
+				}
+				catch (InvalidCastException)
+				{
+					Debug.LogWarning("Invalid cast, using default value instead.");
+				}
+			}
+
 			SetFloat(id, defaultValue, path);
 			return defaultValue;
 		}
@@ -165,7 +175,17 @@ namespace VelUtils
 		{
 			InitIfNot();
 			if (HasKey(id, path))
-				return (int)(long)instance.data[path][id];
+			{
+				try
+				{
+					return (int)(long)instance.data[path][id];
+				}
+				catch (InvalidCastException)
+				{
+					Debug.LogWarning("Invalid cast, using default value instead.");
+				}
+			}
+
 			SetInt(id, defaultValue, path);
 			return defaultValue;
 		}
@@ -209,7 +229,9 @@ namespace VelUtils
 		{
 			InitIfNot();
 			if (HasKey(id, path))
-				return (string)instance.data[path][id];
+			{
+				return instance.data[path][id].ToString();
+			}
 
 			SetString(id, defaultValue, path);
 			return defaultValue;
@@ -219,7 +241,16 @@ namespace VelUtils
 		{
 			InitIfNot();
 			if (HasKey(id, path))
-				return (bool)instance.data[path][id];
+			{
+				try
+				{
+					return (bool)instance.data[path][id];
+				}
+				catch (InvalidCastException)
+				{
+					Debug.LogWarning("Invalid cast to bool, using default value instead.");
+				}
+			}
 
 			SetBool(id, defaultValue, path);
 			return defaultValue;
