@@ -78,6 +78,8 @@ namespace VelUtils.VRInteraction
 
 
 			// this is to prevent objects from going near infinity
+			Transform t = transform;
+			Vector3 pos = t.position;
 			if (Mathf.Abs(pos.x) > 10000 ||
 			    Mathf.Abs(pos.y) > 10000 ||
 			    Mathf.Abs(pos.z) > 10000)
