@@ -78,18 +78,21 @@ namespace VelUtils.VRInteraction
 
 
 			// this is to prevent objects from going near infinity
-			Transform t = transform;
-			Vector3 pos = t.position;
 			if (Mathf.Abs(pos.x) > 10000 ||
 			    Mathf.Abs(pos.y) > 10000 ||
 			    Mathf.Abs(pos.z) > 10000)
 			{
 				Debug.Log("Had to reset the position of an object.", this);
-				pos = initialPos;
-				t.rotation = initialRot;
-				rb.velocity = Vector3.zero;
-				rb.angularVelocity = Vector3.zero;
+				ResetPosition();
 			}
+		}
+
+		public void ResetPosition()
+		{
+			transform.position = initialPos;
+			transform.rotation = initialRot;
+			rb.velocity = Vector3.zero;
+			rb.angularVelocity = Vector3.zero;
 		}
 
 		public override void HandleGrab(VRGrabbableHand h)
