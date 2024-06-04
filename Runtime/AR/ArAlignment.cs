@@ -59,6 +59,8 @@ namespace VelUtils.Ar
 			new Color(0, 1, 0, .1f),
 		};
 
+		public bool inputsEnabled = true;
+
 
 		private void OnEnable()
 		{
@@ -148,31 +150,34 @@ namespace VelUtils.Ar
 
 		private void Update()
 		{
-			if (InputMan.ThumbstickPress(Side.Left))
+			if (inputsEnabled)
 			{
-				SpawnPoint(0, rig.leftHand.position + rig.leftHand.forward * .2f);
-				TryAlign(false);
-			}
+				if (InputMan.ThumbstickPress(Side.Left))
+				{
+					SpawnPoint(0, rig.leftHand.position + rig.leftHand.forward * .2f);
+					TryAlign(false);
+				}
 
-			if (InputMan.ThumbstickPress(Side.Right))
-			{
-				SpawnPoint(1, rig.rightHand.position + rig.rightHand.forward * .2f);
-				TryAlign(false);
-			}
+				if (InputMan.ThumbstickPress(Side.Right))
+				{
+					SpawnPoint(1, rig.rightHand.position + rig.rightHand.forward * .2f);
+					TryAlign(false);
+				}
 
-			if (InputMan.ThumbstickPressUp(Side.Left))
-			{
-				TryAlign();
-			}
+				if (InputMan.ThumbstickPressUp(Side.Left))
+				{
+					TryAlign();
+				}
 
-			if (InputMan.ThumbstickPressUp(Side.Right))
-			{
-				TryAlign();
-			}
+				if (InputMan.ThumbstickPressUp(Side.Right))
+				{
+					TryAlign();
+				}
 
-			if (Input.GetKeyDown(KeyCode.F1) || (InputMan.Button1(Side.Left) && InputMan.Button1Down(Side.Right)))
-			{
-				TryAlign();
+				if (Input.GetKeyDown(KeyCode.F1) || (InputMan.Button1(Side.Left) && InputMan.Button1Down(Side.Right)))
+				{
+					TryAlign();
+				}
 			}
 		}
 	}
