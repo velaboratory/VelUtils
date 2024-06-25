@@ -35,7 +35,7 @@ namespace VelUtils.Interaction.WorldMouse
 		private float targetHoverTime; // Seconds hovering required to activate button
 		public float defaultHoverTime;
 		[SerializeField]
-		private float currentHoverTime = 0f;
+		public float currentHoverTime = 0f;
 
 		public GameObject currentHoverObj;
 		public GameObject lastHoverObj;
