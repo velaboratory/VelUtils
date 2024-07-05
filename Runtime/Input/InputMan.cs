@@ -310,14 +310,12 @@ namespace VelUtils
 		{
 			InputDevices.GetDevices(devices);
 			
-			Debug.Log($"Number of connected devices: {devices.Count}");
-
 			string xrDeviceName = XRSettings.loadedDeviceName;
 
 			string modelName = SystemInfo.deviceModel; // e.g. Oculus Quest
 			string deviceName = SystemInfo.deviceName; // e.g. Oculus Quest 2
 
-			// if (!string.IsNullOrEmpty(modelName))
+			if (!string.IsNullOrEmpty(modelName))
 			{
 				Debug.Log($"[UU] Loaded device: {XRSettings.loadedDeviceName}", instance);
 			}

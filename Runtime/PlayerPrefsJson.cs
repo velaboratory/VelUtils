@@ -167,7 +167,6 @@ namespace VelUtils
 				}
 			}
 
-			SetFloat(id, defaultValue, path);
 			return defaultValue;
 		}
 
@@ -186,7 +185,6 @@ namespace VelUtils
 				}
 			}
 
-			SetInt(id, defaultValue, path);
 			return defaultValue;
 		}
 
@@ -196,7 +194,6 @@ namespace VelUtils
 			if (HasKey(id, path))
 				return ((Dictionary<string, object>)instance.data[path][id]).ToVector3();
 
-			SetVector3(id, defaultValue, path);
 			return defaultValue;
 		}
 
@@ -210,7 +207,6 @@ namespace VelUtils
 		// 			return ((JObject) instance.data[path][id]).ToObject<Vector3>();
 		// 	}
 		//
-		// 	SetVector3(id, defaultValue, path);
 		// 	return defaultValue;
 		// }
 
@@ -219,9 +215,10 @@ namespace VelUtils
 		{
 			InitIfNot();
 			if (HasKey(id, path))
+			{
 				return ((Dictionary<string, object>)instance.data[path][id]).ToQuaternion();
+			}
 
-			SetQuaternion(id, defaultValue, path);
 			return defaultValue;
 		}
 
@@ -230,10 +227,9 @@ namespace VelUtils
 			InitIfNot();
 			if (HasKey(id, path))
 			{
-				return instance.data[path][id].ToString();
+				return instance.data[path][id]?.ToString() ?? "";
 			}
 
-			SetString(id, defaultValue, path);
 			return defaultValue;
 		}
 
@@ -252,7 +248,6 @@ namespace VelUtils
 				}
 			}
 
-			SetBool(id, defaultValue, path);
 			return defaultValue;
 		}
 
@@ -269,7 +264,6 @@ namespace VelUtils
 				};
 			}
 
-			SetDictionary(id, defaultValue, path);
 			return defaultValue;
 		}
 
@@ -284,8 +278,6 @@ namespace VelUtils
 		// 	InitIfNot();
 		// 	if (HasKey(id, path))
 		// 		return ((JObject) instance.data[path][id]).ToObject<Dictionary<string, object>>();
-		//
-		// 	SetDictionary(id, defaultValue, path);
 		// 	return defaultValue;
 		// }
 

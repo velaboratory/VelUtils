@@ -66,7 +66,6 @@ namespace VelUtils.Interaction.WorldMouse
 		protected void Disable()
 		{
 			WorldMouseInputModule.RemoveWorldMouse(this);
-			Debug.Log("Disabled " + name);
 		}
 
 		public void SetIndex(int index)
