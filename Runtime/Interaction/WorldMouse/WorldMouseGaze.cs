@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace VelUtils.Interaction.WorldMouse
+namespace CustomVelUtils.Interaction.WorldMouse
 {
     /*
 #if UNITY_EDITOR

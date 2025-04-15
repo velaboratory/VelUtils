@@ -1,5 +1,5 @@
 using UnityEngine;
-using VelUtils.Interaction.WorldMouse;
+using CustomVelUtils.Interaction.WorldMouse;
 
 public class WorldMouseFindCanvasesOnEnable : MonoBehaviour
 {

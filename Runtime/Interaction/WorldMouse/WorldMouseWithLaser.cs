@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace VelUtils.Interaction.WorldMouse
+namespace CustomVelUtils.Interaction.WorldMouse
 {
 #if UNITY_EDITOR
 	[CustomEditor(typeof(WorldMouseWithLaser))]
@@ -28,7 +28,7 @@ namespace VelUtils.Interaction.WorldMouse
 
 
 		[Space] public bool useLaser = true;
-
+		public Material laserMaterial;
 		/// <summary>
 		/// Default laser color. Can't be changed during runtime
 		/// </summary>
@@ -88,10 +88,14 @@ namespace VelUtils.Interaction.WorldMouse
 			lineRend.transform.localRotation = Quaternion.identity;
 			lineRend.widthMultiplier = laserThickness;
 			lineRend.positionCount = 2;
-			lineRend.material = new Material(Shader.Find("Unlit/Color"))
-			{
-				color = laserColor
-			};
+			if (laserMaterial == null) {
+				lineRend.material = new Material(Shader.Find("Unlit/Color"))
+				{
+					color = laserColor
+				};
+			} else {
+				lineRend.material = laserMaterial;
+			}
 		}
 
 		protected override void Update()
