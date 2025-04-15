@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace CustomVelUtils.Interaction.WorldMouse
+namespace VelUtils.Interaction.WorldMouse
 {
 	public class FingerWorldMouse : WorldMouse
 	{

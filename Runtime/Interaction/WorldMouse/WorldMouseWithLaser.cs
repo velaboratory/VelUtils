@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace CustomVelUtils.Interaction.WorldMouse
+namespace VelUtils.Interaction.WorldMouse
 {
 #if UNITY_EDITOR
 	[CustomEditor(typeof(WorldMouseWithLaser))]
