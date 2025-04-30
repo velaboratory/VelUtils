@@ -72,6 +72,7 @@ namespace VelUtils.Interaction.WorldMouse
 		public static bool autoFindCanvases = true;
 		private Camera cam;
 
+		public WorldMouse lastProcessedMouse;
 		internal static WorldMouseInputModule Instance
 		{
 			get
@@ -199,12 +200,20 @@ namespace VelUtils.Interaction.WorldMouse
 		public override void Process()
 		{
 #pragma warning disable
+			if (eventSystem.currentSelectedGameObject != null) {
+				var data = GetBaseEventData();
+				ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.updateSelectedHandler);
+
+			}
+				
+
 			for (int index = 0; index < worldMice.Count; index++)
 			{
 				try
 				{
 					if (worldMice[index] != null && worldMice[index].enabled)
 					{
+						lastProcessedMouse = worldMice[index];
 						cam.transform.position = worldMice[index].GetPosition();
 						cam.transform.forward = worldMice[index].GetForward();
 						float dist = worldMice[index].GetMaxDistance();
@@ -237,6 +246,7 @@ namespace VelUtils.Interaction.WorldMouse
 
 		private GameObject ProcessPressLocal(int index)
 		{
+			lastProcessedMouse = worldMice[index];
 			cam.transform.position = worldMice[index].GetPosition();
 			cam.transform.forward = worldMice[index].GetForward();
 			float dist = worldMice[index].GetMaxDistance();
@@ -260,11 +270,13 @@ namespace VelUtils.Interaction.WorldMouse
 
 		public static void ProcessRelease(int index)
 		{
+			
 			Instance.ProcessReleaseLocal(index);
 		}
 
 		private void ProcessReleaseLocal(int index)
 		{
+			lastProcessedMouse = worldMice[index];
 			cam.transform.position = worldMice[index].GetPosition();
 			cam.transform.forward = worldMice[index].GetForward();
 

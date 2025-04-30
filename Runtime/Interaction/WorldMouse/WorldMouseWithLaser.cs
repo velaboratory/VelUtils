@@ -64,7 +64,7 @@ namespace VelUtils.Interaction.WorldMouse
 
 		private void OnHover(GameObject obj)
 		{
-			if (obj != null && obj.GetComponentInParent<Selectable>() != null)
+			if (obj != null && obj.GetComponentInParent<Selectable>() != null && vibrateOnHover > 0)
 			{
 				InputMan.Vibrate(side, vibrateOnHover);
 				if (soundOnHover != null) AudioSource.PlayClipAtPoint(soundOnHover, obj.transform.position, .5f);
@@ -73,7 +73,7 @@ namespace VelUtils.Interaction.WorldMouse
 
 		private void OnClicked(GameObject obj)
 		{
-			if (obj != null && obj.GetComponentInParent<Selectable>() != null)
+			if (obj != null && obj.GetComponentInParent<Selectable>() != null && vibrateOnClick > 0)
 			{
 				InputMan.Vibrate(side, vibrateOnClick);
 				if (soundOnClick != null) AudioSource.PlayClipAtPoint(soundOnClick, obj.transform.position, .5f);
