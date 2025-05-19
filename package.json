@@ -1,8 +1,8 @@
 {
   "name": "edu.uga.engr.vel.velutils",
   "displayName": "VelUtils",
-  "version": "3.3.1",
-  "unity": "6000",
+  "version": "3.3.2",
+  "unity": "6000.0",
   "description": "A lightweight collection of flexible utilities for VR projects.",
   "keywords": [
     "virtual reality",
