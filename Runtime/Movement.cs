@@ -419,7 +419,7 @@ namespace VelUtils
 
 			cpt.followPosition = true;
 			cpt.positionFollowType = CopyTransform.FollowType.Velocity;
-			normalDrag = rig.rb.drag;
+			normalDrag = rig.rb.linearDamping;
 
 			wasKinematic = rig.rb.isKinematic;
 		}
@@ -460,7 +460,7 @@ namespace VelUtils
 			SlidingMovement();
 
 			// update lastVels
-			lastVels.Enqueue(rig.rb.velocity);
+			lastVels.Enqueue(rig.rb.linearVelocity);
 			if (lastVels.Count > lastVelsLength) lastVels.Dequeue();
 
 			// update last frame's grabbed objs
@@ -786,9 +786,9 @@ namespace VelUtils
 
 		private void RoundVelToZero()
 		{
-			if (rig.rb.velocity.magnitude < minVel)
+			if (rig.rb.linearVelocity.magnitude < minVel)
 			{
-				rig.rb.velocity = Vector3.zero;
+				rig.rb.linearVelocity = Vector3.zero;
 			}
 		}
 
@@ -810,24 +810,24 @@ namespace VelUtils
 			if (useForce)
 			{
 				Vector3 forwardForce = Time.deltaTime * vertical * forward * 1000f;
-				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.forward)) < slidingSpeed)
+				if (Mathf.Abs(Vector3.Dot(rig.rb.linearVelocity, rig.head.forward)) < slidingSpeed)
 				{
 					rig.rb.AddForce(forwardForce);
 				}
 
 				Vector3 rightForce = Time.deltaTime * horizontal * right * 1000f;
-				if (Mathf.Abs(Vector3.Dot(rig.rb.velocity, rig.head.right)) < slidingSpeed)
+				if (Mathf.Abs(Vector3.Dot(rig.rb.linearVelocity, rig.head.right)) < slidingSpeed)
 				{
 					rig.rb.AddForce(rightForce);
 				}
 			}
 			else
 			{
-				Vector3 currentSpeed = rig.rb.velocity;
+				Vector3 currentSpeed = rig.rb.linearVelocity;
 				Vector3 forwardSpeed = vertical * forward;
 				Vector3 rightSpeed = horizontal * right;
 				Vector3 speed = forwardSpeed + rightSpeed;
-				rig.rb.velocity = slidingSpeed * speed + (currentSpeed.y * rig.rb.transform.up);
+				rig.rb.linearVelocity = slidingSpeed * speed + (currentSpeed.y * rig.rb.transform.up);
 			}
 		}
 
@@ -846,17 +846,17 @@ namespace VelUtils
 				{
 					// TODO speed can be faster by spherical Pythagorus
 
-					float beforeSpeed = Vector3.Dot(rig.rb.velocity, rig.head.forward);
+					float beforeSpeed = Vector3.Dot(rig.rb.linearVelocity, rig.head.forward);
 					
 					// add the force
 					rig.rb.AddForce(mainBoosterForce * 100f * rig.head.forward);
 					
 					// limit max speed
-					float afterSpeed = Vector3.Dot(rig.rb.velocity, rig.head.forward);
+					float afterSpeed = Vector3.Dot(rig.rb.linearVelocity, rig.head.forward);
 					if (afterSpeed > mainBoosterMaxSpeed)
 					{
 						// subtract out the gained velocity from the moving direction
-						rig.rb.velocity -= rig.rb.velocity.normalized * (afterSpeed - beforeSpeed);
+						rig.rb.linearVelocity -= rig.rb.linearVelocity.normalized * (afterSpeed - beforeSpeed);
 					}
 					
 
@@ -868,11 +868,11 @@ namespace VelUtils
 			if (stickBoostBrake && InputMan.PadClick(Side.Right))
 			{
 				// add a bunch of drag
-				rig.rb.drag = mainBrakeDrag;
+				rig.rb.linearDamping = mainBrakeDrag;
 			}
 			else if (InputMan.PadClickUp(Side.Right))
 			{
-				rig.rb.drag = normalDrag;
+				rig.rb.linearDamping = normalDrag;
 				RoundVelToZero();
 			}
 
@@ -881,16 +881,16 @@ namespace VelUtils
 				if (InputMan.Button2(Side.Left))
 				{
 					// TODO speed can be faster by spherical Pythagorus
-					float beforeSpeed = Vector3.Dot(rig.rb.velocity, rig.leftHand.forward);
+					float beforeSpeed = Vector3.Dot(rig.rb.linearVelocity, rig.leftHand.forward);
 					
 					// add the force
 					rig.rb.AddForce(handBoosterAccel * Time.deltaTime * 100f * rig.leftHand.forward);
 					
-					float afterSpeed = Vector3.Dot(rig.rb.velocity, rig.leftHand.forward);
+					float afterSpeed = Vector3.Dot(rig.rb.linearVelocity, rig.leftHand.forward);
 					// limit max speed
 					if (afterSpeed < maxHandBoosterSpeed)
 					{
-						rig.rb.velocity -= rig.rb.velocity.normalized * (afterSpeed - beforeSpeed);
+						rig.rb.linearVelocity -= rig.rb.linearVelocity.normalized * (afterSpeed - beforeSpeed);
 					}
 				}
 
@@ -898,7 +898,7 @@ namespace VelUtils
 				{
 					// TODO speed can be faster by spherical Pythagorus
 					// limit max speed
-					if (Vector3.Dot(rig.rb.velocity, rig.rightHand.forward) < maxHandBoosterSpeed)
+					if (Vector3.Dot(rig.rb.linearVelocity, rig.rightHand.forward) < maxHandBoosterSpeed)
 					{
 						// add the force
 						rig.rb.AddForce(handBoosterAccel * Time.deltaTime * 100f * rig.rightHand.forward);
@@ -1113,14 +1113,14 @@ namespace VelUtils
 				Vector3 baseVel = Vector3.zero;
 				if (rb != null)
 				{
-					baseVel = rb.velocity;
+					baseVel = rb.linearVelocity;
 				}
 
 				cpt.SetTarget(null);
 
-				rig.rb.velocity = Vector3.ClampMagnitude(baseVel + rig.rb.velocity, grabMovementMaxThrowSpeed);
+				rig.rb.linearVelocity = Vector3.ClampMagnitude(baseVel + rig.rb.linearVelocity, grabMovementMaxThrowSpeed);
 
-				rig.rb.velocity = MedianAvg(lastVels.ToArray());
+				rig.rb.linearVelocity = MedianAvg(lastVels.ToArray());
 
 				// rig.rb.velocity = -rig.transform.TransformVector(InputMan.ControllerVelocity(side)) * cdRatioGrabbing;
 				RoundVelToZero();
@@ -1129,7 +1129,7 @@ namespace VelUtils
 
 				Vector3 localOffset = grabInitialLocalPos[(int)side] - rig.GetHand(side).position;
 				Vector3 globalOffset = grabInitialLocalPos[(int)side] - rig.GetHand(side).localPosition;
-				OnRelease?.Invoke(grabPos[(int)side].transform, side, localOffset, globalOffset, rig.rb.velocity, grabHoldTime[(int)side]);
+				OnRelease?.Invoke(grabPos[(int)side].transform, side, localOffset, globalOffset, rig.rb.linearVelocity, grabHoldTime[(int)side]);
 			}
 		}
 

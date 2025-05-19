@@ -112,7 +112,7 @@ namespace VelUtils
 			}
 		}
 
-		public dynamic InputStrings2XRUsageValue(InputStrings key)
+		public InputFeatureUsage<float> InputStrings2XRUsageValueFloat(InputStrings key)
 		{
 			switch (key)
 			{
@@ -120,12 +120,32 @@ namespace VelUtils
 					return CommonUsages.trigger;
 				case InputStrings.VR_Grip:
 					return CommonUsages.grip;
+			}
+
+			throw new NotImplementedException();
+		}
+		public InputFeatureUsage<bool> InputStrings2XRUsageValueBool(InputStrings key)
+		{
+			switch (key)
+			{
+				
 				case InputStrings.VR_Button1:
 					return CommonUsages.primaryButton;
 				case InputStrings.VR_Button2:
 					return CommonUsages.secondaryButton;
 				case InputStrings.VR_Menu:
 					return CommonUsages.menuButton;
+				case InputStrings.VR_Thumbstick_Press:
+					return CommonUsages.primary2DAxisClick;
+			}
+
+			throw new NotImplementedException();
+		}
+
+		public InputFeatureUsage<Vector2> InputStrings2XRUsageValueVector2(InputStrings key)
+		{
+			switch (key)
+			{
 				case InputStrings.VR_Thumbstick_X:
 				case InputStrings.VR_Thumbstick_Y:
 				case InputStrings.VR_Thumbstick_X_Left:
@@ -133,11 +153,9 @@ namespace VelUtils
 				case InputStrings.VR_Thumbstick_Y_Up:
 				case InputStrings.VR_Thumbstick_Y_Down:
 					return CommonUsages.primary2DAxis;
-				case InputStrings.VR_Thumbstick_Press:
-					return CommonUsages.primary2DAxisClick;
 			}
 
-			return null;
+			throw new NotImplementedException();
 		}
 
 
@@ -165,7 +183,7 @@ namespace VelUtils
 
 			if (key.IsAxis() && !key.IsThumbstickAxis())
 			{
-				if (device.TryGetFeatureValue(InputStrings2XRUsageValue(key), out float value))
+				if (device.TryGetFeatureValue(InputStrings2XRUsageValueFloat(key), out float value))
 				{
 					return value;
 				}
@@ -173,7 +191,7 @@ namespace VelUtils
 			}
 			else if (key.IsAxis() && key.IsThumbstickAxis())
 			{
-				if (device.TryGetFeatureValue(InputStrings2XRUsageValue(key), out Vector2 value))
+				if (device.TryGetFeatureValue(InputStrings2XRUsageValueVector2(key), out Vector2 value))
 				{
 					switch (key)
 					{
@@ -197,7 +215,7 @@ namespace VelUtils
 			}
 			else if (!key.IsAxis())
 			{
-				if (device.TryGetFeatureValue(InputStrings2XRUsageValue(key), out bool value))
+				if (device.TryGetFeatureValue(InputStrings2XRUsageValueBool(key), out bool value))
 				{
 					return value ? 1 : 0;
 				}

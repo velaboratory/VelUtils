@@ -93,7 +93,7 @@ namespace VelUtils.VRInteraction
 		{
 			transform.position = initialPos;
 			transform.rotation = initialRot;
-			rb.velocity = Vector3.zero;
+			rb.linearVelocity = Vector3.zero;
 			rb.angularVelocity = Vector3.zero;
 		}
 
@@ -172,7 +172,7 @@ namespace VelUtils.VRInteraction
 				if (h != null)
 				{
 					// get the average
-					rb.velocity = h.lastVels.Aggregate(new Vector3(0, 0, 0), (s, v) => s + v) / h.lastVels.Count;
+					rb.linearVelocity = h.lastVels.Aggregate(new Vector3(0, 0, 0), (s, v) => s + v) / h.lastVels.Count;
 
 					// get the median
 					//rb.velocity = h.lastVels.OrderBy(e => e.sqrMagnitude).ToList()[h.lastVels.Count / 2];
@@ -180,7 +180,7 @@ namespace VelUtils.VRInteraction
 					// get the last vel
 					if (h.lastVels.Count > 0 && rb != null)
 					{
-						rb.velocity = h.lastVels.Last();
+						rb.linearVelocity = h.lastVels.Last();
 					}
 					else
 					{

@@ -128,7 +128,7 @@ namespace VelUtils
 					transform.position = Vector3.Lerp(transform.position, t, 1 - smoothness);
 					if (rb)
 					{
-						rb.velocity = Vector3.zero;
+						rb.linearVelocity = Vector3.zero;
 					}
 
 					break;
@@ -139,7 +139,7 @@ namespace VelUtils
 						transform.position = t;
 					}
 
-					rb.velocity = Vector3.ClampMagnitude(((t - transform.position) / timeStep) * (1 - smoothness), 100);
+					rb.linearVelocity = Vector3.ClampMagnitude(((t - transform.position) / timeStep) * (1 - smoothness), 100);
 					break;
 				case FollowType.Force:
 					if (Mathf.Abs(snapIfDistanceGreaterThan) > .001f &&
@@ -363,7 +363,7 @@ namespace VelUtils
 					else
 					{
 						float mass = rbf.GetComponent<Rigidbody>().mass;
-						float drag = rbf.GetComponent<Rigidbody>().drag;
+						float drag = rbf.GetComponent<Rigidbody>().linearDamping;
 						if (drag / mass < 20)
 						{
 							EditorGUILayout.HelpBox(
@@ -421,7 +421,7 @@ namespace VelUtils
 					else
 					{
 						float mass = rbf.GetComponent<Rigidbody>().mass;
-						float angDrag = rbf.GetComponent<Rigidbody>().angularDrag;
+						float angDrag = rbf.GetComponent<Rigidbody>().angularDamping;
 						if (angDrag / mass < 10)
 						{
 							EditorGUILayout.HelpBox(
