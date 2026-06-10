@@ -53,7 +53,10 @@ namespace VelUtils.Interaction.WorldMouse
 
 		private IEnumerator AddPointerDelayed()
 		{
-			yield return null;
+			// Wait until the module actually exists — a single-frame wait could still
+			// miss it (scene-load ordering), leaving this mouse permanently
+			// unregistered and its UI clicks dead.
+			while (WorldMouseInputModule.Instance == null) yield return null;
 
 			WorldMouseInputModule.AddWorldMouse(this);
 		}
@@ -90,8 +93,11 @@ namespace VelUtils.Interaction.WorldMouse
 
 		public void Press()
 		{
-			// Handle the UI events
-			GameObject obj = WorldMouseInputModule.ProcessPress(pointerIndex);
+			// Handle the UI events. Identity-based (not the cached pointerIndex):
+			// the module resolves our slot at press time and self-heals if our
+			// registration was missed or went stale — a stale index silently killed
+			// all UI clicks for this hand until restart.
+			GameObject obj = WorldMouseInputModule.ProcessPress(this);
 
 			// Fire the Unity event
 			ClickDown?.Invoke();
@@ -101,8 +107,8 @@ namespace VelUtils.Interaction.WorldMouse
 
 		public void Release()
 		{
-			// Handle the UI events
-			WorldMouseInputModule.ProcessRelease(pointerIndex);
+			// Handle the UI events (identity-based; see Press)
+			WorldMouseInputModule.ProcessRelease(this);
 
 			// Fire the Unity event
 			ClickUp?.Invoke();
@@ -113,8 +119,9 @@ namespace VelUtils.Interaction.WorldMouse
 		protected virtual void Update()
 		{
 			if (!gameObject.activeInHierarchy) return;
-			
-			PointerEventData data = WorldMouseInputModule.GetData(pointerIndex);
+
+			PointerEventData data = WorldMouseInputModule.GetData(this);
+			if (data == null) return; // module not up yet
 
 			currentRayLength = data.pointerCurrentRaycast.distance;
 			if (currentRayLength > raycastLength) currentRayLength = 0;

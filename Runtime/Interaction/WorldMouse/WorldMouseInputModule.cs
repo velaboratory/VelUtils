@@ -154,16 +154,9 @@ namespace VelUtils.Interaction.WorldMouse
 			if (!worldMice.Contains(wm))
 			{
 				worldMice.Add(wm);
-				eventData = new PointerEventData[worldMice.Count];
-
-				for (int i = 0; i < eventData.Length; i++)
-				{
-					eventData[i] = new PointerEventData(eventSystem)
-					{
-						delta = Vector2.zero,
-						position = new Vector2(Screen.width / 2f, Screen.height / 2f)
-					};
-				}
+				// Preserve existing entries (append keeps their positions); the new
+				// mouse gets a fresh entry, never an aliased old one.
+				RebuildEventData(wm);
 			}
 
 			wm.pointerIndex = worldMice.IndexOf(wm);
@@ -181,20 +174,76 @@ namespace VelUtils.Interaction.WorldMouse
 				worldMice.Remove(wm);
 			}
 
+			// Rebuild FIRST, while every survivor's pointerIndex still names its OLD
+			// slot — that's what lets us carry its in-flight state over. Then re-index.
+			RebuildEventData(null);
+
 			foreach (WorldMouse point in worldMice)
 			{
 				point.SetIndex(worldMice.IndexOf(point));
 			}
+		}
 
-			eventData = new PointerEventData[worldMice.Count];
-			for (int i = 0; i < eventData.Length; i++)
+		/// <summary>
+		/// Resize eventData to match worldMice, PRESERVING surviving mice's entries.
+		/// Replacing the whole array (the old behaviour) silently wiped in-flight
+		/// hover/press state for every other mouse whenever any mouse was added or
+		/// removed (controller sleep, scene churn) — a press whose state vanished
+		/// mid-click could leave that hand's UI dead. Carry-over is by each mouse's
+		/// CURRENT pointerIndex (so call this BEFORE re-indexing), with a claim
+		/// guard so two mice can never end up sharing one PointerEventData.
+		/// </summary>
+		private void RebuildEventData(WorldMouse justAdded)
+		{
+			PointerEventData[] old = eventData;
+			PointerEventData[] fresh = new PointerEventData[worldMice.Count];
+			bool[] claimed = old != null ? new bool[old.Length] : null;
+
+			for (int i = 0; i < worldMice.Count; i++)
 			{
-				eventData[i] = new PointerEventData(eventSystem)
+				WorldMouse m = worldMice[i];
+				if (old != null && m != null && m != justAdded)
 				{
-					delta = Vector2.zero,
-					position = new Vector2(Screen.width / 2f, Screen.height / 2f)
-				};
+					int oldIndex = m.pointerIndex;
+					if (oldIndex >= 0 && oldIndex < old.Length && !claimed[oldIndex] && old[oldIndex] != null)
+					{
+						fresh[i] = old[oldIndex];
+						claimed[oldIndex] = true;
+					}
+				}
+
+				if (fresh[i] == null)
+				{
+					fresh[i] = new PointerEventData(eventSystem)
+					{
+						delta = Vector2.zero,
+						position = new Vector2(Screen.width / 2f, Screen.height / 2f)
+					};
+				}
 			}
+
+			eventData = fresh;
+		}
+
+		/// <summary>
+		/// Resolve a mouse to its CURRENT index, self-healing if it is missing or
+		/// stale (a cached integer pointerIndex can go stale if add/remove events are
+		/// missed or arrive out of order — that left a hand unable to click anything
+		/// until restart). Returns -1 only if the mouse is null.
+		/// </summary>
+		private int ResolveIndex(WorldMouse wm)
+		{
+			if (wm == null) return -1;
+			int index = worldMice.IndexOf(wm);
+			if (index < 0)
+			{
+				// Not registered (missed OnEnable / desynced state) — re-register now.
+				AddWorldMouseLocal(wm);
+				index = worldMice.IndexOf(wm);
+			}
+
+			if (index >= 0 && wm.pointerIndex != index) wm.pointerIndex = index;
+			return index;
 		}
 
 		public override void Process()
@@ -239,8 +288,21 @@ namespace VelUtils.Interaction.WorldMouse
 #pragma warning restore
 		}
 
+		/// <summary>
+		/// Identity-based press: resolves the mouse's index at call time (self-healing
+		/// if its cached index went stale), so a press can never act on another
+		/// mouse's — or a nonexistent — slot.
+		/// </summary>
+		public static GameObject ProcessPress(WorldMouse wm)
+		{
+			if (Instance == null) return null;
+			int index = Instance.ResolveIndex(wm);
+			return index >= 0 ? Instance.ProcessPressLocal(index) : null;
+		}
+
 		public static GameObject ProcessPress(int index)
 		{
+			if (Instance == null || index < 0 || index >= Instance.worldMice.Count) return null;
 			return Instance.ProcessPressLocal(index);
 		}
 
@@ -268,9 +330,17 @@ namespace VelUtils.Interaction.WorldMouse
 			return null;
 		}
 
+		/// <summary>Identity-based release; see <see cref="ProcessPress(WorldMouse)"/>.</summary>
+		public static void ProcessRelease(WorldMouse wm)
+		{
+			if (Instance == null) return;
+			int index = Instance.ResolveIndex(wm);
+			if (index >= 0) Instance.ProcessReleaseLocal(index);
+		}
+
 		public static void ProcessRelease(int index)
 		{
-			
+			if (Instance == null || index < 0 || index >= Instance.worldMice.Count) return;
 			Instance.ProcessReleaseLocal(index);
 		}
 
@@ -299,14 +369,25 @@ namespace VelUtils.Interaction.WorldMouse
 
 		/// <summary>
 		/// Returns a raycast even if past the max distance.
-		/// Make sure to limit distance for things like linerenderers
+		/// Make sure to limit distance for things like linerenderers.
+		/// Identity-based: resolves the mouse's slot at call time (self-healing).
+		/// Null when no module exists yet.
 		/// </summary>
+		public static PointerEventData GetData(WorldMouse wm)
+		{
+			if (Instance == null) return null;
+			int index = Instance.ResolveIndex(wm);
+			return index >= 0 && index < Instance.eventData.Length ? Instance.eventData[index] : null;
+		}
+
 		public static PointerEventData GetData(int index)
 		{
-			if (index >= Instance.eventData.Length)
+			if (Instance == null || Instance.eventData == null ||
+			    index < 0 || index >= Instance.eventData.Length)
 			{
-				Debug.Log("HERE");
+				return null;
 			}
+
 			return Instance.eventData[index];
 		}
 	}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -37,6 +38,22 @@ namespace VelUtils.VRInteraction
 
 		//public bool allowMultiHandGrabbing = false;	// TODO
 
+		// The last isKinematic value we applied, so the ticker only touches the
+		// Rigidbody when the desired state actually changes (a native property write
+		// per object per frame was real main-thread time with hundreds of moveables).
+		private bool lastAppliedKinematic;
+
+		// ---- centralised ticking ----------------------------------------------
+		// One hidden runner iterates every enabled VRMoveable instead of each having
+		// its own Update(): with hundreds of grabbables in a scene the per-instance
+		// Update overhead + unconditional Rigidbody/Transform property calls cost
+		// milliseconds per frame on Quest. Registration via OnEnable/OnDisable keeps
+		// the list to live, enabled instances, so the idle per-object cost is just a
+		// couple of field reads. NOTE: component.enabled still gates ticking exactly
+		// like Update did, and grabbing is unaffected (the hand calls us directly).
+		private static readonly List<VRMoveable> active = new List<VRMoveable>();
+		private static VRMoveableTicker ticker;
+
 		// Use this for initialization
 		private new void Awake()
 		{
@@ -46,6 +63,7 @@ namespace VelUtils.VRInteraction
 			{
 				wasKinematic = rb.isKinematic;
 				wasUsingGravity = rb.useGravity;
+				lastAppliedKinematic = rb.isKinematic;
 			}
 
 			copyTransform = GetComponent<CopyTransform>();
@@ -54,38 +72,68 @@ namespace VelUtils.VRInteraction
 			initialRot = transform.rotation;
 		}
 
-		private void Update()
+		private void OnEnable()
 		{
-			if (GrabbedBy != null)
+			active.Add(this);
+			if (ticker == null)
 			{
-				// TODO only move when changed position
-				Moved?.Invoke(true);
+				GameObject go = new GameObject("VRMoveable Ticker") { hideFlags = HideFlags.HideInHierarchy };
+				DontDestroyOnLoad(go);
+				ticker = go.AddComponent<VRMoveableTicker>();
 			}
+		}
 
+		private void OnDisable()
+		{
+			active.Remove(this);
+		}
 
-			// TODO work out better system
-			if (setKinematic && rb != null)
+		internal static void TickAll()
+		{
+			int frame = Time.frameCount;
+			for (int i = active.Count - 1; i >= 0; i--)
 			{
-				if (!locallyOwned && networkGrabbed)
+				VRMoveable m = active[i];
+				if (m == null)
 				{
-					rb.isKinematic = true;
+					active.RemoveAt(i); // destroyed without OnDisable — belt and braces
+					continue;
 				}
-				else
+
+				if (m.GrabbedBy != null)
 				{
-					rb.isKinematic = wasKinematic;
+					// TODO only move when changed position
+					m.Moved?.Invoke(true);
 				}
-			}
 
+				if (m.setKinematic && m.rb != null)
+				{
+					// Write-on-change only. (The old per-frame stomp also meant external
+					// code couldn't keep its own isKinematic value anyway — now it just
+					// persists until the next grab/ownership transition.)
+					bool want = !m.locallyOwned && m.networkGrabbed ? true : m.wasKinematic;
+					if (want != m.lastAppliedKinematic)
+					{
+						m.rb.isKinematic = want;
+						m.lastAppliedKinematic = want;
+					}
+				}
 
-			// this is to prevent objects from going near infinity
-			Transform t = transform;
-			Vector3 pos = t.position;
-			if (Mathf.Abs(pos.x) > 10000 ||
-			    Mathf.Abs(pos.y) > 10000 ||
-			    Mathf.Abs(pos.z) > 10000)
-			{
-				Debug.Log("Had to reset the position of an object.", this);
-				ResetPosition();
+				// Runaway guard (prevents objects going near infinity): only a falling /
+				// thrown object can run away, and it does so over many frames — checking
+				// each object every ~64th frame (staggered) is plenty and avoids a
+				// Transform read per object per frame.
+				if (((frame + i) & 63) == 0)
+				{
+					Vector3 pos = m.transform.position;
+					if (Mathf.Abs(pos.x) > 10000 ||
+					    Mathf.Abs(pos.y) > 10000 ||
+					    Mathf.Abs(pos.z) > 10000)
+					{
+						Debug.Log("Had to reset the position of an object.", m);
+						m.ResetPosition();
+					}
+				}
 			}
 		}
 
@@ -93,8 +141,11 @@ namespace VelUtils.VRInteraction
 		{
 			transform.position = initialPos;
 			transform.rotation = initialRot;
-			rb.linearVelocity = Vector3.zero;
-			rb.angularVelocity = Vector3.zero;
+			if (rb != null && !rb.isKinematic)
+			{
+				rb.linearVelocity = Vector3.zero;
+				rb.angularVelocity = Vector3.zero;
+			}
 		}
 
 		public override void HandleGrab(VRGrabbableHand h)
@@ -167,7 +218,10 @@ namespace VelUtils.VRInteraction
 				Debug.LogError("No copy transform on release.", this);
 			}
 
-			if (releaseVelocitySmoothing)
+			// Throw velocity only applies to dynamic bodies: writing linearVelocity to a
+			// kinematic Rigidbody is rejected by PhysX with a warning on every release
+			// (and most grabbables here are kinematic).
+			if (releaseVelocitySmoothing && rb != null && !rb.isKinematic)
 			{
 				if (h != null)
 				{
@@ -178,7 +232,7 @@ namespace VelUtils.VRInteraction
 					//rb.velocity = h.lastVels.OrderBy(e => e.sqrMagnitude).ToList()[h.lastVels.Count / 2];
 
 					// get the last vel
-					if (h.lastVels.Count > 0 && rb != null)
+					if (h.lastVels.Count > 0)
 					{
 						rb.linearVelocity = h.lastVels.Last();
 					}
@@ -218,6 +272,18 @@ namespace VelUtils.VRInteraction
 
 				Moved?.Invoke(false);
 			}
+		}
+	}
+
+	/// <summary>
+	/// Hidden singleton that drives <see cref="VRMoveable.TickAll"/> once per frame in
+	/// place of a per-instance Update on every moveable.
+	/// </summary>
+	internal class VRMoveableTicker : MonoBehaviour
+	{
+		private void Update()
+		{
+			VRMoveable.TickAll();
 		}
 	}
 
