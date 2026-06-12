@@ -241,6 +241,34 @@ namespace VelUtils.VRInteraction
 			OnGrab?.Invoke(grabbable);
 		}
 
+		// Scratch buffers for GetBestGrabbable - it runs every frame, so no per-call allocations.
+		private readonly List<Collider> grabColliderScratch = new List<Collider>(16);
+		private readonly Dictionary<VRGrabbable, float> grabDistanceScratch = new Dictionary<VRGrabbable, float>();
+
+		/// <summary>
+		/// Squared distance from the hand to the closest point on the grabbable's own colliders.
+		/// Colliders that belong to a NESTED grabbable (e.g. a handle on a board) are skipped -
+		/// the nested grabbable competes as its own candidate. Non-convex mesh colliders fall
+		/// back to their bounds (ClosestPoint only supports convex shapes). No usable colliders
+		/// at all -> pivot distance.
+		/// </summary>
+		private float SqrDistanceToGrabbable(VRGrabbable g, Vector3 point)
+		{
+			float best = float.MaxValue;
+			g.GetComponentsInChildren(false, grabColliderScratch);
+			foreach (Collider c in grabColliderScratch)
+			{
+				if (c == null || !c.enabled) continue;
+				if (c.GetComponentInParent<VRGrabbable>() != g) continue;
+				MeshCollider mc = c as MeshCollider;
+				Vector3 cp = (mc != null && !mc.convex) ? c.ClosestPointOnBounds(point) : c.ClosestPoint(point);
+				float d = (cp - point).sqrMagnitude;
+				if (d < best) best = d;
+			}
+			grabColliderScratch.Clear();
+			return best == float.MaxValue ? (g.transform.position - point).sqrMagnitude : best;
+		}
+
 		/// <summary>
 		/// Finds the VRGrabbable obj being collided with that has the highest priority (or some other algorithm)
 		/// </summary>
@@ -270,16 +298,19 @@ namespace VelUtils.VRInteraction
 
 			if (touchedObjs.Count > 0)
 			{
-				// Sort by priority, then CLOSEST to the hand. The old tiebreak multiplied
-				// distance by zero and effectively sorted by angle from the hand's forward,
-				// which feels random for proximity (sphere-touch) grabbing - the nearest
-				// object is the one users expect to grab (and see highlighted).
+				// Sort by priority, then by the closest POINT on the object - not its pivot.
+				// A big board or long stroke whose surface is right at your hand must beat a
+				// small object whose pivot merely happens to be nearer. Distances are
+				// precomputed once per candidate (a comparator would recompute n log n times).
+				Vector3 handPos = transform.position;
+				grabDistanceScratch.Clear();
+				foreach (VRGrabbable t in touchedObjs)
+					grabDistanceScratch[t] = SqrDistanceToGrabbable(t, handPos);
 				touchedObjs.Sort((a, b) =>
 				{
 					if (a.priority != b.priority)
 						return b.priority.CompareTo(a.priority);
-					return Vector3.Distance(a.transform.position, transform.position)
-						.CompareTo(Vector3.Distance(b.transform.position, transform.position));
+					return grabDistanceScratch[a].CompareTo(grabDistanceScratch[b]);
 				});
 				// return the first element on the list
 				return touchedObjs[0];
