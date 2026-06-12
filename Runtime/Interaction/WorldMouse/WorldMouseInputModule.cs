@@ -270,6 +270,11 @@ namespace VelUtils.Interaction.WorldMouse
 						// Hooks in to Unity's event system to handle hovering
 						eventSystem.RaycastAll(eventData[index], m_RaycastResultCache);
 						RaycastResult ray = FindFirstRaycast(m_RaycastResultCache);
+						// GraphicRaycaster measures distance from the ray origin, which ScreenPointToRay
+						// puts ON the camera near plane - not at the hand. Uncompensated, every consumer
+						// (laser length, hover distance, synced remote lasers) reads ~nearClipPlane short,
+						// which is exactly the visible air gap between the laser tip and the canvas.
+						if (ray.gameObject != null) ray.distance += cam.nearClipPlane;
 						eventData[index].pointerCurrentRaycast = ray;
 						if (dist > ray.distance)
 						{
@@ -321,6 +326,10 @@ namespace VelUtils.Interaction.WorldMouse
 				eventData[index].pointerPress = ExecuteEvents.GetEventHandler<IPointerClickHandler>(eventData[index].pointerPressRaycast.gameObject);
 				eventData[index].pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(eventData[index].pointerPressRaycast.gameObject);
 
+				// Ray pose at press time, for the forgiving-release drift test in ProcessReleaseLocal.
+				worldMice[index].pressOrigin = worldMice[index].GetPosition();
+				worldMice[index].pressForward = worldMice[index].GetForward();
+
 				ExecuteEvents.Execute(eventData[index].pointerPress, eventData[index], ExecuteEvents.pointerDownHandler);
 				ExecuteEvents.Execute(eventData[index].pointerDrag, eventData[index], ExecuteEvents.beginDragHandler);
 
@@ -353,7 +362,23 @@ namespace VelUtils.Interaction.WorldMouse
 			// Hooks in to Unity's event system to process a release
 			GameObject pointerRelease = ExecuteEvents.GetEventHandler<IPointerClickHandler>(eventData[index].pointerCurrentRaycast.gameObject);
 
-			if (eventData[index].pointerPress == pointerRelease)
+			// Forgiving release: squeezing the trigger jerks the hand, so the ray often slips off
+			// the button between press and release - which used to eat the click. A press captures
+			// its target: releasing still clicks it as long as the ray has swept less than the
+			// mouse's tolerance (measured at the pressed surface's distance). Big sweeps -
+			// intentional drags / aborts - still cancel the click, exactly like before.
+			bool clickPressed = eventData[index].pointerPress == pointerRelease;
+			WorldMouse wm = worldMice[index];
+			if (!clickPressed && eventData[index].pointerPress != null && wm != null)
+			{
+				float surfaceDist = eventData[index].pointerPressRaycast.distance;
+				if (surfaceDist <= 0) surfaceDist = 1f;
+				Vector3 pressPoint = wm.pressOrigin + wm.pressForward * surfaceDist;
+				Vector3 nowPoint = wm.GetPosition() + wm.GetForward() * surfaceDist;
+				clickPressed = Vector3.Distance(pressPoint, nowPoint) <= wm.releaseClickTolerance;
+			}
+
+			if (clickPressed)
 			{
 				ExecuteEvents.Execute(eventData[index].pointerPress, eventData[index], ExecuteEvents.pointerClickHandler);
 			}

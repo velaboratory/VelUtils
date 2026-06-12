@@ -11,6 +11,13 @@ namespace VelUtils.Interaction.WorldMouse
 	{
 		[Header("Ray settings")] public float raycastLength = 10f;
 		public float currentRayLength = 0;
+		[Tooltip("Releasing still clicks the pressed button if the ray has swept less than this (m, measured at the button's distance). Compensates for the hand jerking while the trigger is squeezed. 0 = strict press-and-release-on-target.")]
+		public float releaseClickTolerance = 0.05f;
+
+		// Ray pose at the moment of the last press (written by WorldMouseInputModule;
+		// used for the forgiving-release drift test).
+		internal Vector3 pressOrigin;
+		internal Vector3 pressForward;
 		public LayerMask UILayer;
 		public bool autoEnable = true;
 

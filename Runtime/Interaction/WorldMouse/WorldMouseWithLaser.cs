@@ -39,6 +39,9 @@ namespace VelUtils.Interaction.WorldMouse
 		/// </summary>
 		public float laserThickness = .005f;
 
+		[Tooltip("Extra length (m) drawn past the hit surface so the beam visibly touches the UI instead of stopping just shy of it.")]
+		public float laserOvershoot = 0.005f;
+
 		private LineRenderer lineRend;
 
 		private bool showThisFrame = false;
@@ -100,6 +103,10 @@ namespace VelUtils.Interaction.WorldMouse
 
 		protected override void Update()
 		{
+			// Refresh currentRayLength (and hover state) BEFORE drawing - drawing first used
+			// last frame's length, so the beam tip lagged and wobbled behind a moving hand.
+			base.Update();
+
 			if (useLaser)
 			{
 				if (currentRayLength < Mathf.Infinity)
@@ -120,8 +127,6 @@ namespace VelUtils.Interaction.WorldMouse
 			{
 				Release();
 			}
-			
-			base.Update();
 		}
 
 		public void ShowLaser(bool show)
@@ -145,6 +150,9 @@ namespace VelUtils.Interaction.WorldMouse
 		public void SetLaserLength(float length)
 		{
 			if (lineRend == null) CreateLaser();
+			// Overshoot slightly past the surface so the beam visibly touches the UI.
+			// Only when actually hitting something - an idle zero-length beam stays invisible.
+			if (length > 0) length += laserOvershoot;
 			lineRend.SetPositions(new Vector3[] { transform.position, transform.position + transform.forward * length });
 		}
 	}
