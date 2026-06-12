@@ -270,20 +270,16 @@ namespace VelUtils.VRInteraction
 
 			if (touchedObjs.Count > 0)
 			{
-				// Sort the list of grabbables by priority, then distance
+				// Sort by priority, then CLOSEST to the hand. The old tiebreak multiplied
+				// distance by zero and effectively sorted by angle from the hand's forward,
+				// which feels random for proximity (sphere-touch) grabbing - the nearest
+				// object is the one users expect to grab (and see highlighted).
 				touchedObjs.Sort((a, b) =>
 				{
 					if (a.priority != b.priority)
 						return b.priority.CompareTo(a.priority);
-					else
-					{
-						// combine both distance and angular distance from the center for remote grabbing
-						float dist = Vector3.Distance(a.transform.position, transform.position)
-							.CompareTo(Vector3.Distance(b.transform.position, transform.position));
-						float angle = Vector3.Angle(transform.forward, a.transform.position - transform.position)
-							.CompareTo(Vector3.Angle(transform.forward, b.transform.position - transform.position));
-						return (int)(0 * dist + angle);
-					}
+					return Vector3.Distance(a.transform.position, transform.position)
+						.CompareTo(Vector3.Distance(b.transform.position, transform.position));
 				});
 				// return the first element on the list
 				return touchedObjs[0];
