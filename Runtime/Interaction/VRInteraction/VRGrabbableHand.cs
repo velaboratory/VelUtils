@@ -244,25 +244,53 @@ namespace VelUtils.VRInteraction
 		// Scratch buffers for GetBestGrabbable - it runs every frame, so no per-call allocations.
 		private readonly List<Collider> grabColliderScratch = new List<Collider>(16);
 		private readonly Dictionary<VRGrabbable, float> grabDistanceScratch = new Dictionary<VRGrabbable, float>();
+		private SphereCollider handSphere; // this hand's own trigger, for penetration-based distances
 
 		/// <summary>
 		/// Squared distance from the hand to the closest point on the grabbable's own colliders.
 		/// Colliders that belong to a NESTED grabbable (e.g. a handle on a board) are skipped -
-		/// the nested grabbable competes as its own candidate. Non-convex mesh colliders fall
-		/// back to their bounds (ClosestPoint only supports convex shapes). No usable colliders
-		/// at all -> pivot distance.
+		/// the nested grabbable competes as its own candidate.
+		/// CONCAVE mesh colliders (drawn strokes): Unity has no point-to-concave-mesh query
+		/// (ClosestPoint supports convex shapes only), but Physics.ComputePenetration allows a
+		/// concave mesh as long as the OTHER collider is convex - and every candidate here is
+		/// already overlapping this hand's sphere trigger. Penetration depth d of a sphere with
+		/// radius r means the surface is (r - d) from the hand center, which IS the
+		/// closest-point distance to the actual stroke geometry. Bounds only as a last resort.
 		/// </summary>
 		private float SqrDistanceToGrabbable(VRGrabbable g, Vector3 point)
 		{
+			if (handSphere == null) handSphere = GetComponent<SphereCollider>();
 			float best = float.MaxValue;
 			g.GetComponentsInChildren(false, grabColliderScratch);
 			foreach (Collider c in grabColliderScratch)
 			{
 				if (c == null || !c.enabled) continue;
 				if (c.GetComponentInParent<VRGrabbable>() != g) continue;
+
+				float d;
 				MeshCollider mc = c as MeshCollider;
-				Vector3 cp = (mc != null && !mc.convex) ? c.ClosestPointOnBounds(point) : c.ClosestPoint(point);
-				float d = (cp - point).sqrMagnitude;
+				if (mc != null && !mc.convex)
+				{
+					if (handSphere != null && Physics.ComputePenetration(
+							handSphere, handSphere.transform.position, handSphere.transform.rotation,
+							c, c.transform.position, c.transform.rotation,
+							out Vector3 _, out float depth))
+					{
+						float handRadius = handSphere.radius * handSphere.transform.lossyScale.x;
+						float dist = Mathf.Max(0f, handRadius - depth); // 0 = hand center inside the mesh
+						d = dist * dist;
+					}
+					else
+					{
+						// Grazing contact / no hand sphere: AABB is the best Unity offers here.
+						d = (c.ClosestPointOnBounds(point) - point).sqrMagnitude;
+					}
+				}
+				else
+				{
+					d = (c.ClosestPoint(point) - point).sqrMagnitude;
+				}
+
 				if (d < best) best = d;
 			}
 			grabColliderScratch.Clear();
